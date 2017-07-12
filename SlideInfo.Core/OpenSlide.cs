@@ -82,7 +82,7 @@ namespace SlideInfo.Core
 		private void CheckError()
 		{
 			var errorMessage = OpenSlideDll.openslide_get_error(Osr);
-			if (errorMessage.ToInt32() != 0)
+			if (errorMessage.ToInt64() != 0)
 				throw new OpenSlideException($"openslide error: {Marshal.PtrToStringAnsi(errorMessage)}");
 		}
 
