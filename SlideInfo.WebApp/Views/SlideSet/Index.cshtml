@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Http
+@using SlideInfo.WebApp.Models
+@model SlideInfo.WebApp.Models.SlideSet
+@{
+	ViewData["Title"] = "Available slides";
+}
+
+@if (Context.Session.GetString("AlertText") != null)
+{
+	<div class="alert alert-danger">
+		<strong>Error:</strong> @Context.Session.GetString("AlertText")
+	</div>
+	Context.Session.Remove("AlertText");
+}
+
+<div id="properties">
+	<h2>Available slides</h2>
+	@if (Model.FileNames != null)
+	{
+	<table class="table table-hover table-responsive">
+		@foreach (var item in Model.FileNames)
+		{
+		<tr>
+			<th>@Html.ActionLink(item.Value, "ViewSlide", "SlideSet", new { slug = item.Key} ) </th>
+		</tr>
+		}
+	</table>
+	}
+</div>

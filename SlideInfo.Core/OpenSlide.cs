@@ -1,0 +1,354 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Runtime.InteropServices;
+using SlideInfo.Helpers;
+
+namespace SlideInfo.Core
+{
+	public sealed unsafe partial class OpenSlide : AbstractSlide, IDisposable
+	{
+		private readonly object slideLock;
+		private bool disposed;
+
+		public int* Osr { get; private set; }
+		public string FileName { get; set; }
+		public int QuickHash1 { get; private set; }
+		public override int LevelCount => ReadLevelCount();
+		public override IList<SizeL> LevelDimensions => ReadLevelDimensions();
+		public override IList<double> LevelDownsamples => ReadLevelDownsamples();
+
+		private SlideDictionary<string> properties;
+		public override SlideDictionary<string> Properties
+		{
+			get => properties ?? (properties = new PropertiesDictionary(this));
+			set => properties = value;
+		}
+
+		private SlideDictionary<AssociatedImage> associated;
+		public override SlideDictionary<AssociatedImage> AssociatedImages 
+		{
+			get => associated ?? (associated = new AssociatedImageDictionary(this));
+			set => associated = value;
+		}
+
+		public OpenSlide()
+		{
+			slideLock = new object();
+		}
+
+		public OpenSlide(string fileName)
+		{
+			slideLock = new object();
+			CheckIfFileExists(fileName);
+			FileName = fileName;
+
+			ReadOpenSlide();
+			ReadQuickHash();
+		}
+
+		private void CheckIfFileExists(string fileName)
+		{
+			if (!File.Exists(fileName))
+				throw new OpenSlideException($"File '{fileName}' cannot be opened");
+		}
+
+		private void ReadOpenSlide()
+		{
+			Osr = OpenSlideDll.openslide_open(FileName);
+			if (Osr == null || Osr[0] == 0)
+				CheckVendorIsValid(FileName);
+			// dispose on error, we are in the constructor
+			try
+			{
+				CheckError();
+			}
+			catch (OpenSlideException)
+			{
+				Close();
+				throw;
+			}
+		}
+
+		private void CheckVendorIsValid(string fileName)
+		{
+			var vendor = OpenSlideDll.openslide_detect_vendor(fileName);
+			if (vendor.ToInt32() != 0)
+				throw new OpenSlideUnsupportedFormatException($"Vendor {Marshal.PtrToStringAnsi(vendor)} unsupported");
+		}
+
+		private void CheckError()
+		{
+			var errorMessage = OpenSlideDll.openslide_get_error(Osr);
+			if (errorMessage.ToInt32() != 0)
+				throw new OpenSlideException($"openslide error: {Marshal.PtrToStringAnsi(errorMessage)}");
+		}
+
+		private void ReadQuickHash()
+		{
+			var quickhash1 = GetPropertyValue(PROPERTY_NAME_QUICKHASH1);
+
+			if (quickhash1 == null)
+			{
+				QuickHash1 = FileName.GetHashCode();
+			}
+			else
+			{
+				int.TryParse(quickhash1.Substring(0, 8), out int quickHash);
+				QuickHash1 = quickHash;
+			}
+		}
+
+		public int ReadLevelCount()
+		{
+			var levelCount = OpenSlideDll.openslide_get_level_count(Osr);
+			if (levelCount == -1)
+				CheckError();
+			return levelCount;
+		}
+
+		private IList<SizeL> ReadLevelDimensions()
+		{
+			var dimensions = new List<SizeL>();
+
+			for (var level = 0; level < LevelCount; level++)
+			{
+				OpenSlideDll.openslide_get_level_dimensions(Osr, level, out long width, out long height);
+				if (width == -1 || height == -1)
+					CheckError();
+
+				dimensions.Add(new SizeL(width, height));
+			}
+			return dimensions;
+		}
+
+		private IList<double> ReadLevelDownsamples()
+		{
+			var downsamples = new List<double>();
+
+			for (var level = 0; level < LevelCount; level++)
+			{
+				var downsample = OpenSlideDll.openslide_get_level_downsample(Osr, level);
+				if (Math.Abs(downsample - (-1.0)) < 1E-9)
+					CheckError();
+				downsamples.Add(downsample);
+			}
+			return downsamples;
+		}
+
+		public SlideDictionary<string> ReadProperties()
+		{
+			var propertyNames = GetPropertyNames();
+			var props = new PropertiesDictionary(this);
+			foreach (var property in propertyNames)
+			{
+				props[property] = GetPropertyValue(property);
+			}
+			AddMissingStandardProperties(props);
+			return props;
+		}
+
+		public IEnumerable<string> GetPropertyNames()
+		{
+			var propertyNames = StringMarshaller.Marshal(OpenSlideDll.openslide_get_property_names(Osr));
+			return propertyNames;
+		}
+
+		public string GetPropertyValue(string propertyName)
+		{
+			return Marshal.PtrToStringAnsi(OpenSlideDll.openslide_get_property_value(Osr, propertyName));
+		}
+
+		private void AddMissingStandardProperties(IDictionary<string, string> properties)
+		{
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_WIDTH))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_WIDTH] = Dimensions.Width.ToString();
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_HEIGHT))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_HEIGHT] = Dimensions.Height.ToString();
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_X))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_X] = "0";
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_Y))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_Y] = "0";
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_X))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_X] = "0";
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_Y))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_Y] = "0";
+			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BACKGROUND_COLOR))
+				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BACKGROUND_COLOR] = "ffffff";
+		}
+
+		public SlideDictionary<AssociatedImage> ReadAssociatedImages()
+		{
+			var associatedImageNames = GetAssociatedImageNames();
+			var images = new AssociatedImageDictionary(this);
+			foreach (var s in associatedImageNames)
+			{
+				try
+				{
+					var image = ReadAssociatedImage(s);
+					images.Add(s, new AssociatedImage(s, image, QuickHash1));
+				}
+				catch
+				{
+					images.Add(s, new AssociatedImage(s, QuickHash1));
+				}
+			}
+
+			return images;
+		}
+
+		public IEnumerable<string> GetAssociatedImageNames()
+		{
+			var imageNames = StringMarshaller.Marshal(OpenSlideDll.openslide_get_associated_image_names(Osr));
+			return imageNames;
+		}
+
+		public Image ReadAssociatedImage(string name)
+		{
+			lock (slideLock)
+			{
+				CheckDisposed();
+				OpenSlideDll.openslide_get_associated_image_dimensions(Osr, name, out long width, out long height);
+				CheckError();
+				if (width == -1)
+					throw new OpenSlideException("Failure reading associated image");
+
+				var bmp = new Bitmap((int)width, (int)height);
+				var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite,
+							PixelFormat.Format32bppArgb);
+
+				var bmpPtr = bmpData.Scan0.ToPointer();
+				OpenSlideDll.openslide_read_associated_image(Osr, name, bmpPtr);
+				CheckError();
+
+				return bmp;
+			}
+		}
+
+		public override int GetBestLevelForDownsample(double downsample)
+		{
+			// too small, return first
+			if (downsample < LevelDownsamples[0])
+				return 0;
+
+			// find where we are in the middle
+			for (var i = 1; i < LevelCount; i++)
+				if (downsample < LevelDownsamples[i])
+					return i - 1;
+
+			// too big, return last
+			return LevelCount - 1;
+		}
+
+		public override Image ReadRegion(SizeL location, int level, SizeL size)
+		{
+			if (level < 0)
+				throw new OpenSlideException("Invalid level");
+			if (size.Width < 0 || size.Height < 0)
+				throw new OpenSlideException($"Size {size} must be non-negative");
+
+			var bmp = new Bitmap((int)size.Width, (int)size.Height);
+			var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite,
+				PixelFormat.Format32bppArgb);
+
+			var bmpPtr = bmpData.Scan0.ToPointer();
+
+			CheckDisposed();
+			OpenSlideDll.openslide_read_region(Osr, bmpPtr, location.Width, location.Height, level, size.Width, size.Height);
+			if (bmpPtr == null)
+				throw new OpenSlideException($"error reading region location:{location}, level:{level}, size:{size}");
+
+			bmp.UnlockBits(bmpData);
+
+			CheckError();
+			return bmp;
+
+		}
+
+		public override Image GetThumbnail(SizeL size)
+		{
+			var downsample = Math.Max(Dimensions.Width / size.Width, Dimensions.Height / size.Height);
+			var level = GetBestLevelForDownsample(downsample);
+			var thumbnailSize = LevelDimensions[level];
+
+			var thumbnail = ReadRegion(new SizeL(0, 0), level, thumbnailSize);
+			if (size.Equals(thumbnailSize))
+				return thumbnail;
+
+			var thumbSize = thumbnail.GetProportionateResize(size.ToSize());
+			var callback = new Image.GetThumbnailImageAbort(ThumbnailCallback);
+			var thumb = thumbnail.GetThumbnailImage(thumbSize.Width, thumbSize.Height, callback, new IntPtr());
+
+			return thumb;
+		}
+
+		public override string DetectFormat(string fileName)
+		{
+			return Marshal.PtrToStringAnsi(OpenSlideDll.openslide_detect_vendor(fileName));
+		}
+
+		// call with the reader lock held
+		private void CheckDisposed()
+		{
+			if (Osr == null)
+				throw new OpenSlideDisposedException();
+		}
+
+		public override void Close()
+		{
+			Dispose();
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (disposed) return;
+			if (disposing) { }
+			if (Osr != null && Osr[0] != 0)
+			{
+				OpenSlideDll.openslide_close(Osr);
+			}
+
+			disposed = true;
+		}
+
+		public string GetLibraryVersion()
+		{
+			LIBRARY_VERSION = Marshal.PtrToStringAnsi(OpenSlideDll.openslide_get_version());
+			return LIBRARY_VERSION;
+		}
+
+		public override string ToString()
+		{
+			return $"OpenSlide({FileName})";
+		}
+
+		public override int GetHashCode()
+		{
+			return QuickHash1;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj == null || GetType() != obj.GetType())
+				return false;
+
+			var os2 = (OpenSlide)obj;
+			var quickhash1 = Properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_QUICKHASH1];
+			var os2Quickhash1 = os2.Properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_QUICKHASH1];
+
+			if (quickhash1 != null && os2Quickhash1 != null)
+				return quickhash1.Equals(os2Quickhash1);
+			if (quickhash1 == null && os2Quickhash1 == null)
+				return FileName.Equals(os2.FileName);
+			return false;
+		}
+	}
+}
