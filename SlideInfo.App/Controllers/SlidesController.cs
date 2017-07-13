@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -119,7 +120,7 @@ namespace SlideInfo.App.Controllers
         }
 
         // GET: Slides/Properties/5
-        public async Task<IActionResult> Properties(int? id)
+        public async Task<IActionResult> Properties(int? id, string sortOrder)
         {
             logger.LogInformation("Getting properties of slide {ID}", id);
             if (id == null)
@@ -134,9 +135,20 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var osr = new OpenSlide(slide.FilePath);
-            var viewModel = new PropertiesViewModel(slide.Name, osr.ReadProperties());
-
+            var properties = new OpenSlide(slide.FilePath).ReadProperties().ToDictionary();
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    properties = properties.OrderByDescending(s => s.Key) as IDictionary<string,string>;
+                    logger.LogInformation("Sorting properties of slide {ID} by name descending", id);
+                    break;
+                default:
+                    properties = properties.OrderBy(s => s.Key) as IDictionary<string, string>;
+                    logger.LogInformation("Sorting properties of slide {ID} by name", id);
+                    break;
+            }
+            var viewModel = new PropertiesViewModel(slide.Name, properties);
             return View(viewModel);
         }
 

@@ -8,14 +8,25 @@
 	<h2>@Model.Name properties</h2>
 	@if (Model.Properties != null)
 	{
-		<table class="table table-striped table-condensed table-hover">
-			@foreach (var item in Model.Properties)
-			{
-				<tr>
-					<th>@item.Key</th>
-					<td>@item.Value</td>
-				</tr>
-			}
-		</table>
+	    <table class="table table-striped table-condensed table-hover">
+        <thead>
+        <tr>
+            <th>
+                <a asp-action="Properties" asp-route-sortOrder="@ViewData["NameSortParm"]">Property</a>
+            </th>
+            <th>
+                Value
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+	        @foreach (var item in Model.Properties)
+	        {
+	            <tr>
+	                <th>@item.Key</th>
+	                <td>@item.Value</td>
+	            </tr>
+	        }
+	    </table>
 	}
 </div>
