@@ -268,7 +268,7 @@ namespace SlideInfo.Core
 
 		/*Returns a stream containing the XML metadata for the .dzi file.
 		format:    the format of the individual tiles ('png' or 'jpeg')*/
-		public MemoryStream GetDziMetadata(string imageFormat)
+		public MemoryStream GetDziMetadata(string imageFormat = "jpeg")
 		{
 			var updatedMetadataString = GetDziMetadataString(imageFormat);
 			var stream = new MemoryStream();
@@ -281,7 +281,7 @@ namespace SlideInfo.Core
 
 		/*Returns a string containing the XML metadata for the .dzi file.
 		format:    the format of the individual tiles ('png' or 'jpeg')*/
-		public string GetDziMetadataString(string imageFormat)
+		public string GetDziMetadataString(string imageFormat = "jpeg")
 		{
 			if (!imageFormat.Equals("jpeg", StringComparison.OrdinalIgnoreCase) && !imageFormat.Equals("png", StringComparison.OrdinalIgnoreCase))
 				throw new ArgumentException($"Invalid image format {imageFormat}");

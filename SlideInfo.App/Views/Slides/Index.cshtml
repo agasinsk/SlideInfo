@@ -19,13 +19,13 @@
                     @Html.DisplayNameFor(model => model.FilePath)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.SlideUrl)
+                    @Html.DisplayNameFor(model => model.Url)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.SlideDziUrl)
+                    @Html.DisplayNameFor(model => model.DziUrl)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.SlideMpp)
+                    @Html.DisplayNameFor(model => model.Mpp)
                 </th>
             <th></th>
         </tr>
@@ -40,13 +40,13 @@
                 @Html.DisplayFor(modelItem => item.FilePath)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SlideUrl)
+                @Html.DisplayFor(modelItem => item.Url)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SlideDziUrl)
+                @Html.DisplayFor(modelItem => item.DziUrl)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SlideMpp)
+                @Html.DisplayFor(modelItem => item.Mpp)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

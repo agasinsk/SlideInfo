@@ -11,9 +11,9 @@ namespace SlideInfo.App.Models
 		public int Id { get; set; }
 		public string Name { get; set; }
 		public string FilePath { get; set; }
-		public string SlideUrl { get; set; }
-		public string SlideDziUrl { get; set; }
-		public double SlideMpp { get; set; }
+		public string Url { get; set; }
+		public string DziUrl { get; set; }
+		public double Mpp { get; set; }
 		public int QuickHash { get; set; }
 
 		public virtual ICollection<Comment> Comments { get; set; }
@@ -27,8 +27,8 @@ namespace SlideInfo.App.Models
 		{
 			FilePath = pathToSlide;
 			Name = Path.GetFileName(pathToSlide);
-			SlideUrl = UrlFormatter.UrlFor(Name);
-			SlideDziUrl = SlideUrl + ".dzi";
+			Url = UrlFormatter.UrlFor(Name);
+			DziUrl = Url + ".dzi";
 
 			using (var osr = new OpenSlide(pathToSlide))
 			{
@@ -36,11 +36,11 @@ namespace SlideInfo.App.Models
 				{
 					double.TryParse(osr.Properties[OpenSlide.PROPERTY_NAME_MPP_X], out double mppX);
 					double.TryParse(osr.Properties[OpenSlide.PROPERTY_NAME_MPP_Y], out double mppY);
-					SlideMpp = (mppX + mppY) / 2;
+					Mpp = (mppX + mppY) / 2;
 				}
 				catch (Exception)
 				{
-					SlideMpp = 0;
+					Mpp = 0;
 				}
 
 				QuickHash = osr.QuickHash1;

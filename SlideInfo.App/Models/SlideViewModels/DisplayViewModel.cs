@@ -25,5 +25,9 @@ namespace SlideInfo.App.Models.SlideViewModels
             SlideMpp = mpp;
             DeepZoomGenerator = generator;
         }
+
+        public DisplayViewModel()
+        {
+        }
     }
 }

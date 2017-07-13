@@ -1,12 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
+using Microsoft.Extensions.Logging;
 using SlideInfo.App.Data;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
+using SlideInfo.App.Repositories;
 using SlideInfo.Core;
 
 namespace SlideInfo.App.Controllers
@@ -14,35 +22,142 @@ namespace SlideInfo.App.Controllers
     public class SlidesController : Controller
     {
         private readonly SlideInfoDbContext context;
+        private readonly AsyncRepository<Slide> repository;
+        private readonly ILogger logger;
 
-        public SlidesController(SlideInfoDbContext context)
+        public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context)
         {
-            this.context = context;    
+            this.logger = logger;
+            this.context = context;
+            repository = new AsyncRepository<Slide>(context);
         }
 
         // GET: Slides
         public async Task<IActionResult> Index()
         {
-            return View(await context.Slides.ToListAsync());
+            logger.LogInformation("Getting all slides...");
+            return View(await repository.GetAllAsync());
         }
 
         // GET: Slides/Display/5
         public async Task<IActionResult> Display(int? id)
         {
+            logger.LogInformation("Getting slide {ID}", id);
+            if (id == null)
+            {
+                logger.LogWarning("Slide id was null");
+                return NotFound();
+            }
+
+            var slide = await repository.GetByIdAsync(id.Value);
+
+            if (slide == null)
+            {
+                logger.LogError("GetById({ID}) NOT FOUND", id);
+                return NotFound();
+            }
+
+            var osr = new OpenSlide(slide.FilePath);
+            var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
+
+            return View(viewModel);
+        }
+
+        // GET: slug.dzi
+        [Produces("application/xml")]
+        [Route("[controller]/Display/{slug}.dzi")]
+        public string Dzi(string slug)
+        {
+            try
+            {
+                logger.LogInformation("Getting slide {slug} .dzi metadata...", slug);
+                var slide = repository.Get(m => m.Url == slug).FirstOrDefault();
+                if (slide != null)
+                    using (var osr = new OpenSlide(slide.FilePath))
+                    {
+                        var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
+                        return viewModel.DeepZoomGenerator.GetDziMetadataString();
+                    }
+
+            }
+            catch (Exception)
+            {
+                logger.LogError("Error while getting .dzi of {slug}...", slug);
+                HttpContext.Session.SetString("AlertText", "Nie znaleziono pliku.");
+            }
+            return "";
+        }
+
+        [Route("[controller]/Display/{slug}_files/{level:int}/{col:int}_{row:int}.jpeg")]
+        public IActionResult Tile(string slug, int level, int col, int row)
+        {
+            try
+            {
+                logger.LogInformation("Getting tile: {level}, col: {col}, row: {row}", level, col, row);
+              
+                var slide = repository.Get(m => m.Url == slug).FirstOrDefault();
+                if (slide != null)
+                    using (var osr = new OpenSlide(slide.FilePath))
+                    {
+                        var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
+                        var tile = viewModel.DeepZoomGenerator.GetTile(level, new SizeL(col, row));
+
+                        using (var stream = new MemoryStream())
+                        {
+                            tile.Save(stream, ImageFormat.Jpeg);
+                            tile.Dispose();
+                            return File(stream.ToArray(), "image/jpeg");
+                        }
+                    }
+            }
+            catch (OpenSlideException)
+            {
+                logger.LogError("Error while getting tile lev: {level}, col: {col}, row: {row}", level, col, row);
+                throw new HttpException(404, "Wrong level or coordinates");
+            }
+            return new FileContentResult(new byte[]{},"");
+        }
+
+        // GET: Slides/Properties/5
+        public async Task<IActionResult> Properties(int? id)
+        {
+            logger.LogInformation("Getting properties of slide {ID}", id);
             if (id == null)
             {
                 return NotFound();
             }
 
-            var slide = await context.Slides
-                .SingleOrDefaultAsync(m => m.Id == id);
+            var slide = await repository.GetByIdAsync(id.Value);
+
             if (slide == null)
             {
                 return NotFound();
             }
 
             var osr = new OpenSlide(slide.FilePath);
-            var viewModel = new DisplayViewModel(slide.Name, slide.SlideDziUrl, slide.SlideMpp, osr);
+            var viewModel = new PropertiesViewModel(slide.Name, osr.ReadProperties());
+
+            return View(viewModel);
+        }
+
+        // GET: Slides/AssociatedImages/5
+        public async Task<IActionResult> AssociatedImages(int? id)
+        {
+            logger.LogInformation("Getting properties of slide {ID}", id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var slide = await repository.GetByIdAsync(id.Value);
+
+            if (slide == null)
+            {
+                return NotFound();
+            }
+
+            var osr = new OpenSlide(slide.FilePath);
+            var viewModel = new AssociatedImagesViewModel(slide.Name, osr.ReadAssociatedImages());
 
             return View(viewModel);
         }
@@ -50,13 +165,14 @@ namespace SlideInfo.App.Controllers
         // GET: Slides/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            logger.LogInformation("Getting details of slide {ID}", id);
             if (id == null)
             {
                 return NotFound();
             }
 
-            var slide = await context.Slides
-                .SingleOrDefaultAsync(m => m.Id == id);
+            var slide = await repository.GetByIdAsync(id.Value);
+
             if (slide == null)
             {
                 return NotFound();
@@ -80,8 +196,7 @@ namespace SlideInfo.App.Controllers
         {
             if (ModelState.IsValid)
             {
-                context.Add(slide);
-                await context.SaveChangesAsync();
+                await repository.InsertAsync(slide);
                 return RedirectToAction("Index");
             }
             return View(slide);
@@ -95,7 +210,8 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await context.Slides.SingleOrDefaultAsync(m => m.Id == id);
+            var slide = await repository.GetByIdAsync(id.Value);
+
             if (slide == null)
             {
                 return NotFound();
@@ -119,8 +235,7 @@ namespace SlideInfo.App.Controllers
             {
                 try
                 {
-                    context.Update(slide);
-                    await context.SaveChangesAsync();
+                    await repository.UpdateAsync(slide);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -128,10 +243,7 @@ namespace SlideInfo.App.Controllers
                     {
                         return NotFound();
                     }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction("Index");
             }
@@ -146,8 +258,8 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await context.Slides
-                .SingleOrDefaultAsync(m => m.Id == id);
+            var slide = await repository.GetByIdAsync(id.Value);
+
             if (slide == null)
             {
                 return NotFound();
@@ -161,9 +273,7 @@ namespace SlideInfo.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var slide = await context.Slides.SingleOrDefaultAsync(m => m.Id == id);
-            context.Slides.Remove(slide);
-            await context.SaveChangesAsync();
+            await repository.DeleteAsync(id);
             return RedirectToAction("Index");
         }
 

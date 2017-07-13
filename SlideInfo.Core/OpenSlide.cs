@@ -163,20 +163,20 @@ namespace SlideInfo.Core
 
 		private void AddMissingStandardProperties(IDictionary<string, string> properties)
 		{
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_WIDTH))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_WIDTH] = Dimensions.Width.ToString();
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_HEIGHT))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_HEIGHT] = Dimensions.Height.ToString();
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_X))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_X] = "0";
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_Y))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BOUNDS_Y] = "0";
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_X))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_X] = "0";
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_Y))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_MPP_Y] = "0";
-			if (!properties.ContainsKey(global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BACKGROUND_COLOR))
-				properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_BACKGROUND_COLOR] = "ffffff";
+			if (!properties.ContainsKey(PROPERTY_NAME_BOUNDS_WIDTH))
+				properties[PROPERTY_NAME_BOUNDS_WIDTH] = Dimensions.Width.ToString();
+			if (!properties.ContainsKey(PROPERTY_NAME_BOUNDS_HEIGHT))
+				properties[PROPERTY_NAME_BOUNDS_HEIGHT] = Dimensions.Height.ToString();
+			if (!properties.ContainsKey(PROPERTY_NAME_BOUNDS_X))
+				properties[PROPERTY_NAME_BOUNDS_X] = "0";
+			if (!properties.ContainsKey(PROPERTY_NAME_BOUNDS_Y))
+				properties[PROPERTY_NAME_BOUNDS_Y] = "0";
+			if (!properties.ContainsKey(PROPERTY_NAME_MPP_X))
+				properties[PROPERTY_NAME_MPP_X] = "0";
+			if (!properties.ContainsKey(PROPERTY_NAME_MPP_Y))
+				properties[PROPERTY_NAME_MPP_Y] = "0";
+			if (!properties.ContainsKey(PROPERTY_NAME_BACKGROUND_COLOR))
+				properties[PROPERTY_NAME_BACKGROUND_COLOR] = "ffffff";
 		}
 
 		public SlideDictionary<AssociatedImage> ReadAssociatedImages()
@@ -309,14 +309,17 @@ namespace SlideInfo.Core
 
 		private void Dispose(bool disposing)
 		{
-			if (disposed) return;
-			if (disposing) { }
-			if (Osr != null && Osr[0] != 0)
-			{
-				OpenSlideDll.openslide_close(Osr);
-			}
-
-			disposed = true;
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    if (Osr != null && Osr[0] != 0)
+                    {
+                        OpenSlideDll.openslide_close(Osr);
+                    }
+                }
+            }
+            disposed = true;
 		}
 
 		public string GetLibraryVersion()
@@ -341,8 +344,8 @@ namespace SlideInfo.Core
 				return false;
 
 			var os2 = (OpenSlide)obj;
-			var quickhash1 = Properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_QUICKHASH1];
-			var os2Quickhash1 = os2.Properties[global::SlideInfo.Core.OpenSlide.PROPERTY_NAME_QUICKHASH1];
+			var quickhash1 = Properties[PROPERTY_NAME_QUICKHASH1];
+			var os2Quickhash1 = os2.Properties[PROPERTY_NAME_QUICKHASH1];
 
 			if (quickhash1 != null && os2Quickhash1 != null)
 				return quickhash1.Equals(os2Quickhash1);
