@@ -120,8 +120,11 @@ namespace SlideInfo.App.Controllers
         }
 
         // GET: Slides/Properties/5
-        public async Task<IActionResult> Properties(int? id, string sortOrder)
+        public async Task<IActionResult> Properties(int? id, string sortOrder, string searchString)
         {
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CurrentFilter"] = searchString;
+
             logger.LogInformation("Getting properties of slide {ID}", id);
             if (id == null)
             {
@@ -136,21 +139,33 @@ namespace SlideInfo.App.Controllers
             }
 
             var slideProperties = new OpenSlide(slide.FilePath).ReadProperties().ToDictionary();
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            IEnumerable<KeyValuePair<string,string>> properties;
 
-            IOrderedEnumerable<KeyValuePair<string,string>> sortedProperties;
+            //filtering
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                logger.LogInformation("Searching for properties containing {searchString}", searchString);
+                properties = slideProperties.Where(s => s.Key.Contains(searchString)
+                                               || s.Value.Contains(searchString));
+            }
+            else
+            {
+                properties = slideProperties;
+            }
+            /*
+            //sorting
             switch (sortOrder)
             {
                 case "name_desc":
-                    sortedProperties = slideProperties.OrderByDescending(s => s.Key);
+                    properties = slideProperties.OrderByDescending(s => s.Key);
                     logger.LogInformation("Sorting properties of slide {ID} by name descending", id);
                     break;
                 default:
                     logger.LogInformation("Sorting properties of slide {ID} by name", id);
-                    sortedProperties = slideProperties.OrderBy(s => s.Key);
+                    properties = slideProperties.OrderBy(s => s.Key);
                     break;
-            }
-            var viewModel = new PropertiesViewModel(slide.Name, sortedProperties);
+            }*/
+            var viewModel = new PropertiesViewModel(slide.Name, properties);
             return View(viewModel);
         }
 

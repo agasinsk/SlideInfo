@@ -8,9 +8,9 @@ namespace SlideInfo.App.Models.SlideViewModels
     public class PropertiesViewModel
     {
         public string Name { get; set; }
-        public IOrderedEnumerable<KeyValuePair<string,string>> Properties { get; set; }
+        public IEnumerable<KeyValuePair<string,string>> Properties { get; set; }
 
-        public PropertiesViewModel(string name, IOrderedEnumerable<KeyValuePair<string, string>> properties)
+        public PropertiesViewModel(string name, IEnumerable<KeyValuePair<string, string>> properties)
         {
             Name = name;
             Properties = properties;
