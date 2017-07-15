@@ -13,8 +13,9 @@ namespace SlideInfo.App.Data
 		public DbSet<AppUser> AppUsers { get; set; }
 	    public DbSet<Comment> Comments { get; set; }
 	    public DbSet<Slide> Slides { get; set; }
+        public DbSet<Property> Properties { get; set; }
 
-	    public SlideInfoDbContext(DbContextOptions options)
+        public SlideInfoDbContext(DbContextOptions options)
 		    : base(options)
 	    {
 	    }

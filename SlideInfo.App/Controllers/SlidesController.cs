@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Microsoft.Extensions.Logging;
 using SlideInfo.App.Data;
+using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Repositories;
@@ -23,21 +24,23 @@ namespace SlideInfo.App.Controllers
     public class SlidesController : Controller
     {
         private readonly SlideInfoDbContext context;
-        private readonly AsyncRepository<Slide> repository;
+        private readonly AsyncRepository<Slide> slideRepository;
+        private readonly AsyncRepository<Property> propertyRepository;
         private readonly ILogger logger;
 
         public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context)
         {
             this.logger = logger;
             this.context = context;
-            repository = new AsyncRepository<Slide>(context);
+            slideRepository = new AsyncRepository<Slide>(context);
+            propertyRepository = new AsyncRepository<Property>(context);
         }
 
         // GET: Slides
         public async Task<IActionResult> Index()
         {
             logger.LogInformation("Getting all slides...");
-            return View(await repository.GetAllAsync());
+            return View(await slideRepository.GetAllAsync());
         }
 
         // GET: Slides/Display/5
@@ -50,7 +53,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await repository.GetByIdAsync(id.Value);
+            var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
@@ -72,7 +75,7 @@ namespace SlideInfo.App.Controllers
             try
             {
                 logger.LogInformation("Getting slide {slug} .dzi metadata...", slug);
-                var slide = repository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
                     {
@@ -96,7 +99,7 @@ namespace SlideInfo.App.Controllers
             {
                 logger.LogInformation("Getting tile: {level}, col: {col}, row: {row}", level, col, row);
               
-                var slide = repository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
                     {
@@ -120,9 +123,21 @@ namespace SlideInfo.App.Controllers
         }
 
         // GET: Slides/Properties/5
-        public async Task<IActionResult> Properties(int? id, string sortOrder, string searchString)
+        public async Task<IActionResult> Properties(int? id, string sortOrder, 
+            string currentFilter, string searchString, int? page)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+           
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
             ViewData["CurrentFilter"] = searchString;
 
             logger.LogInformation("Getting properties of slide {ID}", id);
@@ -131,41 +146,40 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await repository.GetByIdAsync(id.Value);
+            var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
                 return NotFound();
             }
 
-            var slideProperties = new OpenSlide(slide.FilePath).ReadProperties().ToDictionary();
-            IEnumerable<KeyValuePair<string,string>> properties;
+            var properties = context.Properties.Where(c => c.SlideId == id);
 
             //filtering
             if (!String.IsNullOrEmpty(searchString))
             {
                 logger.LogInformation("Searching for properties containing {searchString}", searchString);
-                properties = slideProperties.Where(s => s.Key.Contains(searchString)
+                properties = properties.Where(s => s.Key.Contains(searchString)
                                                || s.Value.Contains(searchString));
             }
-            else
-            {
-                properties = slideProperties;
-            }
-            /*
+            
             //sorting
             switch (sortOrder)
             {
                 case "name_desc":
-                    properties = slideProperties.OrderByDescending(s => s.Key);
+                    properties = properties.OrderByDescending(s => s.Key);
                     logger.LogInformation("Sorting properties of slide {ID} by name descending", id);
                     break;
                 default:
                     logger.LogInformation("Sorting properties of slide {ID} by name", id);
-                    properties = slideProperties.OrderBy(s => s.Key);
+                    properties = properties.OrderBy(s => s.Key);
                     break;
-            }*/
-            var viewModel = new PropertiesViewModel(slide.Name, properties);
+            }
+
+            int pageSize = 13;
+            var paginatedProperties = await PaginatedList<Property>.
+                CreateAsync(properties.AsNoTracking(), page ?? 1, pageSize);
+            var viewModel = new PropertiesViewModel(slide.Name, paginatedProperties);
             return View(viewModel);
         }
 
@@ -178,7 +192,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await repository.GetByIdAsync(id.Value);
+            var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
@@ -200,7 +214,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await repository.GetByIdAsync(id.Value);
+            var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
@@ -225,7 +239,7 @@ namespace SlideInfo.App.Controllers
         {
             if (ModelState.IsValid)
             {
-                await repository.InsertAsync(slide);
+                await slideRepository.InsertAsync(slide);
                 return RedirectToAction("Index");
             }
             return View(slide);
@@ -239,7 +253,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await repository.GetByIdAsync(id.Value);
+            var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
@@ -264,7 +278,7 @@ namespace SlideInfo.App.Controllers
             {
                 try
                 {
-                    await repository.UpdateAsync(slide);
+                    await slideRepository.UpdateAsync(slide);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -287,7 +301,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await repository.GetByIdAsync(id.Value);
+            var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
@@ -302,7 +316,7 @@ namespace SlideInfo.App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await repository.DeleteAsync(id);
+            await slideRepository.DeleteAsync(id);
             return RedirectToAction("Index");
         }
 

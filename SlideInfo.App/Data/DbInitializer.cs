@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
+using SlideInfo.Core;
 
 namespace SlideInfo.App.Data
 {
@@ -28,8 +29,19 @@ namespace SlideInfo.App.Data
 
 			foreach (var path in dirs)
 			{
-				var slide = new Slide(path);
+                var osr = new OpenSlide(path);
+
+				var slide = new Slide(osr);
 				context.Add(slide);
+			    context.SaveChanges();
+
+                var properties = osr.ReadProperties();
+
+			    foreach (var slideProp in properties)
+			    {
+			        var property = new Property(slide.Id, slideProp.Key, slideProp.Value);
+			        context.Add(property);
+			    }
 			}
 
 			context.SaveChanges();

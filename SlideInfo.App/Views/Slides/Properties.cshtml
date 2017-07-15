@@ -36,6 +36,27 @@
                         <td>@item.Value</td>
                     </tr>
                 }
+            </tbody>
         </table>
+
+        var prevDisabled = !Model.Properties.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.Properties.HasNextPage ? "disabled" : "";
+
+
+        <a asp-action="Properties"
+           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-page="@(Model.Properties.PageIndex - 1)"
+           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+            <a asp-action="Properties"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-page="@(Model.Properties.PageIndex + 1)"
+               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               class="btn btn-default @nextDisabled">
+                Next
+            </a>
     }
+
 </div>

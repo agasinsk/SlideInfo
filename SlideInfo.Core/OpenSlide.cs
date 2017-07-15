@@ -14,7 +14,7 @@ namespace SlideInfo.Core
 		private bool disposed;
 
 		public int* Osr { get; private set; }
-		public string FileName { get; set; }
+		public string FilePath { get; set; }
 		public int QuickHash1 { get; private set; }
 		public override int LevelCount => ReadLevelCount();
 		public override IList<SizeL> LevelDimensions => ReadLevelDimensions();
@@ -39,11 +39,11 @@ namespace SlideInfo.Core
 			slideLock = new object();
 		}
 
-		public OpenSlide(string fileName)
+		public OpenSlide(string filePath)
 		{
 			slideLock = new object();
-			CheckIfFileExists(fileName);
-			FileName = fileName;
+			CheckIfFileExists(filePath);
+			FilePath = filePath;
 
 			ReadOpenSlide();
 			ReadQuickHash();
@@ -57,9 +57,9 @@ namespace SlideInfo.Core
 
 		private void ReadOpenSlide()
 		{
-			Osr = OpenSlideDll.openslide_open(FileName);
+			Osr = OpenSlideDll.openslide_open(FilePath);
 			if (Osr == null || Osr[0] == 0)
-				CheckVendorIsValid(FileName);
+				CheckVendorIsValid(FilePath);
 			// dispose on error, we are in the constructor
 			try
 			{
@@ -92,7 +92,7 @@ namespace SlideInfo.Core
 
 			if (quickhash1 == null)
 			{
-				QuickHash1 = FileName.GetHashCode();
+				QuickHash1 = FilePath.GetHashCode();
 			}
 			else
 			{
@@ -330,7 +330,7 @@ namespace SlideInfo.Core
 
 		public override string ToString()
 		{
-			return $"OpenSlide({FileName})";
+			return $"OpenSlide({FilePath})";
 		}
 
 		public override int GetHashCode()
@@ -350,7 +350,7 @@ namespace SlideInfo.Core
 			if (quickhash1 != null && os2Quickhash1 != null)
 				return quickhash1.Equals(os2Quickhash1);
 			if (quickhash1 == null && os2Quickhash1 == null)
-				return FileName.Equals(os2.FileName);
+				return FilePath.Equals(os2.FilePath);
 			return false;
 		}
 	}
