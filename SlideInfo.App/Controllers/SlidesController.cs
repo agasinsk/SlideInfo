@@ -135,20 +135,22 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var properties = new OpenSlide(slide.FilePath).ReadProperties().ToDictionary();
+            var slideProperties = new OpenSlide(slide.FilePath).ReadProperties().ToDictionary();
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+
+            IOrderedEnumerable<KeyValuePair<string,string>> sortedProperties;
             switch (sortOrder)
             {
                 case "name_desc":
-                    properties = properties.OrderByDescending(s => s.Key) as IDictionary<string,string>;
+                    sortedProperties = slideProperties.OrderByDescending(s => s.Key);
                     logger.LogInformation("Sorting properties of slide {ID} by name descending", id);
                     break;
                 default:
-                    properties = properties.OrderBy(s => s.Key) as IDictionary<string, string>;
                     logger.LogInformation("Sorting properties of slide {ID} by name", id);
+                    sortedProperties = slideProperties.OrderBy(s => s.Key);
                     break;
             }
-            var viewModel = new PropertiesViewModel(slide.Name, properties);
+            var viewModel = new PropertiesViewModel(slide.Name, sortedProperties);
             return View(viewModel);
         }
 
