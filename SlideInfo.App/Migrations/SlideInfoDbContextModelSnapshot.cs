@@ -233,9 +233,9 @@ namespace SlideInfo.App.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<int>("QuickHash");
-
                     b.Property<string>("Url");
+
+                    b.Property<string>("Vendor");
 
                     b.HasKey("Id");
 

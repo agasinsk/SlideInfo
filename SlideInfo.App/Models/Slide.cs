@@ -15,7 +15,7 @@ namespace SlideInfo.App.Models
         public string Url { get; set; }
         public string DziUrl => Url + ".dzi";
         public double Mpp { get; set; }
-        public int QuickHash { get; set; }
+        public string Vendor { get; set; }
 
         public virtual ICollection<Comment> Comments { get; set; }
         public virtual ICollection<Property> Properties { get; set; }
@@ -30,6 +30,7 @@ namespace SlideInfo.App.Models
             FilePath = pathToSlide;
             Name = Path.GetFileName(pathToSlide);
             Url = UrlFormatter.UrlFor(Name);
+            Vendor = OpenSlide.DetectVendor(pathToSlide);
 
             using (var osr = new OpenSlide(pathToSlide))
             {
@@ -43,8 +44,6 @@ namespace SlideInfo.App.Models
                 {
                     Mpp = 0;
                 }
-
-                QuickHash = osr.QuickHash1;
             }
         }
 
@@ -64,9 +63,6 @@ namespace SlideInfo.App.Models
             {
                 Mpp = 0;
             }
-
-            QuickHash = osr.QuickHash1;
-
         }
     }
 }

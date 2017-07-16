@@ -205,29 +205,29 @@ namespace SlideInfo.Core
 			return imageNames;
 		}
 
-		public Image ReadAssociatedImage(string name)
-		{
-			lock (slideLock)
-			{
-				CheckDisposed();
-				OpenSlideDll.openslide_get_associated_image_dimensions(Osr, name, out long width, out long height);
-				CheckError();
-				if (width == -1)
-					throw new OpenSlideException("Failure reading associated image");
+	    public Image ReadAssociatedImage(string name)
+	    {
+	        lock (slideLock)
+	        {
+	            CheckDisposed();
+	            OpenSlideDll.openslide_get_associated_image_dimensions(Osr, name, out long width, out long height);
+	            CheckError();
+	            if (width == -1)
+	                throw new OpenSlideException("Failure reading associated image");
 
-				var bmp = new Bitmap((int)width, (int)height);
-				var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite,
-							PixelFormat.Format32bppArgb);
+	            var bmp = new Bitmap((int) width, (int) height);
+	            var bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite,
+	                PixelFormat.Format32bppArgb);
 
-				var bmpPtr = bmpData.Scan0.ToPointer();
-				OpenSlideDll.openslide_read_associated_image(Osr, name, bmpPtr);
-				CheckError();
+	            var bmpPtr = bmpData.Scan0.ToPointer();
+	            OpenSlideDll.openslide_read_associated_image(Osr, name, bmpPtr);
+	            CheckError();
+	            bmp.UnlockBits(bmpData);
+	            return bmp;
+	        }
+	    }
 
-				return bmp;
-			}
-		}
-
-		public override int GetBestLevelForDownsample(double downsample)
+	    public override int GetBestLevelForDownsample(double downsample)
 		{
 			// too small, return first
 			if (downsample < LevelDownsamples[0])
@@ -286,11 +286,16 @@ namespace SlideInfo.Core
 
 		public override string DetectFormat(string fileName)
 		{
-			return Marshal.PtrToStringAnsi(OpenSlideDll.openslide_detect_vendor(fileName));
+			return DetectVendor(fileName);
 		}
 
-		// call with the reader lock held
-		private void CheckDisposed()
+	    public static string DetectVendor(string fileName)
+	    {
+	        return Marshal.PtrToStringAnsi(OpenSlideDll.openslide_detect_vendor(fileName));
+	    }
+
+        // call with the reader lock held
+        private void CheckDisposed()
 		{
 			if (Osr == null)
 				throw new OpenSlideDisposedException();

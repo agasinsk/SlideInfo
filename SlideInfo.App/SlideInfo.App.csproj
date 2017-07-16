@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <UserSecretsId>aspnet-SlideInfo.App-6ac40fb1-9323-43c1-b22a-63bbaddbacca</UserSecretsId>
-    <ApplicationIcon>wwwroot\SlideInfoFavicon.ico</ApplicationIcon>
+    <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
     <Authors>Artur Gasinski</Authors>
     <Version>0.5.0</Version>
     <OutputTypeEx>exe</OutputTypeEx>
@@ -24,7 +24,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <Optimize>True</Optimize>
+    <Optimize>False</Optimize>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
 
@@ -161,6 +161,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.1" />

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.IO;
-using System.Text;
+using SlideInfo.Helpers;
 
 namespace SlideInfo.Core
 {
@@ -32,21 +31,23 @@ namespace SlideInfo.Core
 			SlideHashCode = slideHashCode;
 		}
 
-		public void WriteToFile(string writePath)
-		{
-			var exactPathToWrite = CreatePathToWriteBitmap(writePath);
+	    public Image GetThumbnail(SizeL size)
+	    {
+	        return GetThumbnail(size.ToSize());
+	    }
 
-			Directory.CreateDirectory(writePath);
-			Image?.Save(exactPathToWrite);
-		}
+        public Image GetThumbnail(Size size)
+	    {
+	        var thumbSize = Image.GetProportionateResize(size);
+            var callback = new Image.GetThumbnailImageAbort(AbstractSlide.ThumbnailCallback);
+	        var thumbnail = Image.GetThumbnailImage(thumbSize.Width, thumbSize.Height, callback, new IntPtr());
+	        return thumbnail;
+	    }
 
-		private string CreatePathToWriteBitmap(string writePath)
-		{
-			var exactWritePath = new StringBuilder();
-
-			exactWritePath.Append(writePath).Append("/").Append(Name).Append(".bmp");
-			return exactWritePath.ToString();
-		}
+	    public ImageSlide ToImageSlide()
+	    {
+	        return new ImageSlide(Image);
+        }
 
 		public override int GetHashCode()
 		{

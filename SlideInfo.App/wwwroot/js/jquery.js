@@ -9811,4 +9811,4 @@ if ( !noGlobal ) {
 }
 
 return jQuery;
-}));
+    }));

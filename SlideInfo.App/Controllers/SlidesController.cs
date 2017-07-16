@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -43,7 +44,7 @@ namespace SlideInfo.App.Controllers
         // GET: Slides/Display/5
         public async Task<IActionResult> Display(int? id)
         {
-            logger.LogInformation("Getting slide {ID}", id);
+            logger.LogInformation("Getting slide {ID} to display...", id);
             if (id == null)
             {
                 logger.LogWarning("Slide id was null");
@@ -66,14 +67,13 @@ namespace SlideInfo.App.Controllers
             return View(viewModel);
         }
 
-        // GET: slug.dzi
         [Produces("application/xml")]
         [Route("[controller]/Display/{slug}.dzi")]
         public string Dzi(string slug)
         {
             try
             {
-                logger.LogInformation("Getting slide {slug} .dzi metadata...", slug);
+                logger.LogInformation("Getting {slug}.dzi metadata...", slug);
                 var slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
@@ -81,11 +81,10 @@ namespace SlideInfo.App.Controllers
                         var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
                         return viewModel.DeepZoomGenerator.GetDziMetadataString();
                     }
-
             }
             catch (Exception)
             {
-                logger.LogError("Error while getting .dzi of {slug}...", slug);
+                logger.LogError("Error while getting {slug}.dzi", slug);
                 HttpContext.Session.SetString(ALERT, NO_ACCESS);
             }
             return "";
@@ -183,9 +182,10 @@ namespace SlideInfo.App.Controllers
         }
 
         // GET: Slides/AssociatedImages/5
-        public async Task<IActionResult> AssociatedImages(int? id)
+        public async Task<IActionResult> AssociatedImages(int? id, string imageName)
         {
-            logger.LogInformation("Getting properties of slide {ID}", id);
+            logger.LogInformation("Getting index of associated images of slide {ID}", id);
+
             if (id == null)
             {
                 return NotFound();
@@ -199,35 +199,87 @@ namespace SlideInfo.App.Controllers
             }
 
             var osr = new OpenSlide(slide.FilePath);
-            var viewModel = new AssociatedImagesViewModel(slide.Name, osr.ReadAssociatedImages());
+
+            if (!String.IsNullOrEmpty(imageName))
+            { 
+                var associatedSlide = osr.AssociatedImages[imageName].ToImageSlide();
+                var imageUrl = slide.Id + "/" + imageName + ".dzi";
+
+                var displayViewModel = new DisplayViewModel(imageName, imageUrl, 0, associatedSlide);
+
+                return View("Display", displayViewModel);
+            }
+
+            var associated = osr.ReadAssociatedImages();
+            if(Directory.Exists($"\\wwwroot\\images\\associatedThumbs\\{id}"))
+            foreach (var image in associated)
+            {
+                var thumb = image.Value.GetThumbnail(new Size(400, 400));
+                thumb.Save($"\\wwwroot\\images\\associatedThumbs/{id}{image.Key}.jpeg", ImageFormat.Jpeg);
+            }
+
+            var viewModel = new AssociatedImagesViewModel(slide.Name, associated);
             ViewData["SlideId"] = id.Value;
 
             return View(viewModel);
+
         }
 
-        [Route("[controller]/GetAssociatedImage/{id}/{imageName}")]
-        [Produces("image/jpeg")]
-        public async Task<IActionResult> GetAssociatedImage(int? id, string imageName)
+        [Produces("application/xml")]
+        [Route("[controller]/AssociatedImages/{id}/{imageName}.dzi")]
+        public string AssociatedDzi(int? id, string imageName)
         {
+            logger.LogInformation("Getting {slug}.dzi metadata...", imageName);
             try
             {
-                var slide = await slideRepository.GetByIdAsync(id.Value);
-                var osr = new OpenSlide(slide.FilePath);
-                var associated = osr.AssociatedImages[imageName];
-                var associatedBitmap = associated.Image;
-                using (var stream = new MemoryStream())
-                {
-                    associatedBitmap.Save(stream, ImageFormat.Jpeg);
-                    associatedBitmap.Dispose();
-                    return File(stream.ToArray(), "image/jpeg");
-                }
+                var slide = slideRepository.Get(m => m.Id == id).FirstOrDefault();
+                if (slide != null)
+                    using (var osr = new OpenSlide(slide.FilePath))
+                    {
+                        var associated = osr.AssociatedImages[imageName].ToImageSlide();
+                        var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, associated);
+                        return viewModel.DeepZoomGenerator.GetDziMetadataString();
+                    }
             }
             catch (Exception)
             {
+                logger.LogError("Error while getting {slug}.dzi", imageName);
                 HttpContext.Session.SetString(ALERT, NO_ACCESS);
-                return RedirectToAction("Index");
             }
+            return "";
         }
+
+        [Route("[controller]/AssociatedImages/{id}/{imageName}_files/{level:int}/{col:int}_{row:int}.jpeg")]
+        public IActionResult AssociatedTile(int? id, string imageName, int level, int col, int row)
+        {
+            logger.LogInformation("Getting tile of {slug} | lev: {level}, col: {col}, row: {row}", imageName, level, col, row);
+            try
+            {
+                var slide = slideRepository.Get(m => m.Id == id).FirstOrDefault();
+                if (slide != null)
+                    using (var osr = new OpenSlide(slide.FilePath))
+                    {
+                        var associated = osr.AssociatedImages[imageName].ToImageSlide();
+                        var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, associated);
+                        var tile = viewModel.DeepZoomGenerator.GetTile(level, new SizeL(col, row));
+
+                        using (var stream = new MemoryStream())
+                        {
+                            tile.Save(stream, ImageFormat.Jpeg);
+                            tile.Save($"C:\\Users\\artur\\Documents\\Visual Studio 2017\\Projects\\SlideInfo\\test\\final_{level}_{row}{col}.jpeg", ImageFormat.Jpeg);
+                            tile.Dispose();
+                            return File(stream.ToArray(), "image/jpeg");
+                        }
+                    }
+            }
+            catch (OpenSlideException)
+            {
+                logger.LogError("Error while getting tile | lev: {level}, col: {col}, row: {row}", level, col, row);
+                HttpContext.Session.SetString(ALERT, CANT_LOAD);
+            }
+            return new FileContentResult(new byte[] { }, "");
+        }
+
 
         // GET: Slides/Details/5
         public async Task<IActionResult> Details(int? id)

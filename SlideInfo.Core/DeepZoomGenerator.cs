@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
@@ -225,8 +226,8 @@ namespace SlideInfo.Core
 
 			var tileBmp = Osr.ReadRegion(level0Location, preferedSlideLevel, regionSize);
 
-			//Apply on background color (composite)
-			tileBmp = ApplyOnBackgroundColor(tileBmp);
+            //Apply on background color (composite)
+            tileBmp = ApplyOnBackgroundColor(tileBmp);
 
 			// Scale to the correct size
 			var deepZoomSize = finalTileSize;
@@ -234,8 +235,8 @@ namespace SlideInfo.Core
 				regionSize.Height == deepZoomSize.Height)
 				return tileBmp;
 
-			tileBmp = new Bitmap(tileBmp, deepZoomSize.ToSize());
-			return tileBmp;
+		    tileBmp = new Bitmap(tileBmp, deepZoomSize.ToSize());
+            return tileBmp;
 		}
 
 		private void CheckParameters(int level, SizeL adress)

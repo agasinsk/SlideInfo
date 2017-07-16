@@ -19,10 +19,10 @@ namespace SlideInfo.Core
 			Height = otherSize.Height;
 		}
 
-		public SizeL(Size otherSize)
+		public SizeL(Size size)
 		{
-			Width = otherSize.Width;
-			Height = otherSize.Height;
+			Width = size.Width;
+			Height = size.Height;
 		}
 
 		public Size ToSize()
@@ -51,7 +51,7 @@ namespace SlideInfo.Core
 
 		public override string ToString()
 		{
-			return "w:" + Width + " h:" + Height;
+			return "w " + Width + " h " + Height;
 		}
 	}
 }
