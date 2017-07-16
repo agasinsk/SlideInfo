@@ -21,7 +21,7 @@
                                 <h4><a asp-action="AssociatedImages" asp-route-id="@ViewData["SlideId"]" asp-route-imageName="@item.Key">@item.Key.ToSentenceCase()</a></h4>
                                 <p>Original size: @item.Value.Image.Width x @item.Value.Image.Height px</p>
                             </div>
-                            @{var imgName = ViewData["SlideId"] + item.Key + ".jpeg";}
+                            @{var imgName = ViewData["SlideId"] + "_" + item.Key + ".jpeg";}
                             <img src="/images/associatedThumbs/@imgName" alt="@item.Key.ToSentenceCase()">
                         </div>
                     }

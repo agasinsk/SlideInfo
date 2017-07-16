@@ -19,7 +19,7 @@ namespace SlideInfo.App.Helpers
 			return isActive ? "active" : "";
 		}
 
-		public static string LinkStatus(this IHtmlHelper html,
+		public static string SetActiveOrInvisible(this IHtmlHelper html,
 			string control,
 			string action, 
 			string item)

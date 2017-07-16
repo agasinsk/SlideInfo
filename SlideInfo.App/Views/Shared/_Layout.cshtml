@@ -34,19 +34,23 @@
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li class="@Html.IsActive("Home","Index")">
+                        <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
                     <li class="@Html.IsActive("Slides","Index")">
                         <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>
                     </li>
-                    <li class="@Html.LinkStatus("Slides", "Properties", Context.Session.GetString("Slide"))">
+                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li class="@Html.SetActiveOrInvisible("Slides", "Properties", Context.Session.GetString("Slide"))">
                         <a asp-area="" asp-controller="Slides" asp-action="Properties">Properties</a>
                     </li>
-                    <li class="@Html.LinkStatus("Slides","AssociatedImages", Context.Session.GetString("Slide"))">
+                    <li class="@Html.SetActiveOrInvisible("Slides","AssociatedImages", Context.Session.GetString("Slide"))">
                         <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages">Associated Images</a>
                     </li>
-
+                    <li class="@Html.SetActiveOrInvisible("Slides", "Properties", Context.Session.GetString("Slide"))">
+                        <a asp-area="" asp-controller="Slides" asp-action="Properties">Properties</a>
+                    </li>
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>

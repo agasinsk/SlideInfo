@@ -33,9 +33,12 @@ namespace SlideInfo.Core
 		level:    the level number.
 		size:     (width, height) tuple giving the region size.*/
 		public abstract Image ReadRegion(SizeL location, int level, SizeL size);
-		
-		//Returns a thumbnail of the image of the specified maximum size
-		public abstract Image GetThumbnail(SizeL size);
+
+	    public abstract Image GetThumbnail(Size size);
+
+        //Returns a thumbnail of the image of the specified maximum size
+        public abstract Image GetThumbnail(SizeL size);
+
 
 		public static bool ThumbnailCallback()
 		{

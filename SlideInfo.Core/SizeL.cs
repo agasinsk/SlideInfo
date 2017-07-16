@@ -54,4 +54,12 @@ namespace SlideInfo.Core
 			return "w " + Width + " h " + Height;
 		}
 	}
+
+    public static class SizeExtension
+    {
+        public static SizeL ToSizeL(this Size size)
+        {
+            return new SizeL(size.Width, size.Height);
+        }
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace SlideInfo.Helpers
@@ -27,21 +28,16 @@ namespace SlideInfo.Helpers
 			return "image/unknown";
 		}
 
-		public static Size GetProportionateResize(this Image i, Size resize)
+		public static Size GetProportionateResize(this Image i, Size maxSize)
 		{
-			var proportionRatio = (double)i.Width / i.Height;
-			if (resize.Width >= resize.Height)
-			{
-				var height = (int) (resize.Width / proportionRatio) ;
-				var size = new Size(resize.Width, height);
-				return size;
-			}
-			else
-			{
-				var width = (int)(resize.Height / proportionRatio);
-				var size = new Size(width, resize.Height);
-				return size;
-			}
+		    var ratioX = (double) maxSize.Width / i.Width;
+		    var ratioY = (double) maxSize.Height / i.Height;
+		    var ratio = Math.Min(ratioX, ratioY);
+
+		    var newWidth = (int)(i.Width * ratio);
+		    var newHeight = (int)(i.Height * ratio);
+
+            return new Size(newWidth, newHeight);
 		}
 
 	    public static Image CropImage(this Image i, Rectangle section)

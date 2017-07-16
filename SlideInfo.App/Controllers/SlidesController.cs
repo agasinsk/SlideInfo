@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -37,8 +38,29 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Index()
         {
             logger.LogInformation("Getting all slides...");
+            var slides = await slideRepository.GetAllAsync();
+            GenerateSlidesThumbnails(slides);
             HttpContext.Session.Remove(SLIDE_ENTRY);
-            return View(await slideRepository.GetAllAsync());
+            return View(slides);
+        }
+
+        private void GenerateSlidesThumbnails(ICollection<Slide> slides)
+        {
+            var existingThumbs = Directory.EnumerateFiles(AppDirectories.SlidesThumbs);
+            var existingThumbsCount = existingThumbs.Count();
+            if (slides.Count == existingThumbsCount)
+                return;
+
+            logger.LogInformation("Generating thumbnails of slides...");
+            foreach (var slide in slides)
+            {
+                if (existingThumbs.Contains($"{slide.Id}")) continue;
+                using (var osr = new OpenSlide(slide.FilePath))
+                {
+                    var thumb = osr.GetThumbnail(new Size(400, 400));
+                    thumb.Save($@"{AppDirectories.SlidesThumbs}{slide.Id}.jpeg", ImageFormat.Jpeg);
+                }
+            }
         }
 
         // GET: Slides/Display/5
@@ -184,7 +206,7 @@ namespace SlideInfo.App.Controllers
         // GET: Slides/AssociatedImages/5
         public async Task<IActionResult> AssociatedImages(int? id, string imageName)
         {
-            logger.LogInformation("Getting index of associated images of slide {ID}", id);
+            logger.LogInformation("Getting associated images of slide {ID}", id);
 
             if (id == null)
             {
@@ -201,7 +223,8 @@ namespace SlideInfo.App.Controllers
             var osr = new OpenSlide(slide.FilePath);
 
             if (!String.IsNullOrEmpty(imageName))
-            { 
+            {
+                logger.LogInformation("Getting associated image {name} of slide {ID}", imageName, id);
                 var associatedSlide = osr.AssociatedImages[imageName].ToImageSlide();
                 var imageUrl = slide.Id + "/" + imageName + ".dzi";
 
@@ -211,18 +234,26 @@ namespace SlideInfo.App.Controllers
             }
 
             var associated = osr.ReadAssociatedImages();
-            if(Directory.Exists($"\\wwwroot\\images\\associatedThumbs\\{id}"))
-            foreach (var image in associated)
-            {
-                var thumb = image.Value.GetThumbnail(new Size(400, 400));
-                thumb.Save($"\\wwwroot\\images\\associatedThumbs/{id}{image.Key}.jpeg", ImageFormat.Jpeg);
-            }
+
+            GenerateAssociatedImagesThumbnails(id.Value, associated);
 
             var viewModel = new AssociatedImagesViewModel(slide.Name, associated);
             ViewData["SlideId"] = id.Value;
 
             return View(viewModel);
+        }
 
+        private void GenerateAssociatedImagesThumbnails(int id, SlideDictionary<AssociatedImage> associated)
+        {
+            if (Directory.EnumerateFiles(AppDirectories.AssociatedImagesThumbs, $"{id}*").Any())
+                return;
+
+            logger.LogInformation("Generating thumbnails of associated images of slide {ID}", id);
+            foreach (var image in associated)
+            {
+                var thumb = image.Value.GetThumbnail(new Size(400, 400));
+                thumb.Save($@"{AppDirectories.AssociatedImagesThumbs}{id}_{image.Key}.jpeg", ImageFormat.Jpeg);
+            }
         }
 
         [Produces("application/xml")]
@@ -266,7 +297,6 @@ namespace SlideInfo.App.Controllers
                         using (var stream = new MemoryStream())
                         {
                             tile.Save(stream, ImageFormat.Jpeg);
-                            tile.Save($"C:\\Users\\artur\\Documents\\Visual Studio 2017\\Projects\\SlideInfo\\test\\final_{level}_{row}{col}.jpeg", ImageFormat.Jpeg);
                             tile.Dispose();
                             return File(stream.ToArray(), "image/jpeg");
                         }
@@ -279,7 +309,6 @@ namespace SlideInfo.App.Controllers
             }
             return new FileContentResult(new byte[] { }, "");
         }
-
 
         // GET: Slides/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -395,6 +424,11 @@ namespace SlideInfo.App.Controllers
         private bool SlideExists(int id)
         {
             return context.Slides.Any(e => e.Id == id);
+        }
+
+        public IActionResult Comments()
+        {
+            throw new NotImplementedException();
         }
     }
 }

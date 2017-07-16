@@ -109,6 +109,11 @@ namespace SlideInfo.Core
             return tile;
         }
 
+        public override Image GetThumbnail(Size size)
+        {
+            return GetThumbnail(size.ToSizeL());
+        }
+
         public override Image GetThumbnail(SizeL size)
         {
             var thumbSize = image.GetProportionateResize(size.ToSize());
