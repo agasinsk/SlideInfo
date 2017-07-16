@@ -1,20 +1,21 @@
-﻿@using SlideInfo.WebApp.Models
-@model SlideInfo.WebApp.Models.Slide
+﻿@model SlideInfo.App.Models.SlideViewModels.AssociatedImagesViewModel
 
 @{
-	ViewData["Title"] = "Associated Images | " + Model.FileName;
+	ViewData["Title"] = "Associated Images | " + Model.Name;
 }
 
 <div id="images">
 
-	<h2>@Model.FileName associated images</h2>
+	<h2>@Model.Name associated images</h2>
 	@if (Model.AssociatedImages != null)
 	{
 	<table class="table table-hover table-responsive">
 		@foreach (var item in Model.AssociatedImages)
 		{
 		<tr>
-			<th>@Html.ActionLink(item.Key, "GetAssociatedImage", "SlideSet", new { slug = Model.SlideUrl, imageName = item.Key }) </th>
+		    <th>
+		        <a asp-action="GetAssociatedImage" asp-route-id="@ViewData["SlideId"]" asp-route-imageName="@item.Key">@item.Key</a>
+		    </th>
 		</tr>
 		}
 	</table>

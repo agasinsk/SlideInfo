@@ -1,16 +1,11 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.Internal;
 using Microsoft.Extensions.Logging;
 using SlideInfo.App.Data;
 using SlideInfo.App.Helpers;
@@ -18,6 +13,7 @@ using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Repositories;
 using SlideInfo.Core;
+using static SlideInfo.App.Helpers.SessionConstants;
 
 namespace SlideInfo.App.Controllers
 {
@@ -40,6 +36,7 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Index()
         {
             logger.LogInformation("Getting all slides...");
+            HttpContext.Session.Remove(SLIDE_ENTRY);
             return View(await slideRepository.GetAllAsync());
         }
 
@@ -60,6 +57,8 @@ namespace SlideInfo.App.Controllers
                 logger.LogError("GetById({ID}) NOT FOUND", id);
                 return NotFound();
             }
+
+            HttpContext.Session.Set(SLIDE_ENTRY, slide);
 
             var osr = new OpenSlide(slide.FilePath);
             var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
@@ -87,7 +86,7 @@ namespace SlideInfo.App.Controllers
             catch (Exception)
             {
                 logger.LogError("Error while getting .dzi of {slug}...", slug);
-                HttpContext.Session.SetString("AlertText", "Nie znaleziono pliku.");
+                HttpContext.Session.SetString(ALERT, NO_ACCESS);
             }
             return "";
         }
@@ -98,7 +97,7 @@ namespace SlideInfo.App.Controllers
             try
             {
                 logger.LogInformation("Getting tile: {level}, col: {col}, row: {row}", level, col, row);
-              
+
                 var slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
@@ -117,18 +116,18 @@ namespace SlideInfo.App.Controllers
             catch (OpenSlideException)
             {
                 logger.LogError("Error while getting tile lev: {level}, col: {col}, row: {row}", level, col, row);
-                throw new HttpException(404, "Wrong level or coordinates");
+                HttpContext.Session.SetString(ALERT, CANT_LOAD);
             }
-            return new FileContentResult(new byte[]{},"");
+            return new FileContentResult(new byte[] { }, "");
         }
 
         // GET: Slides/Properties/5
-        public async Task<IActionResult> Properties(int? id, string sortOrder, 
+        public async Task<IActionResult> Properties(int? id, string sortOrder,
             string currentFilter, string searchString, int? page)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-           
+
             if (searchString != null)
             {
                 page = 1;
@@ -162,7 +161,7 @@ namespace SlideInfo.App.Controllers
                 properties = properties.Where(s => s.Key.Contains(searchString)
                                                || s.Value.Contains(searchString));
             }
-            
+
             //sorting
             switch (sortOrder)
             {
@@ -201,8 +200,33 @@ namespace SlideInfo.App.Controllers
 
             var osr = new OpenSlide(slide.FilePath);
             var viewModel = new AssociatedImagesViewModel(slide.Name, osr.ReadAssociatedImages());
+            ViewData["SlideId"] = id.Value;
 
             return View(viewModel);
+        }
+
+        [Route("[controller]/GetAssociatedImage/{id}/{imageName}")]
+        [Produces("image/jpeg")]
+        public async Task<IActionResult> GetAssociatedImage(int? id, string imageName)
+        {
+            try
+            {
+                var slide = await slideRepository.GetByIdAsync(id.Value);
+                var osr = new OpenSlide(slide.FilePath);
+                var associated = osr.AssociatedImages[imageName];
+                var associatedBitmap = associated.Image;
+                using (var stream = new MemoryStream())
+                {
+                    associatedBitmap.Save(stream, ImageFormat.Jpeg);
+                    associatedBitmap.Dispose();
+                    return File(stream.ToArray(), "image/jpeg");
+                }
+            }
+            catch (Exception)
+            {
+                HttpContext.Session.SetString(ALERT, NO_ACCESS);
+                return RedirectToAction("Index");
+            }
         }
 
         // GET: Slides/Details/5
@@ -231,8 +255,6 @@ namespace SlideInfo.App.Controllers
         }
 
         // POST: Slides/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,FilePath,SlideUrl,SlideDziUrl,SlideMpp")] Slide slide)
@@ -263,8 +285,6 @@ namespace SlideInfo.App.Controllers
         }
 
         // POST: Slides/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,FilePath,SlideUrl,SlideDziUrl,SlideMpp")] Slide slide)

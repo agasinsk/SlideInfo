@@ -1,39 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using SlideInfo.App.Data;
 
-namespace SlideInfo.App.Data.Migrations
+namespace SlideInfo.App.Migrations
 {
     [DbContext(typeof(SlideInfoDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    partial class SlideInfoDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.0.0-rc3")
+                .HasAnnotation("ProductVersion", "1.1.2")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole", b =>
                 {
-                    b.Property<string>("Id");
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
                     b.Property<string>("Name")
-                        .HasAnnotation("MaxLength", 256);
+                        .HasMaxLength(256);
 
                     b.Property<string>("NormalizedName")
-                        .HasAnnotation("MaxLength", 256);
+                        .HasMaxLength(256);
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
+                        .IsUnique()
                         .HasName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles");
@@ -105,8 +105,6 @@ namespace SlideInfo.App.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("AspNetUserRoles");
                 });
 
@@ -125,9 +123,10 @@ namespace SlideInfo.App.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("SlideInfo.App.Models.ApplicationUser", b =>
+            modelBuilder.Entity("SlideInfo.App.Models.AppUser", b =>
                 {
-                    b.Property<string>("Id");
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<int>("AccessFailedCount");
 
@@ -135,19 +134,25 @@ namespace SlideInfo.App.Data.Migrations
                         .IsConcurrencyToken();
 
                     b.Property<string>("Email")
-                        .HasAnnotation("MaxLength", 256);
+                        .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<string>("FirstMidName");
+
+                    b.Property<DateTime>("LastActive");
+
+                    b.Property<string>("LastName");
 
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
 
                     b.Property<string>("NormalizedEmail")
-                        .HasAnnotation("MaxLength", 256);
+                        .HasMaxLength(256);
 
                     b.Property<string>("NormalizedUserName")
-                        .HasAnnotation("MaxLength", 256);
+                        .HasMaxLength(256);
 
                     b.Property<string>("PasswordHash");
 
@@ -160,7 +165,7 @@ namespace SlideInfo.App.Data.Migrations
                     b.Property<bool>("TwoFactorEnabled");
 
                     b.Property<string>("UserName")
-                        .HasAnnotation("MaxLength", 256);
+                        .HasMaxLength(256);
 
                     b.HasKey("Id");
 
@@ -174,6 +179,69 @@ namespace SlideInfo.App.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("SlideInfo.App.Models.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("AppUserId");
+
+                    b.Property<string>("AppUserId1");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<int>("SlideId");
+
+                    b.Property<string>("Text")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId1");
+
+                    b.HasIndex("SlideId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("SlideInfo.App.Models.Property", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Key");
+
+                    b.Property<int>("SlideId");
+
+                    b.Property<string>("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SlideId");
+
+                    b.ToTable("Properties");
+                });
+
+            modelBuilder.Entity("SlideInfo.App.Models.Slide", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("FilePath");
+
+                    b.Property<double>("Mpp");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("QuickHash");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Slides");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole")
@@ -184,7 +252,7 @@ namespace SlideInfo.App.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("SlideInfo.App.Models.ApplicationUser")
+                    b.HasOne("SlideInfo.App.Models.AppUser")
                         .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -192,7 +260,7 @@ namespace SlideInfo.App.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("SlideInfo.App.Models.ApplicationUser")
+                    b.HasOne("SlideInfo.App.Models.AppUser")
                         .WithMany("Logins")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -205,9 +273,29 @@ namespace SlideInfo.App.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("SlideInfo.App.Models.ApplicationUser")
+                    b.HasOne("SlideInfo.App.Models.AppUser")
                         .WithMany("Roles")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SlideInfo.App.Models.Comment", b =>
+                {
+                    b.HasOne("SlideInfo.App.Models.AppUser")
+                        .WithMany("Comments")
+                        .HasForeignKey("AppUserId1");
+
+                    b.HasOne("SlideInfo.App.Models.Slide")
+                        .WithMany("Comments")
+                        .HasForeignKey("SlideId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("SlideInfo.App.Models.Property", b =>
+                {
+                    b.HasOne("SlideInfo.App.Models.Slide")
+                        .WithMany("Properties")
+                        .HasForeignKey("SlideId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
         }

@@ -49,9 +49,10 @@
                 @Html.DisplayFor(modelItem => item.Mpp)
             </td>
             <td>
+                <a asp-action="Properties" asp-route-id="@item.Id">Properties</a> |
+                <a asp-action="AssociatedImages" asp-route-id="@item.Id">Associated Images</a> |
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
 }
