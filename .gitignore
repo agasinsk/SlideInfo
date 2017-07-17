@@ -25,9 +25,9 @@ bld/
 # Visual Studio 2015 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
-wwwroot/images/slideThumbs
-wwwroot/images/associatedThumbs
+#wwwroot
+/wwwroot/images/slideThumbs/
+/wwwroot/images/associatedThumbs/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -264,3 +264,4 @@ __pycache__/
 /SlideInfo.App/wwwroot/images/associatedThumbs
 /SlideInfo.App/wwwroot/images/associatedThumbs
 /SlideInfo.App/wwwroot/images/associatedThumbs/1_macro.jpeg
+/SlideInfo.App/wwwroot/images/slideThumbs

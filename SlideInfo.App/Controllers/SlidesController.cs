@@ -51,9 +51,9 @@ namespace SlideInfo.App.Controllers
             if (slides.Count == existingThumbsCount)
                 return;
 
-            logger.LogInformation("Generating thumbnails of slides...");
-            foreach (var slide in slides)
-            {
+           foreach (var slide in slides)
+           {
+                logger.LogInformation("Generating thumbnails of slide {id}:{name}..", slide.Id, slide.Name);
                 if (existingThumbs.Contains($"{slide.Id}")) continue;
                 using (var osr = new OpenSlide(slide.FilePath))
                 {
