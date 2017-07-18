@@ -39,22 +39,29 @@ namespace SlideInfo.App.Controllers
         {
             logger.LogInformation("Getting all slides...");
             var slides = await slideRepository.GetAllAsync();
-            GenerateSlidesThumbnails(slides);
+            GetSlideThumbnails(slides);
             HttpContext.Session.Remove(SLIDE_ENTRY);
             return View(slides);
         }
 
-        private void GenerateSlidesThumbnails(ICollection<Slide> slides)
+        private void GetSlideThumbnails(ICollection<Slide> slides)
         {
-            var existingThumbs = Directory.EnumerateFiles(AppDirectories.SlidesThumbs);
+            var existingThumbs = from file in Directory.EnumerateFiles(AppDirectories.SlidesThumbs, "*.jpeg")
+                select file;
             var existingThumbsCount = existingThumbs.Count();
+
             if (slides.Count == existingThumbsCount)
                 return;
 
-           foreach (var slide in slides)
-           {
-                logger.LogInformation("Generating thumbnails of slide {id}:{name}..", slide.Id, slide.Name);
-                if (existingThumbs.Contains($"{slide.Id}")) continue;
+            foreach (var slide in slides)
+            {
+                var existingSlideThumb = from file in existingThumbs
+                    where file.ToLower().Contains($"{slide.Id}.jpeg")
+                    select file;
+                if (existingSlideThumb.Any())
+                    continue;
+
+                logger.LogInformation("Generating thumbnail of slide {id}: {name}..", slide.Id, slide.Name);
                 using (var osr = new OpenSlide(slide.FilePath))
                 {
                     var thumb = osr.GetThumbnail(new Size(400, 400));
@@ -235,7 +242,7 @@ namespace SlideInfo.App.Controllers
 
             var associated = osr.ReadAssociatedImages();
 
-            GenerateAssociatedImagesThumbnails(id.Value, associated);
+            GetAssociatedImagesThumbnails(id.Value, associated);
 
             var viewModel = new AssociatedImagesViewModel(slide.Name, associated);
             ViewData["SlideId"] = id.Value;
@@ -243,12 +250,12 @@ namespace SlideInfo.App.Controllers
             return View(viewModel);
         }
 
-        private void GenerateAssociatedImagesThumbnails(int id, SlideDictionary<AssociatedImage> associated)
+        private void GetAssociatedImagesThumbnails(int id, SlideDictionary<AssociatedImage> associated)
         {
             if (Directory.EnumerateFiles(AppDirectories.AssociatedImagesThumbs, $"{id}*").Any())
                 return;
 
-            logger.LogInformation("Generating thumbnails of associated images of slide {ID}", id);
+            logger.LogInformation("Generating thumbnails of associated images of slide {ID}...", id);
             foreach (var image in associated)
             {
                 var thumb = image.Value.GetThumbnail(new Size(400, 400));
