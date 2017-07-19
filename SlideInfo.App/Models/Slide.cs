@@ -16,9 +16,11 @@ namespace SlideInfo.App.Models
         public string DziUrl => Url + ".dzi";
         public double Mpp { get; set; }
         public string Vendor { get; set; }
+        public long Width { get; set; }
+        public long Height { get; set; }
 
-        public virtual ICollection<Comment> Comments { get; set; }
-        public virtual ICollection<Property> Properties { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Property> Properties { get; set; }
 
         public Slide()
         {
@@ -44,6 +46,8 @@ namespace SlideInfo.App.Models
                 {
                     Mpp = 0;
                 }
+                Width = osr.Dimensions.Width;
+                Height = osr.Dimensions.Height;
             }
         }
 
@@ -52,6 +56,9 @@ namespace SlideInfo.App.Models
             FilePath = osr.FilePath;
             Name = Path.GetFileName(FilePath);
             Url = UrlFormatter.UrlFor(Name);
+            Vendor = osr.DetectFormat(FilePath);
+            Width = osr.Dimensions.Width;
+            Height = osr.Dimensions.Height;
 
             try
             {

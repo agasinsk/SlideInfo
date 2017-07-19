@@ -34,18 +34,54 @@ namespace SlideInfo.App.Controllers
         }
 
         // GET: Slides
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? id, string sortOrder,
+            string currentFilter, string searchString)
         {
             logger.LogInformation("Getting all slides...");
-            var slides = await slideRepository.GetAllAsync();
-            GetSlideThumbnails(slides);
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["VendorSortParm"] = sortOrder == "Vendor" ? "vendor_desc" : "vendor";
+            ViewData["CurrentFilter"] = searchString;
+
+            var slides = from s in context.Slides
+                select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                slides = slides.Where(s => s.Name.Contains(searchString)
+                                               || s.Vendor.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    slides = slides.OrderByDescending(s => s.Name);
+                    break;
+                case "vendor":
+                    slides = slides.OrderBy(s => s.Vendor);
+                    break;
+                case "vendor_desc":
+                    slides = slides.OrderByDescending(s => s.Vendor);
+                    break;
+                default:
+                    slides = slides.OrderBy(s => s.Name);
+                    break;
+            }
+            
             HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
-            return View(slides);
+            var finalSlides = await slides.AsNoTracking().ToListAsync();
+            GetSlideThumbnails(finalSlides);
+            return View(finalSlides);
+        }
+        
+        // Slides
+        public void Update()
+        {
+            DbInitializer.Update(context);
         }
 
         private void GetSlideThumbnails(ICollection<Slide> slides)
         {
-            var existingThumbs = from file in Directory.EnumerateFiles(AppDirectories.SlidesThumbs, "*.jpeg")
+            var existingThumbs = from file in Directory.EnumerateFiles(AppDirectories.SlideThumbs, "*.jpeg")
                                  select file;
             var existingThumbsCount = existingThumbs.Count();
 
@@ -64,7 +100,7 @@ namespace SlideInfo.App.Controllers
                 using (var osr = new OpenSlide(slide.FilePath))
                 {
                     var thumb = osr.GetThumbnail(new Size(400, 400));
-                    thumb.Save($@"{AppDirectories.SlidesThumbs}{slide.Id}.jpeg", ImageFormat.Jpeg);
+                    thumb.Save($@"{AppDirectories.SlideThumbs}{slide.Id}.jpeg", ImageFormat.Jpeg);
                 }
             }
         }

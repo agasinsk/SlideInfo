@@ -8,9 +8,10 @@ using SlideInfo.App.Data;
 namespace SlideInfo.App.Migrations
 {
     [DbContext(typeof(SlideInfoDbContext))]
-    partial class SlideInfoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170719194106_vendor+size")]
+    partial class vendorsize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")
