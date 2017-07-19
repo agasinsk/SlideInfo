@@ -15,7 +15,6 @@ using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Repositories;
 using SlideInfo.Core;
-using static SlideInfo.App.Helpers.SessionConstants;
 
 namespace SlideInfo.App.Controllers
 {
@@ -40,14 +39,14 @@ namespace SlideInfo.App.Controllers
             logger.LogInformation("Getting all slides...");
             var slides = await slideRepository.GetAllAsync();
             GetSlideThumbnails(slides);
-            HttpContext.Session.Remove(SLIDE_ENTRY);
+            HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
             return View(slides);
         }
 
         private void GetSlideThumbnails(ICollection<Slide> slides)
         {
             var existingThumbs = from file in Directory.EnumerateFiles(AppDirectories.SlidesThumbs, "*.jpeg")
-                select file;
+                                 select file;
             var existingThumbsCount = existingThumbs.Count();
 
             if (slides.Count == existingThumbsCount)
@@ -56,8 +55,8 @@ namespace SlideInfo.App.Controllers
             foreach (var slide in slides)
             {
                 var existingSlideThumb = from file in existingThumbs
-                    where file.ToLower().Contains($"{slide.Id}.jpeg")
-                    select file;
+                                         where file.ToLower().Contains($"{slide.Id}.jpeg")
+                                         select file;
                 if (existingSlideThumb.Any())
                     continue;
 
@@ -88,7 +87,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            HttpContext.Session.Set(SLIDE_ENTRY, slide);
+            HttpContext.Session.Set(SessionConstants.CURRENT_SLIDE, slide);
 
             var osr = new OpenSlide(slide.FilePath);
             var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
@@ -103,7 +102,11 @@ namespace SlideInfo.App.Controllers
             try
             {
                 logger.LogInformation("Getting {slug}.dzi metadata...", slug);
-                var slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE);
+
+                if (slide == null)
+                    slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
                     {
@@ -114,7 +117,7 @@ namespace SlideInfo.App.Controllers
             catch (Exception)
             {
                 logger.LogError("Error while getting {slug}.dzi", slug);
-                HttpContext.Session.SetString(ALERT, NO_ACCESS);
+                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.NO_ACCESS);
             }
             return "";
         }
@@ -126,7 +129,11 @@ namespace SlideInfo.App.Controllers
             {
                 logger.LogInformation("Getting tile: {level}, col: {col}, row: {row}", level, col, row);
 
-                var slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE);
+
+                if (slide == null)
+                    slide = slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
                     {
@@ -144,7 +151,7 @@ namespace SlideInfo.App.Controllers
             catch (OpenSlideException)
             {
                 logger.LogError("Error while getting tile lev: {level}, col: {col}, row: {row}", level, col, row);
-                HttpContext.Session.SetString(ALERT, CANT_LOAD);
+                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.CANT_LOAD);
             }
             return new FileContentResult(new byte[] { }, "");
         }
@@ -213,7 +220,7 @@ namespace SlideInfo.App.Controllers
         // GET: Slides/AssociatedImages/5
         public async Task<IActionResult> AssociatedImages(int? id, string imageName)
         {
-            logger.LogInformation("Getting associated images of slide {ID}", id);
+            logger.LogInformation("Getting associated images of slide {ID}...", id);
 
             if (id == null)
             {
@@ -231,7 +238,7 @@ namespace SlideInfo.App.Controllers
 
             if (!String.IsNullOrEmpty(imageName))
             {
-                logger.LogInformation("Getting associated image {name} of slide {ID}", imageName, id);
+                logger.LogInformation("Getting associated image {name} of slide {ID}...", imageName, id);
                 var associatedSlide = osr.AssociatedImages[imageName].ToImageSlide();
                 var imageUrl = slide.Id + "/" + imageName + ".dzi";
 
@@ -282,7 +289,7 @@ namespace SlideInfo.App.Controllers
             catch (Exception)
             {
                 logger.LogError("Error while getting {slug}.dzi", imageName);
-                HttpContext.Session.SetString(ALERT, NO_ACCESS);
+                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.NO_ACCESS);
             }
             return "";
         }
@@ -312,7 +319,7 @@ namespace SlideInfo.App.Controllers
             catch (OpenSlideException)
             {
                 logger.LogError("Error while getting tile | lev: {level}, col: {col}, row: {row}", level, col, row);
-                HttpContext.Session.SetString(ALERT, CANT_LOAD);
+                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.CANT_LOAD);
             }
             return new FileContentResult(new byte[] { }, "");
         }

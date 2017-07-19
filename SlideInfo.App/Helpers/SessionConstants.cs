@@ -13,6 +13,6 @@
         public const string NO_ACCESS = "No access to data";
 
         //serializable objects
-        public const string SLIDE_ENTRY = "currentSlide";
+        public const string CURRENT_SLIDE = "Slide";
     }
 }
