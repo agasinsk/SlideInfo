@@ -90,3 +90,12 @@ ul {
     padding-left: 7%;
     text-align: left;
 }
+
+.div-inline {
+    display: inline-block;
+}
+
+.div-inline-right {
+    display: inline-block;
+    align-self: right;
+}

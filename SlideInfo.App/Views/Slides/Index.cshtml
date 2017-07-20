@@ -1,3 +1,4 @@
+@using SlideInfo.Helpers
 @model IEnumerable<SlideInfo.App.Models.Slide>
 @{
     ViewData["Title"] = "Slides";
@@ -5,18 +6,32 @@
 
 <h2>Whole-slide images index</h2>
 
-<form asp-action="Index" method="get">
-    <div class="form-actions no-color">
-        <p>
-            Find slide: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
-            <input type="submit" value="Search" class="btn btn-default" /> |
-            <a asp-action="Index">Back to Full List</a> |
-            <a asp-action="Update">Rescan</a> | Sort by:
-            <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">name</a> | 
-            <a asp-action="Index" asp-route-sortOrder="@ViewData["VendorSortParm"]">vendor</a>
-        </p>
+<div class="container">
+    
+    <div class="dropdown div-inline">
+        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+            Sort by
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">Name</a></li>
+            <li><a asp-action="Index" asp-route-sortOrder="@ViewData["VendorSortParm"]">Vendor</a></li>
+            <li><a asp-action="Index" asp-route-sortOrder="@ViewData["SizeSortParm"]">Size</a></li>
+        </ul>
     </div>
-</form>
+    <a asp-action="Update" class="btn btn-default">Rescan slides</a>
+
+    <form class="form-inline div-inline-right pull-right" asp-action="Index" method="get">
+        @if (ViewData["CurrentFilter"] != null)
+        {
+            <a asp-action="Index" class="btn btn-default" role="button">Refresh</a>
+        }
+        <input type="text" class="form-control" placeholder="Find slide..." name="searchString" value="@ViewData["CurrentFilter"]">
+        <input type="submit" value="Search" class="btn btn-success" />
+    </form>
+</div>
+
+<br />
 
 <div class="container">
     <div class="row">
@@ -28,7 +43,7 @@
                         <h4><a asp-action="Display" asp-route-id="@slide.Id">@slide.Name</a></h4>
                         <ul style="list-style-type: none">
                             <li>
-                                Vendor: @slide.Vendor
+                                Vendor: @slide.Vendor.ToSentenceCase()
                             </li>
                             <li>
                                 Original size: @slide.Width x @slide.Height

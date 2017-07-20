@@ -74,9 +74,10 @@ namespace SlideInfo.App.Controllers
         }
         
         // Slides
-        public void Update()
+        public IActionResult Update()
         {
             DbInitializer.Update(context);
+            return RedirectToAction("Index");
         }
 
         private void GetSlideThumbnails(ICollection<Slide> slides)

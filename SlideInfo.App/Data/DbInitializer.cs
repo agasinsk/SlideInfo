@@ -57,30 +57,27 @@ namespace SlideInfo.App.Data
             {
                 var osr = new OpenSlide(path);
 
-                var updatedSlide = new Slide(osr);
+                var newSlide = new Slide(osr);
 
-                var existingSlide = context.Slides.Find(updatedSlide.FilePath);
-                Slide slide;
+                var existingSlide = context.Slides.First(s => s.FilePath == path);
+                
                 if (existingSlide != null)
                 {
-                    context.Entry(existingSlide).CurrentValues.SetValues(updatedSlide);
-                    slide = existingSlide;
+                    newSlide.Id = existingSlide.Id;
+                    context.Entry(existingSlide).CurrentValues.SetValues(newSlide);
                 }
                 else
                 {
-                    context.Add(updatedSlide);
-                    slide = updatedSlide;
+                    context.Add(newSlide);
+
+                    var properties = osr.ReadProperties();
+                    foreach (var slideProp in properties)
+                    {
+                        var property = new Property(newSlide.Id, slideProp.Key, slideProp.Value);
+                        context.Add(property);
+                    }
                 }
 
-                context.SaveChanges();
-
-                var properties = osr.ReadProperties();
-
-                foreach (var slideProp in properties)
-                {
-                    var property = new Property(slide.Id, slideProp.Key, slideProp.Value);
-                    context.Update(property);
-                }
             }
 
             context.SaveChanges();
