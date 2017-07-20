@@ -37,21 +37,39 @@
                     <li class="@Html.IsActive("Home","Index")">
                         <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
-
-                    <li class="dropdown @Html.IsActive("Slides", "Index")">
-                        <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
-                            Slides
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a asp-area="" asp-controller="Slides" asp-action="Display">Display</a></li>
-                            <li><a asp-area="" asp-controller="Slides" asp-action="Properties">Properties</a></li>
-                            <li><a asp-area="" asp-controller="Slides" asp-action="AssociatedImages">Associated Images</a></li>
-                            <li><a asp-area="" asp-controller="Slides" asp-action="Comments">Comments</a></li>
-                        </ul>
-                    </li>
+                    @if (ViewData["SlideId"] != null)
+                    {
+                        <li class="dropdown @Html.IsActiveController("Slides")">
+                            <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
+                                Slides
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a asp-area="" asp-controller="Slides" asp-action="Display">Display</a>
+                                </li>
+                                <li class="divider"><</li>
+                                <li>
+                                    <a asp-area="" asp-controller="Slides" asp-action="Properties">Properties</a>
+                                </li>
+                                <li>
+                                    <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages">Associated Images</a>
+                                </li>
+                                <li>
+                                    <a asp-area="" asp-controller="Slides" asp-action="Comments">Comments</a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    @if (ViewData["SlideId"] == null)
+                    {
+                        <li class="@Html.IsActiveController("Slides")">
+                            <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>
+                        </li>
+                    }
                     <li class="@Html.IsActive("Home","About")"><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li class="@Html.IsActive("Home","Contact")"><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li>@ViewData["SlideId"]</li>
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>
@@ -91,16 +109,16 @@
 </html>
 
 <script>
-    jQuery(function($) {
-        $('.navbar .dropdown').hover(function() {
+    jQuery(function ($) {
+        $('.navbar .dropdown').hover(function () {
             $(this).find('.dropdown-menu').first().stop(true, true).slideDown();
 
-        }, function() {
+        }, function () {
             $(this).find('.dropdown-menu').first().stop(true, true).slideUp();
 
         });
 
-        $('.navbar .dropdown > a').click(function(){
+        $('.navbar .dropdown > a').click(function () {
             location.href = this.href;
         });
 

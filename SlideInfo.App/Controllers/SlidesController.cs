@@ -41,7 +41,7 @@ namespace SlideInfo.App.Controllers
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["VendorSortParm"] = sortOrder == "Vendor" ? "vendor_desc" : "vendor";
             ViewData["CurrentFilter"] = searchString;
-
+            ViewData["SlideId"] = null;
             var slides = from s in context.Slides
                 select s;
 
@@ -124,6 +124,7 @@ namespace SlideInfo.App.Controllers
             }
 
             HttpContext.Session.Set(SessionConstants.CURRENT_SLIDE, slide);
+            ViewData["SlideId"] = slide.Id.ToString();
 
             var osr = new OpenSlide(slide.FilePath);
             var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
@@ -217,11 +218,11 @@ namespace SlideInfo.App.Controllers
             }
 
             var slide = await slideRepository.GetByIdAsync(id.Value);
-
             if (slide == null)
             {
                 return NotFound();
             }
+            ViewData["SlideId"] = slide.Id.ToString();
 
             var properties = context.Properties.Where(c => c.SlideId == id);
 
@@ -269,6 +270,7 @@ namespace SlideInfo.App.Controllers
             {
                 return NotFound();
             }
+            ViewData["SlideId"] = slide.Id.ToString();
 
             var osr = new OpenSlide(slide.FilePath);
 

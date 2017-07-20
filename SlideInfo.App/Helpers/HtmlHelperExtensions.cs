@@ -4,7 +4,16 @@ namespace SlideInfo.App.Helpers
 {
 	public static class HtmlHelperExtensions
 	{
-		public static string IsActive(this IHtmlHelper html,
+	    public static string IsActiveController(this IHtmlHelper html,
+	        string controller)
+	    {
+	        var routeData = html.ViewContext.RouteData;
+	        var routeController = (string)routeData.Values["controller"];
+
+	        return controller == routeController ? "active" : "";
+	    }
+
+        public static string IsActive(this IHtmlHelper html,
 			string controller,
 			string action)
 		{
@@ -19,7 +28,23 @@ namespace SlideInfo.App.Helpers
 			return isActive ? "active" : "";
 		}
 
-		public static string SetActiveOrInvisible(this IHtmlHelper html,
+	    public static string IsDropdownActive(this IHtmlHelper html,
+	        string controller,
+	        string item)
+	    {
+	        if (item == null)
+	            return "";
+
+            var routeData = html.ViewContext.RouteData;
+	        var routeController = (string)routeData.Values["controller"];
+
+	        // both must match
+	        var isActive = controller == routeController;
+
+	        return isActive ? "dropdown-toggle" : "";
+	    }
+
+        public static string SetActiveOrInvisible(this IHtmlHelper html,
 			string control,
 			string action, 
 			string item)
