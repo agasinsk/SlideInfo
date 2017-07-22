@@ -45,6 +45,9 @@ namespace SlideInfo.App.Controllers
             ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "height_desc" : "height";
             ViewData[CURRENT_FILTER] = searchString;
             ViewData[SLIDE_ID] = null;
+            ViewData[HAS_ASSOCIATED_IMAGES] = null;
+            ViewData[HAS_COMMENTS] = null;
+
             var slides = from s in context.Slides
                          select s;
 

@@ -52,12 +52,18 @@
                                 <li>
                                     <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Properties</a>
                                 </li>
-                                <li>
-                                    <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_ASSOCIATED_IMAGES] as string)" asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Associated Images</a>
-                                </li>
-                                <li>
-                                    <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Comments</a>
-                                </li>
+                                @if (ViewData[ViewDataConstants.HAS_ASSOCIATED_IMAGES] is string)
+                                {
+                                    <li>
+                                        <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Associated Images</a>
+                                    </li>
+                                }
+                                @if (ViewData[ViewDataConstants.HAS_COMMENTS] is string)
+                                {
+                                    <li>
+                                        <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Comments</a>
+                                    </li>
+                                }
                             </ul>
                         </li>
                     }
