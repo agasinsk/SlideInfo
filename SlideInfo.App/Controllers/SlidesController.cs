@@ -15,6 +15,7 @@ using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Repositories;
 using SlideInfo.Core;
+using static SlideInfo.App.Helpers.ViewDataConstants;
 
 namespace SlideInfo.App.Controllers
 {
@@ -38,12 +39,14 @@ namespace SlideInfo.App.Controllers
             string currentFilter, string searchString)
         {
             logger.LogInformation("Getting all slides...");
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["VendorSortParm"] = sortOrder == "Vendor" ? "vendor_desc" : "vendor";
-            ViewData["CurrentFilter"] = searchString;
-            ViewData["SlideId"] = null;
+            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "vendor_desc" : "vendor";
+            ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "width_desc" : "width";
+            ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "height_desc" : "height";
+            ViewData[CURRENT_FILTER] = searchString;
+            ViewData[SLIDE_ID] = null;
             var slides = from s in context.Slides
-                select s;
+                         select s;
 
             if (!String.IsNullOrEmpty(searchString))
             {
@@ -62,17 +65,29 @@ namespace SlideInfo.App.Controllers
                 case "vendor_desc":
                     slides = slides.OrderByDescending(s => s.Vendor);
                     break;
+                case "width":
+                    slides = slides.OrderBy(s => s.Width);
+                    break;
+                case "width_desc":
+                    slides = slides.OrderByDescending(s => s.Width);
+                    break;
+                case "height":
+                    slides = slides.OrderBy(s => s.Height);
+                    break;
+                case "height_desc":
+                    slides = slides.OrderByDescending(s => s.Height);
+                    break;
                 default:
                     slides = slides.OrderBy(s => s.Name);
                     break;
             }
-            
+
             HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
             var finalSlides = await slides.AsNoTracking().ToListAsync();
             GetSlideThumbnails(finalSlides);
             return View(finalSlides);
         }
-        
+
         // Slides
         public IActionResult Update()
         {
@@ -125,7 +140,10 @@ namespace SlideInfo.App.Controllers
             }
 
             HttpContext.Session.Set(SessionConstants.CURRENT_SLIDE, slide);
-            ViewData["SlideId"] = slide.Id.ToString();
+            ViewData[SLIDE_ID] = slide.Id.ToString();
+            ViewData[SLIDE_NAME] = slide.Name;
+            ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
+            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
 
             var osr = new OpenSlide(slide.FilePath);
             var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
@@ -196,10 +214,10 @@ namespace SlideInfo.App.Controllers
 
         // GET: Slides/Properties/5
         public async Task<IActionResult> Properties(int? id, string sortOrder,
-            string currentFilter, string searchString, int? page)
+            string currentFilter, string searchString, int? pageSize, int? page)
         {
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData[CURRENT_SORT] = sortOrder;
+            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
 
             if (searchString != null)
             {
@@ -210,7 +228,7 @@ namespace SlideInfo.App.Controllers
                 searchString = currentFilter;
             }
 
-            ViewData["CurrentFilter"] = searchString;
+            ViewData[CURRENT_FILTER] = searchString;
 
             logger.LogInformation("Getting properties of slide {ID}", id);
             if (id == null)
@@ -223,7 +241,10 @@ namespace SlideInfo.App.Controllers
             {
                 return NotFound();
             }
-            ViewData["SlideId"] = slide.Id.ToString();
+            ViewData[SLIDE_ID] = slide.Id.ToString();
+            ViewData[SLIDE_NAME] = slide.Name;
+            ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
+            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
 
             var properties = context.Properties.Where(c => c.SlideId == id);
 
@@ -248,9 +269,11 @@ namespace SlideInfo.App.Controllers
                     break;
             }
 
-            int pageSize = 13;
+          
+            var defaultPageSize = 15;
+            
             var paginatedProperties = await PaginatedList<Property>.
-                CreateAsync(properties.AsNoTracking(), page ?? 1, pageSize);
+                CreateAsync(properties.AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
             var viewModel = new PropertiesViewModel(slide.Name, paginatedProperties);
             return View(viewModel);
         }
@@ -264,15 +287,17 @@ namespace SlideInfo.App.Controllers
             {
                 return NotFound();
             }
-
+   
             var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
             {
                 return NotFound();
             }
-            ViewData["SlideId"] = slide.Id.ToString();
-
+            ViewData[SLIDE_NAME] = slide.Name;
+            ViewData[SLIDE_ID] = id.ToString();
+            ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
+            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
             var osr = new OpenSlide(slide.FilePath);
 
             if (!String.IsNullOrEmpty(imageName))
@@ -291,7 +316,6 @@ namespace SlideInfo.App.Controllers
             GetAssociatedImagesThumbnails(id.Value, associated);
 
             var viewModel = new AssociatedImagesViewModel(slide.Name, associated);
-            ViewData["SlideId"] = id.Value;
 
             return View(viewModel);
         }
@@ -363,44 +387,7 @@ namespace SlideInfo.App.Controllers
             return new FileContentResult(new byte[] { }, "");
         }
 
-        // GET: Slides/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            logger.LogInformation("Getting details of slide {ID}", id);
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var slide = await slideRepository.GetByIdAsync(id.Value);
-
-            if (slide == null)
-            {
-                return NotFound();
-            }
-
-            return View(slide);
-        }
-
-        // GET: Slides/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Slides/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,FilePath,SlideUrl,SlideDziUrl,SlideMpp")] Slide slide)
-        {
-            if (ModelState.IsValid)
-            {
-                await slideRepository.InsertAsync(slide);
-                return RedirectToAction("Index");
-            }
-            return View(slide);
-        }
-
+      
         // GET: Slides/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -447,33 +434,7 @@ namespace SlideInfo.App.Controllers
             return View(slide);
         }
 
-        // GET: Slides/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var slide = await slideRepository.GetByIdAsync(id.Value);
-
-            if (slide == null)
-            {
-                return NotFound();
-            }
-
-            return View(slide);
-        }
-
-        // POST: Slides/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await slideRepository.DeleteAsync(id);
-            return RedirectToAction("Index");
-        }
-
+  
         private bool SlideExists(int id)
         {
             return context.Slides.Any(e => e.Id == id);

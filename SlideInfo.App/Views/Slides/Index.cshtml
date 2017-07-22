@@ -1,3 +1,4 @@
+@using SlideInfo.App.Helpers
 @using SlideInfo.Helpers
 @model IEnumerable<SlideInfo.App.Models.Slide>
 @{
@@ -7,26 +8,30 @@
 <h2>Whole-slide images index</h2>
 
 <div class="container">
-    
+
     <div class="dropdown div-inline">
         <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
             Sort by
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-            <li><a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]">Name</a></li>
-            <li><a asp-action="Index" asp-route-sortOrder="@ViewData["VendorSortParm"]">Vendor</a></li>
-            <li><a asp-action="Index" asp-route-sortOrder="@ViewData["SizeSortParm"]">Size</a></li>
+            <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Name</a></li>
+            <li>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.VENDOR_SORT_PARAM]">Vendor</a>
+                <a asp-action="Index" class="glyphicon glyphicon-chevron-down" asp-route-sortOrder="vendor-desc">Vendor</a>
+            </li>
+            <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.WIDTH_SORT_PARAM]">Width</a></li>
+            <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM]">Height</a></li>
         </ul>
     </div>
     <a asp-action="Update" class="btn btn-default">Rescan slides</a>
 
     <form class="form-inline div-inline-right pull-right" asp-action="Index" method="get">
-        @if (ViewData["CurrentFilter"] != null)
+        @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
         {
             <a asp-action="Index" class="btn btn-default" role="button">Refresh</a>
         }
-        <input type="text" class="form-control" placeholder="Find slide..." name="searchString" value="@ViewData["CurrentFilter"]">
+        <input type="text" class="form-control" placeholder="Find slide..." name="searchString" value="@ViewData[ViewDataConstants.CURRENT_FILTER]">
         <input type="submit" value="Search" class="btn btn-success" />
     </form>
 </div>
@@ -51,12 +56,18 @@
                             <li>
                                 <a asp-action="Properties" asp-route-id="@slide.Id">Properties</a>
                             </li>
-                            <li>
-                                <a asp-action="AssociatedImages" asp-route-id="@slide.Id">Associated Images</a>
-                            </li>
-                            <li>
-                                <a asp-action="Comments" asp-route-id="@slide.Id">Comments</a>
-                            </li>
+                            @if (slide.HasAssociatedImages)
+                            {
+                                <li>
+                                    <a asp-action="AssociatedImages" asp-route-id="@slide.Id">Associated Images</a>
+                                </li>
+                            }
+                            @if (slide.Comments != null && slide.Comments.Any())
+                            {
+                                <li>
+                                    <a asp-action="Comments" asp-route-id="@slide.Id">Comments</a>
+                                </li>
+                            }
                         </ul>
 
                     </div>

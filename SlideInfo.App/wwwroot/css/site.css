@@ -99,3 +99,11 @@ ul {
     display: inline-block;
     align-self: right;
 }
+
+.navbar .nav > .active-red-bg > a,
+.navbar .nav > .active-red-bg > a:hover,
+.navbar .nav > .active-red-bg > a:focus {
+    background-color: #a52a2a;
+    color: #ffffff;
+    text-decoration: none;
+}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using SlideInfo.App.Helpers;
 using SlideInfo.Core;
 
@@ -18,6 +19,7 @@ namespace SlideInfo.App.Models
         public string Vendor { get; set; }
         public long Width { get; set; }
         public long Height { get; set; }
+        public bool HasAssociatedImages { get; set; }
 
         public ICollection<Comment> Comments { get; set; }
         public ICollection<Property> Properties { get; set; }
@@ -48,6 +50,7 @@ namespace SlideInfo.App.Models
                 }
                 Width = osr.Dimensions.Width;
                 Height = osr.Dimensions.Height;
+                HasAssociatedImages = osr.ReadAssociatedImages().Any();
             }
         }
 
@@ -59,6 +62,7 @@ namespace SlideInfo.App.Models
             Vendor = osr.DetectFormat(FilePath);
             Width = osr.Dimensions.Width;
             Height = osr.Dimensions.Height;
+            HasAssociatedImages = osr.ReadAssociatedImages().Any();
 
             try
             {

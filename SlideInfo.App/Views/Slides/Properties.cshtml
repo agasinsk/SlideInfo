@@ -1,4 +1,5 @@
-﻿@model SlideInfo.App.Models.SlideViewModels.PropertiesViewModel
+﻿@using SlideInfo.App.Helpers
+@model SlideInfo.App.Models.SlideViewModels.PropertiesViewModel
 
 @{
     ViewData["Title"] = "Properties | " + Model.Name;
@@ -9,11 +10,14 @@
     @if (Model.Properties != null)
     {
         <form asp-action="Properties" method="get">
-            <div class="form-actions no-color">
+            <div class="form-inline no-color">
                 <p>
-                    Find property: <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
-                    <input type="submit" value="Search" class="btn btn-default" /> |
-                    <a asp-action="Properties">Back to full list</a>
+                    <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]"/>
+                    <input type="submit" value="Search" class="btn btn-success"/>
+                    @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
+                    {
+                        <a asp-action="Properties" class="btn btn-default" role="button">Refresh</a>
+                    }
                 </p>
             </div>
         </form>
@@ -21,7 +25,7 @@
             <thead>
                 <tr>
                     <th>
-                        <a asp-action="Properties" asp-route-sortOrder="@ViewData["NameSortParm"]">Property</a>
+                        <a asp-action="Properties" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Property</a>
                     </th>
                     <th>
                         Value
@@ -44,16 +48,16 @@
 
 
         <a asp-action="Properties"
-           asp-route-sortOrder="@ViewData["CurrentSort"]"
+           asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
            asp-route-page="@(Model.Properties.PageIndex - 1)"
-           asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           asp-route-currentFilter="@ViewData[ViewDataConstants.CURRENT_FILTER]"
            class="btn btn-default @prevDisabled">
             Previous
         </a>
             <a asp-action="Properties"
-               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
                asp-route-page="@(Model.Properties.PageIndex + 1)"
-               asp-route-currentFilter="@ViewData["CurrentFilter"]"
+               asp-route-currentFilter= "@ViewData[ViewDataConstants.CURRENT_FILTER]"
                class="btn btn-default @nextDisabled">
                 Next
             </a>
