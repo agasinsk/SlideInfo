@@ -20,74 +20,101 @@
     </environment>
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
+
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">SlideInfo</a>
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li class="@Html.IsActive("Home","Index")">
-                        <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    @if (ViewData[ViewDataConstants.SLIDE_ID] != null)
-                    {
-                        <li class="dropdown @Html.IsSlideChosen("Slides", ViewData["SlideId"] as string)">
-                            <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
-                                Slides
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Display @ViewData[ViewDataConstants.SLIDE_NAME]</a>
-                                </li>
-                                <li class="divider"><</li>
-                                <li>
-                                    <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Properties</a>
-                                </li>
-                                @if (ViewData[ViewDataConstants.HAS_ASSOCIATED_IMAGES] is string)
-                                {
-                                    <li>
-                                        <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Associated Images</a>
-                                    </li>
-                                }
-                                @if (ViewData[ViewDataConstants.HAS_COMMENTS] is string)
-                                {
-                                    <li>
-                                        <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Comments</a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
-                    }
-                    @if (ViewData[ViewDataConstants.SLIDE_ID] == null)
-                    {
-                        <li class="@Html.IsActiveController("Slides")">
-                            <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>
-                        </li>
-                    }
-                    <li class="@Html.IsActive("Home","About")"><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
-                    <li class="@Html.IsActive("Home","Contact")"><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
-                </ul>
-                @await Html.PartialAsync("_LoginPartial")
-            </div>
+    <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="col-xs-12 form-group">
+            <label class="sidenav-text">User name:</label>
+            <input class="form-control" type="text" placeholder="User login" readonly>
         </div>
-    </nav>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2017 - SlideInfo.App</p>
-        </footer>
+
+        <div class="col-xs-12 form-group">
+            <label class="sidenav-text">Slide name:</label>
+            <input class="form-control" type="text" placeholder="@ViewData[ViewDataConstants.SLIDE_NAME]" readonly>
+        </div>
+        
+        <div class="col-xs-12 form-group">
+            <label class="sidenav-text">Comment:</label>
+            <textarea class="form-control" rows="6" placeholder="Your observations about this slide..." name="commentContent" required></textarea>
+            <br/>
+            <input type="submit" value="Submit" class="btn btn-success sidenav-button" />
+        </div>
+
     </div>
 
+    <div id="main">
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">SlideInfo</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="@Html.IsActive("Home", "Index")">
+                            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @if (ViewData[ViewDataConstants.SLIDE_ID] != null)
+                        {
+                            <li class="dropdown @Html.IsSlideChosen("Slides", ViewData["SlideId"] as string)">
+                                <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
+                                    Slides
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Display @ViewData[ViewDataConstants.SLIDE_NAME]</a>
+                                    </li>
+                                    <li>
+                                        <a href="#"><span class="btn btn-success" onclick="openNav()">Add new comment</span></a>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Properties</a>
+                                    </li>
+                                    @if (ViewData[ViewDataConstants.HAS_ASSOCIATED_IMAGES] is string)
+                                    {
+                                        <li>
+                                            <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Associated Images</a>
+                                        </li>
+                                    }
+                                    @if (ViewData[ViewDataConstants.HAS_COMMENTS] is string)
+                                    {
+                                        <li>
+                                            <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Comments</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @if (ViewData[ViewDataConstants.SLIDE_ID] == null)
+                        {
+                            <li class="@Html.IsActiveController("Slides")">
+                                <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>
+                            </li>
+                        }
+                        <li class="@Html.IsActive("Home", "About")"><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                        <li class="@Html.IsActive("Home", "Contact")"><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    </ul>
+                    @await Html.PartialAsync("_LoginPartial")
+                </div>
+            </div>
+        </nav>
+
+        <div class="container body-content">
+            @RenderBody()
+            <hr />
+            <footer>
+                <p>&copy; 2017 - SlideInfo.App</p>
+            </footer>
+        </div>
+    </div>
     <environment names="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
@@ -128,4 +155,15 @@
         });
 
     });
+
+    function openNav() {
+        document.getElementById("mySidenav").style.width = "250px";
+        document.getElementById("main").style.marginLeft = "250px";
+    }
+
+    function closeNav() {
+        document.getElementById("mySidenav").style.width = "0";
+        document.getElementById("main").style.marginLeft = "0";
+    }
+
 </script>

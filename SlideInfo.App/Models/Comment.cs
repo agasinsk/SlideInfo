@@ -13,5 +13,10 @@ namespace SlideInfo.App.Models
 	    [Required]
 		public string Text { get; set; }
 		public DateTime Date { get; set; }
+
+        public Comment()
+        {
+            Date = DateTime.Now;
+        }
 	}
 }

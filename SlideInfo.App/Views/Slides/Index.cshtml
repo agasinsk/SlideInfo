@@ -18,7 +18,6 @@
             <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Name</a></li>
             <li>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.VENDOR_SORT_PARAM]">Vendor</a>
-                <a asp-action="Index" class="glyphicon glyphicon-chevron-down" asp-route-sortOrder="vendor-desc">Vendor</a>
             </li>
             <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.WIDTH_SORT_PARAM]">Width</a></li>
             <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM]">Height</a></li>
@@ -31,7 +30,7 @@
         {
             <a asp-action="Index" class="btn btn-default" role="button">Refresh</a>
         }
-        <input type="text" class="form-control" placeholder="Find slide..." name="searchString" value="@ViewData[ViewDataConstants.CURRENT_FILTER]">
+        <input type="text" class="form-control form-control-inline" placeholder="Find slide..." name="searchString" value="@ViewData[ViewDataConstants.CURRENT_FILTER]">
         <input type="submit" value="Search" class="btn btn-success" />
     </form>
 </div>
@@ -53,6 +52,7 @@
                             <li>
                                 Original size: @slide.Width x @slide.Height
                             </li>
+                            <li class="divider"><hr/></li>
                             <li>
                                 <a asp-action="Properties" asp-route-id="@slide.Id">Properties</a>
                             </li>

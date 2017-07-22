@@ -39,14 +39,17 @@ namespace SlideInfo.App.Controllers
             string currentFilter, string searchString)
         {
             logger.LogInformation("Getting all slides...");
-            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "vendor_desc" : "vendor";
-            ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "width_desc" : "width";
-            ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "height_desc" : "height";
+
+            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
+            ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "Vendor_desc" : "Vendor";
+            ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "Width_desc" : "Width";
+            ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "Height_desc" : "Height";
             ViewData[CURRENT_FILTER] = searchString;
             ViewData[SLIDE_ID] = null;
             ViewData[HAS_ASSOCIATED_IMAGES] = null;
             ViewData[HAS_COMMENTS] = null;
+
+            HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
 
             var slides = from s in context.Slides
                          select s;
@@ -57,35 +60,22 @@ namespace SlideInfo.App.Controllers
                                                || s.Vendor.Contains(searchString));
             }
 
-            switch (sortOrder)
+            if (string.IsNullOrEmpty(sortOrder))
             {
-                case "name_desc":
-                    slides = slides.OrderByDescending(s => s.Name);
-                    break;
-                case "vendor":
-                    slides = slides.OrderBy(s => s.Vendor);
-                    break;
-                case "vendor_desc":
-                    slides = slides.OrderByDescending(s => s.Vendor);
-                    break;
-                case "width":
-                    slides = slides.OrderBy(s => s.Width);
-                    break;
-                case "width_desc":
-                    slides = slides.OrderByDescending(s => s.Width);
-                    break;
-                case "height":
-                    slides = slides.OrderBy(s => s.Height);
-                    break;
-                case "height_desc":
-                    slides = slides.OrderByDescending(s => s.Height);
-                    break;
-                default:
-                    slides = slides.OrderBy(s => s.Name);
-                    break;
+                sortOrder = "Name";
             }
 
-            HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
+            var descending = false;
+            if (sortOrder.EndsWith("_desc"))
+            {
+                sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
+                descending = true;
+            }
+
+            slides = @descending ? 
+                slides.OrderByDescending(e => EF.Property<object>(e, sortOrder))
+                : slides.OrderBy(e => EF.Property<object>(e, sortOrder));
+
             var finalSlides = await slides.AsNoTracking().ToListAsync();
             GetSlideThumbnails(finalSlides);
             return View(finalSlides);
@@ -272,9 +262,9 @@ namespace SlideInfo.App.Controllers
                     break;
             }
 
-          
+
             var defaultPageSize = 15;
-            
+
             var paginatedProperties = await PaginatedList<Property>.
                 CreateAsync(properties.AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
             var viewModel = new PropertiesViewModel(slide.Name, paginatedProperties);
@@ -290,7 +280,7 @@ namespace SlideInfo.App.Controllers
             {
                 return NotFound();
             }
-   
+
             var slide = await slideRepository.GetByIdAsync(id.Value);
 
             if (slide == null)
@@ -390,7 +380,7 @@ namespace SlideInfo.App.Controllers
             return new FileContentResult(new byte[] { }, "");
         }
 
-      
+
         // GET: Slides/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -437,7 +427,7 @@ namespace SlideInfo.App.Controllers
             return View(slide);
         }
 
-  
+
         private bool SlideExists(int id)
         {
             return context.Slides.Any(e => e.Id == id);
