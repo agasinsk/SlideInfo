@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,6 @@ namespace SlideInfo.App.Controllers
     {
         private readonly SlideInfoDbContext context;
         private readonly AsyncRepository<Slide> slideRepository;
-        private readonly AsyncRepository<Property> propertyRepository;
         private readonly ILogger logger;
 
         public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context)
@@ -31,13 +31,13 @@ namespace SlideInfo.App.Controllers
             this.logger = logger;
             this.context = context;
             slideRepository = new AsyncRepository<Slide>(context);
-            propertyRepository = new AsyncRepository<Property>(context);
         }
 
         // GET: Slides
         public async Task<IActionResult> Index(int? id, string sortOrder,
             string currentFilter, string searchString)
         {
+    
             logger.LogInformation("Getting all slides...");
 
             ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";

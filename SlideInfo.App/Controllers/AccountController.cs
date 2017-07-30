@@ -110,26 +110,24 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
-            {
-                var user = new AppUser { UserName = model.Email, Email = model.Email };
-                var result = await userManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account",
-                        new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                    await emailSender.SendEmailAsync(model.Email, "Confirm your account",
-                        $"Please confirm your account by clicking this link: <a href='{callbackUrl}'>link</a>");
+            if (!ModelState.IsValid)
+                return View(model);
 
-                    // Comment out following line to prevent a new user automatically logged on.
-                    // await _signInManager.SignInAsync(user, isPersistent: false);
-                    logger.LogInformation(3, "User created a new account with password.");
-                    return RedirectToLocal(returnUrl);
-                }
-                AddErrors(result);
+            var user = new AppUser { FirstMidName = model.FirstMidName, LastName = model.Name, UserName = model.Email, Email = model.Email };
+            var result = await userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account",
+                    new { userId = user.Id, code = token }, protocol: HttpContext.Request.Scheme);
+                var confirmationEmailBody =
+                    MessageConstants.ConfirmationEmailBody.Replace("callbackUrl", callbackUrl);
+                await emailSender.SendEmailAsync(model.Email, "Confirm your account", confirmationEmailBody);
+
+                logger.LogInformation(3, "User created a new account with password.");
+                return View("ConfirmationEmailSent");
             }
+            AddErrors(result);
 
             // If we got this far, something failed, redisplay form
             return View(model);
@@ -476,5 +474,10 @@ namespace SlideInfo.App.Controllers
         }
 
         #endregion
+
+        public IActionResult ConfirmationEmailSent()
+        {
+            return View();
+        }
     }
 }

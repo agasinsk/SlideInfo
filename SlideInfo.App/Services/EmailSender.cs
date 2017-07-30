@@ -10,11 +10,10 @@ namespace SlideInfo.App.Services
 {
     public class EmailSender
     {
-
-        public static async void SendEmailAsync(string toName, string toEmailAddress, string subject, string bodyHtml, string bodyText,
-            int retryCount = 4)
+        static SecureSocketOptions secureSocketOptions = SecureSocketOptions.SslOnConnect;
+        public static async void SendEmailAsync(string toEmailAddress, string subject, string bodyText, int retryCount = 4)
         {
-            var message = CreateEmailMessage(toName, toEmailAddress, subject, bodyHtml, bodyText);
+            var message = CreateEmailMessage(toEmailAddress, subject, bodyText);
 
             for (var count = 1; count <= retryCount; count++)
             {
@@ -22,8 +21,6 @@ namespace SlideInfo.App.Services
                 {
                     using (var client = new SmtpClient())
                     {
-                        var secureSocketOptions = SecureSocketOptions.SslOnConnect;
-
                         await client.ConnectAsync(MessageConstants.EMAIL_HOST, MessageConstants.EMAIL_PORT,
                                 secureSocketOptions).ConfigureAwait(false);
                         await client.AuthenticateAsync(MessageConstants.EMAIL_USERNAME, MessageConstants.EMAIL_PASSWORD);
@@ -34,7 +31,6 @@ namespace SlideInfo.App.Services
                 }
                 catch (Exception)
                 {
-                    //logger.LogError(0, exception, "MailKit.Send failed attempt {0}", count);
                     if (retryCount >= 0)
                     {
                         throw;
@@ -68,14 +64,12 @@ namespace SlideInfo.App.Services
 
         public static async Task SendEmailAsync(MimeMessage message, int retryCount = 4)
         {
-            for (var count = 1; count <= retryCount; count++)
+           for (var count = 1; count <= retryCount; count++)
             {
                 try
                 {
                     using (var client = new SmtpClient())
                     {
-                        var secureSocketOptions = SecureSocketOptions.SslOnConnect;
-
                         await client.ConnectAsync(MessageConstants.EMAIL_HOST, MessageConstants.EMAIL_PORT,
                                 secureSocketOptions)
                             .ConfigureAwait(false);
@@ -110,7 +104,7 @@ namespace SlideInfo.App.Services
             message.Subject = subject;
             var builder = new BodyBuilder
             {
-                TextBody = bodyText
+                HtmlBody = bodyText
             };
             message.Body = builder.ToMessageBody();
             return message;
