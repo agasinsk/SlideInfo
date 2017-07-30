@@ -36,30 +36,7 @@ namespace SlideInfo.Test
 
 			osr.ReadRegion(new SizeL(0, 0), 0, new SizeL(100, 100));
 		}
-		/*
-		[TestMethod()]
-		[ExpectedException(typeof(KeyNotFoundException))]
-		public void TestReadingAssociatedImagesOnClosedHandle()
-		{
-			var osr = new OpenSlide("tests/boxes.tiff");
-			var associated = osr.AssociatedImages;
 
-			osr.Close();
-
-			var image = associated["label"];
-		}*/
-		/*
-		[TestMethod()]
-		[ExpectedException(typeof(OpenSlideException))]
-		public void TestReadingPropertiesImagesOnClosedHandle()
-		{
-			var osr = new OpenSlide("tests/boxes.tiff");
-			var props = osr.Properties;
-			osr.Close();
-
-			var prop = props["PROPERTY_NAME_VENDOR"];
-		}
-		*/
 		[TestMethod()]
 		public void TestContextManager()
 		{

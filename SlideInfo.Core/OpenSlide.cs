@@ -60,16 +60,19 @@ namespace SlideInfo.Core
             Osr = OpenSlideDll.openslide_open(FilePath);
             if (Osr == null || Osr[0] == 0)
                 CheckVendorIsValid(FilePath);
+
             // dispose on error, we are in the constructor
             try
             {
-                CheckError();
+                if (Osr != null)
+                    CheckError();
             }
             catch (OpenSlideException)
             {
                 Close();
                 throw;
             }
+
         }
 
         private void CheckVendorIsValid(string fileName)
@@ -158,7 +161,7 @@ namespace SlideInfo.Core
 
         public string GetPropertyValue(string propertyName)
         {
-            return Marshal.PtrToStringAnsi(OpenSlideDll.openslide_get_property_value(Osr, propertyName));
+            return Osr != null ? Marshal.PtrToStringAnsi(OpenSlideDll.openslide_get_property_value(Osr, propertyName)) : "";
         }
 
         private void AddMissingStandardProperties(IDictionary<string, string> properties)

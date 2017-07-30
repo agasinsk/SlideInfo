@@ -107,7 +107,7 @@ namespace SlideInfo.Test
 		[TestMethod]
 		public void TestThumbnail()
 		{
-			Assert.AreEqual(new Size(100, 83), osr.GetThumbnail(new SizeL(100, 83)).Size);
+			Assert.AreEqual(new Size(100, 83), osr.GetThumbnail(new Size(100, 83)).Size);
 		}
 
 		[TestMethod]
