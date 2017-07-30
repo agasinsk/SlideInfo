@@ -43,15 +43,18 @@ namespace SlideInfo.App
             services.AddDbContext<SlideInfoDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<AppUser, IdentityRole>()
+            services.AddIdentity<AppUser, IdentityRole>(config =>
+            {
+                config.SignIn.RequireConfirmedEmail = true;
+            })
                 .AddEntityFrameworkStores<SlideInfoDbContext>()
                 .AddDefaultTokenProviders();
-
+  
             services.AddMvc();
 
             // Add application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
+            services.AddTransient<IEmailSender, MessageSender>();
+            services.AddTransient<ISmsSender, MessageSender>();
 
 
             //AddSesion
