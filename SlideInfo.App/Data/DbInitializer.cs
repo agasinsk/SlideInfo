@@ -17,14 +17,7 @@ namespace SlideInfo.App.Data
                 return;   // DB has been seeded
             }
 
-            var openSlideSupportedExtensions = new[]
-            {
-                "svs", "tif", "vms", "vmu", "ndpi", "scn", "mrxs",
-                "tiff", "svslide", "bif"
-            };
-            const string mainPath = @"C:\Users\artur\Documents\Visual Studio 2017\Projects\OpenSlideExample\data";
-
-            var dirs = FileFilter.FilterFiles(mainPath, openSlideSupportedExtensions);
+            var dirs = FileFilter.FilterFiles(AppDirectories.SlideStorage, FileFilter.OpenSlideExtensions);
 
             foreach (var path in dirs)
             {

@@ -22,12 +22,16 @@ namespace SlideInfo.App.Controllers
 {
     public partial class SlidesController : Controller
     {
+        private readonly UserManager<AppUser> userManager;
+        private readonly SignInManager<AppUser> signInManager;
         private readonly SlideInfoDbContext context;
         private readonly AsyncRepository<Slide> slideRepository;
         private readonly ILogger logger;
 
-        public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context)
+        public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
+            this.userManager = userManager;
+            this.signInManager = signInManager;
             this.logger = logger;
             this.context = context;
             slideRepository = new AsyncRepository<Slide>(context);
@@ -37,48 +41,51 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Index(int? id, string sortOrder,
             string currentFilter, string searchString)
         {
-    
-            logger.LogInformation("Getting all slides...");
-
-            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-            ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "Vendor_desc" : "Vendor";
-            ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "Width_desc" : "Width";
-            ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "Height_desc" : "Height";
-            ViewData[CURRENT_FILTER] = searchString;
-            ViewData[SLIDE_ID] = null;
-            ViewData[HAS_ASSOCIATED_IMAGES] = null;
-            ViewData[HAS_COMMENTS] = null;
-
-            HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
-
-            var slides = from s in context.Slides
-                         select s;
-
-            if (!String.IsNullOrEmpty(searchString))
+            if (signInManager.IsSignedIn(User))
             {
-                slides = slides.Where(s => s.Name.Contains(searchString)
-                                               || s.Vendor.Contains(searchString));
+                logger.LogInformation("Getting all slides...");
+
+                ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
+                ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "Vendor_desc" : "Vendor";
+                ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "Width_desc" : "Width";
+                ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "Height_desc" : "Height";
+                ViewData[CURRENT_FILTER] = searchString;
+                ViewData[SLIDE_ID] = null;
+                ViewData[HAS_ASSOCIATED_IMAGES] = null;
+                ViewData[HAS_COMMENTS] = null;
+
+                HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
+
+                var slides = from s in context.Slides
+                             select s;
+
+                if (!String.IsNullOrEmpty(searchString))
+                {
+                    slides = slides.Where(s => s.Name.Contains(searchString)
+                                                   || s.Vendor.Contains(searchString));
+                }
+
+                if (string.IsNullOrEmpty(sortOrder))
+                {
+                    sortOrder = "Name";
+                }
+
+                var descending = false;
+                if (sortOrder.EndsWith("_desc"))
+                {
+                    sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
+                    descending = true;
+                }
+
+                slides = @descending ?
+                    slides.OrderByDescending(e => EF.Property<object>(e, sortOrder))
+                    : slides.OrderBy(e => EF.Property<object>(e, sortOrder));
+
+                var finalSlides = await slides.AsNoTracking().ToListAsync();
+                GetSlideThumbnails(finalSlides);
+                return View(finalSlides);
             }
-
-            if (string.IsNullOrEmpty(sortOrder))
-            {
-                sortOrder = "Name";
-            }
-
-            var descending = false;
-            if (sortOrder.EndsWith("_desc"))
-            {
-                sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
-                descending = true;
-            }
-
-            slides = @descending ? 
-                slides.OrderByDescending(e => EF.Property<object>(e, sortOrder))
-                : slides.OrderBy(e => EF.Property<object>(e, sortOrder));
-
-            var finalSlides = await slides.AsNoTracking().ToListAsync();
-            GetSlideThumbnails(finalSlides);
-            return View(finalSlides);
+            return RedirectToAction("Login", "Account");
         }
 
         // GET: Slides/Display/5
