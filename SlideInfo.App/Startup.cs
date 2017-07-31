@@ -64,7 +64,7 @@ namespace SlideInfo.App
             services.AddSession(options =>
             {
                 // Set a short timeout for easy testing.
-                options.IdleTimeout = TimeSpan.FromMinutes(1);
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
                 options.CookieHttpOnly = true;
             });
         }

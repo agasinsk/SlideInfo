@@ -19,5 +19,6 @@ namespace SlideInfo.App.Helpers
         public const string CURRENT_FILTER = "CurrentFilter";
         public const string CURRENT_SORT = "CurrentSort";
         public const string TITLE = "Title";
+        public const string COMMENT_TEXT = "CommentText";
     }
 }

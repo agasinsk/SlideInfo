@@ -226,6 +226,78 @@ namespace SlideInfo.App.Controllers
             return View(viewModel);
         }
 
+        // GET: Slides/Comments/5
+        public async Task<IActionResult> Comments(int? id, string sortOrder,
+            string currentFilter, string searchString, int? pageSize, int? page)
+        {
+            ViewData[CURRENT_SORT] = sortOrder;
+            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData[CURRENT_FILTER] = searchString;
+
+            logger.LogInformation("Getting comments of slide {ID}", id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var slide = await slideRepository.GetByIdAsync(id.Value);
+            if (slide == null)
+            {
+                return NotFound();
+            }
+            ViewData[SLIDE_ID] = slide.Id.ToString();
+            ViewData[SLIDE_NAME] = slide.Name;
+            ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
+            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
+
+            var comments = context.Comments.Where(c => c.SlideId == id);
+
+            //filtering
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                logger.LogInformation("Searching for properties containing {searchString}", searchString);
+                comments = comments.Where(s => s.Text.Contains(searchString));
+            }
+
+            //sorting
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    comments = comments.OrderByDescending(s => s.Date);
+                    logger.LogInformation("Sorting properties of slide {ID} by name descending", id);
+                    break;
+                default:
+                    logger.LogInformation("Sorting properties of slide {ID} by name", id);
+                    comments = comments.OrderBy(s => s.Date);
+                    break;
+            }
+
+
+            var defaultPageSize = 15;
+
+            var paginatedProperties = await PaginatedList<Comment>.
+                CreateAsync(comments.AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
+            var viewModel = new CommentsViewModel(slide.Name, paginatedProperties);
+            return View(viewModel);
+        }
+
+        public IActionResult CreateComment()
+        {
+            var slideId = ViewData[SLIDE_ID];
+            HttpContext.Session.SetInt32(ViewDataConstants.SLIDE_ID, (int)slideId);
+            return RedirectToAction("Create", "Comments");
+        }
+
         // GET: Slides/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
