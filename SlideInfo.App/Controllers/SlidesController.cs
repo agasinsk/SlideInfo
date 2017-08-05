@@ -59,7 +59,7 @@ namespace SlideInfo.App.Controllers
             ViewData[HAS_ASSOCIATED_IMAGES] = null;
             ViewData[HAS_COMMENTS] = null;
 
-            var slides = from s in context.Slides
+            var slides = from s in context.Slides.Include(s => s.Comments)
                          select s;
 
             if (!string.IsNullOrEmpty(searchString))
@@ -99,7 +99,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await slideRepository.GetByIdAsync(id.Value);
+            var slide = await context.Slides.FindAsync(id.Value);
 
             if (slide == null)
             {
@@ -112,7 +112,8 @@ namespace SlideInfo.App.Controllers
             HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
-            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
+            var comments = context.Comments.Where(c => c.SlideId == id);
+            ViewData[HAS_COMMENTS] = comments.Any();
 
             var osr = new OpenSlide(slide.FilePath);
             var viewModel = new DisplayViewModel(slide.Name, slide.DziUrl, slide.Mpp, osr);
@@ -153,7 +154,8 @@ namespace SlideInfo.App.Controllers
             HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
-            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
+            var comments = context.Comments.Where(c => c.SlideId == id);
+            ViewData[HAS_COMMENTS] = comments.Any();
 
             var properties = context.Properties.Where(c => c.SlideId == id);
 
@@ -206,7 +208,8 @@ namespace SlideInfo.App.Controllers
             ViewData[SLIDE_ID] = id.ToString();
             HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
-            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
+            var comments = context.Comments.Where(c => c.SlideId == id);
+            ViewData[HAS_COMMENTS] = comments.Any();
             var osr = new OpenSlide(slide.FilePath);
 
             if (!String.IsNullOrEmpty(imageName))
@@ -266,9 +269,9 @@ namespace SlideInfo.App.Controllers
             HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
-            ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
 
             var comments = context.Comments.Where(c => c.SlideId == id);
+            ViewData[HAS_COMMENTS] = comments.Any();
 
             //filtering
             if (!String.IsNullOrEmpty(searchString))
@@ -296,7 +299,7 @@ namespace SlideInfo.App.Controllers
             var defaultPageSize = 15;
 
             var paginatedComments = await PaginatedList<Comment>.
-                CreateAsync(comments.AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
+                CreateAsync(comments.Include(c => c.AppUser).AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
             var viewModel = new CommentsViewModel(slide.Name, paginatedComments);
             return View(viewModel);
         }

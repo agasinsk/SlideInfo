@@ -10,8 +10,8 @@
     @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
     Context.Session.Remove(SessionConstants.ALERT);
 }
-<div class="container" id="properties">
-    <h2>@Model.Name properties</h2>
+<div class="container" id="comments">
+    <h2>@Model.Name comments</h2>
     @if (Model.Comments != null)
     {
         <form asp-action="Comments" method="get">

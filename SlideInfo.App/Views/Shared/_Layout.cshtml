@@ -46,16 +46,18 @@
                         @if (ViewData[ViewDataConstants.SLIDE_ID] != null)
                         {
                             <li class="dropdown @Html.IsSlideChosen("Slides", ViewData["SlideId"] as string)">
-                                <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
-                                    Slides
-                                    <span class="caret"></span>
+                                <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">Slides<span class="caret"></span>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
-                                        <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Display @ViewData[ViewDataConstants.SLIDE_NAME]</a>
+                                        <div class="slide-name">@ViewData[ViewDataConstants.SLIDE_NAME]</div>
+                                    </li>
+                                    <li class="divider"></li>
+                                    <li>
+                                        <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Display</a>
                                     </li>
                                     <li>
-                                        <a href="#" onclick="openNav()"><span class="btn">Add new comment</span></a>
+                                        <a href="#" onclick="openNav()"><span class="btn btn-default">Add new comment</span></a>
                                     </li>
                                     <li class="divider"></li>
                                     <li>
@@ -67,7 +69,7 @@
                                             <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Associated Images</a>
                                         </li>
                                     }
-                                    @if (ViewData[ViewDataConstants.HAS_COMMENTS] is string)
+                                    @if ((bool)ViewData[ViewDataConstants.HAS_COMMENTS])
                                     {
                                         <li>
                                             <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Comments</a>
@@ -94,7 +96,7 @@
             @RenderBody()
             <hr />
             <footer>
-                <p>&copy; 2017 - SlideInfo.App</p>
+                <p>&copy; 2017 - SlideInfo</p>
             </footer>
         </div>
     </div>
@@ -126,10 +128,10 @@
 <script>
     jQuery(function ($) {
         $('.navbar .dropdown').hover(function () {
-            $(this).find('.dropdown-menu').first().stop(true, true).slideDown();
+            $(this).find('.dropdown-menu').first().stop(true, true).slideDown(75);
 
         }, function () {
-            $(this).find('.dropdown-menu').first().stop(true, true).slideUp();
+            $(this).find('.dropdown-menu').first().stop(true, true).slideUp(75);
 
         });
 
@@ -146,5 +148,4 @@
     function closeNav() {
         document.getElementById("mySidenav").style.width = "0";
     }
-
 </script>

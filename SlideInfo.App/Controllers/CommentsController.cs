@@ -1,12 +1,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SlideInfo.App.Data;
-using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 
 namespace SlideInfo.App.Controllers
