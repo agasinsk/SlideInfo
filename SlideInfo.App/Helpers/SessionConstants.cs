@@ -2,10 +2,9 @@
 {
     public static class SessionConstants
     {
-        //typial type of session alerts
-        public const string ALERT = "AlertText";
-        public const string ERROR = "ErrorText";
-        public const string WARNING = "WarningText";
+        public static string ALERT_TEMPLATE = "<div class=\"alert alert-type\"><a href=\"\" class=\"close\" data-dismiss=\"alert\" aria-label=\"close\">&times;</a><strong>alert-title!</strong> alert-content</div>";
+
+        public const string ALERT = "Alert";
 
         //typical messages
         public const string ITEM_NOT_FOUND = "Item not found";

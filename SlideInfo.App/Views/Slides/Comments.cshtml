@@ -1,0 +1,75 @@
+﻿@using Microsoft.AspNetCore.Http
+@using SlideInfo.App.Helpers
+@model SlideInfo.App.Models.SlideViewModels.CommentsViewModel
+
+@{
+    ViewData["Title"] = "Properties | " + Model.Name;
+}
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+{
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
+}
+<div class="container" id="properties">
+    <h2>@Model.Name properties</h2>
+    @if (Model.Comments != null)
+    {
+        <form asp-action="Comments" method="get">
+            <div class="form-inline no-color">
+                <p>
+                    <input type="text" name="searchString" class="form-control" placeholder="Find comment..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]" />
+                    <input type="submit" value="Search" class="btn btn-success" />
+                    @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
+                    {
+                        <a asp-action="Comments" class="btn btn-default" role="button">Refresh</a>
+                    }
+                </p>
+            </div>
+        </form>
+        <table class="table table-striped table-hover table-responsive">
+            <thead>
+                <tr>
+                    <th class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
+                        <a asp-action="Comments" asp-route-sortOrder="@ViewData[ViewDataConstants.USER_SORT_PARAM]">User</a>
+                    </th>
+                    <th class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
+                        <a asp-action="Comments" asp-route-sortOrder="@ViewData[ViewDataConstants.TEXT_SORT_PARAM]">Content</a>
+                    </th>
+                    <th>
+                        <a asp-action="Comments" asp-route-sortOrder="@ViewData[ViewDataConstants.DATE_SORT_PARAM]">Date</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Comments)
+                {
+                    <tr>
+                        <td>@item.AppUser.FullName</td>
+                        <td>@item.Text</td>
+                        <td>@item.Date</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        var prevDisabled = !Model.Comments.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.Comments.HasNextPage ? "disabled" : "";
+
+
+        <a asp-action="Comments"
+           asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
+           asp-route-page="@(Model.Comments.PageIndex - 1)"
+           asp-route-currentFilter="@ViewData[ViewDataConstants.CURRENT_FILTER]"
+           class="btn btn-default @prevDisabled">
+            Previous
+        </a>
+        <a asp-action="Comments"
+           asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
+           asp-route-page="@(Model.Comments.PageIndex + 1)"
+           asp-route-currentFilter="@ViewData[ViewDataConstants.CURRENT_FILTER]"
+           class="btn btn-default @nextDisabled">
+            Next
+        </a>
+    }
+
+</div>

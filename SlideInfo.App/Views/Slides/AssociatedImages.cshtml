@@ -1,11 +1,17 @@
 ﻿@using System.Drawing
+@using Microsoft.AspNetCore.Http
+@using SlideInfo.App.Helpers
 @using SlideInfo.Helpers
 @model SlideInfo.App.Models.SlideViewModels.AssociatedImagesViewModel
 
 @{
     ViewData["Title"] = "Associated Images | " + Model.Name;
 }
-
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+{
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
+}
 <div id="images">
 
     <h2>@Model.Name | Associated images</h2>

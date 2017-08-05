@@ -9,6 +9,8 @@ namespace SlideInfo.App.Models
 		public string FirstMidName { get; set; }
 		public string LastName { get; set; }
 
+	    public string FullName => FirstMidName + " " + LastName;
+
 		public DateTime LastActive { get; set; }
 
 		public virtual ICollection<Comment> Comments { get; set; }

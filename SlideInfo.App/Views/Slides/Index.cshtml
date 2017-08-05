@@ -1,10 +1,15 @@
 @using SlideInfo.App.Helpers
 @using SlideInfo.Helpers
+@using Microsoft.AspNetCore.Http
 @model IEnumerable<SlideInfo.App.Models.Slide>
 @{
     ViewData["Title"] = "Slides";
 }
-
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+{
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
+}
 <h2>Whole-slide images index</h2>
 
 <div class="container">
@@ -52,7 +57,7 @@
                             <li>
                                 Original size: @slide.Width x @slide.Height
                             </li>
-                            <li class="divider"><hr/></li>
+                            <li class="divider"><hr /></li>
                             <li>
                                 <a asp-action="Properties" asp-route-id="@slide.Id">Properties</a>
                             </li>

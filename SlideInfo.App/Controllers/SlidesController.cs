@@ -22,18 +22,21 @@ namespace SlideInfo.App.Controllers
 {
     public partial class SlidesController : Controller
     {
-        private readonly UserManager<AppUser> userManager;
         private readonly SignInManager<AppUser> signInManager;
+        private UserManager<AppUser> userManager;
         private readonly SlideInfoDbContext context;
         private readonly AsyncRepository<Slide> slideRepository;
+        private readonly AlertFactory alertFactory;
         private readonly ILogger logger;
 
-        public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+
+        public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
         {
-            this.userManager = userManager;
             this.signInManager = signInManager;
+            this.userManager = userManager;
             this.logger = logger;
             this.context = context;
+            alertFactory = new AlertFactory(HttpContext);
             slideRepository = new AsyncRepository<Slide>(context);
         }
 
@@ -56,10 +59,8 @@ namespace SlideInfo.App.Controllers
             ViewData[HAS_ASSOCIATED_IMAGES] = null;
             ViewData[HAS_COMMENTS] = null;
 
-            HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
-
             var slides = from s in context.Slides
-                select s;
+                         select s;
 
             if (!string.IsNullOrEmpty(searchString))
             {
@@ -177,7 +178,6 @@ namespace SlideInfo.App.Controllers
                     break;
             }
 
-
             var defaultPageSize = 15;
 
             var paginatedProperties = await PaginatedList<Property>.
@@ -234,7 +234,10 @@ namespace SlideInfo.App.Controllers
             string currentFilter, string searchString, int? pageSize, int? page)
         {
             ViewData[CURRENT_SORT] = sortOrder;
-            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData[DATE_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Date_desc" : "";
+            ViewData[TEXT_SORT_PARAM] = sortOrder == "Text" ? "Text_desc" : "Text";
+            ViewData[USER_SORT_PARAM] = sortOrder == "AppUserId" ? "AppUserId_desc" : "AppUserId";
+            ViewData[CURRENT_FILTER] = searchString;
 
             if (searchString != null)
             {
@@ -270,46 +273,59 @@ namespace SlideInfo.App.Controllers
             //filtering
             if (!String.IsNullOrEmpty(searchString))
             {
-                logger.LogInformation("Searching for properties containing {searchString}", searchString);
-                comments = comments.Where(s => s.Text.Contains(searchString));
+                logger.LogInformation("Searching for comments containing {searchString}", searchString);
+                comments = comments.Where(s => s.Text.Contains(searchString) || s.AppUser.FullName.Contains(searchString));
             }
 
-            //sorting
-            switch (sortOrder)
+            if (string.IsNullOrEmpty(sortOrder))
             {
-                case "name_desc":
-                    comments = comments.OrderByDescending(s => s.Date);
-                    logger.LogInformation("Sorting properties of slide {ID} by name descending", id);
-                    break;
-                default:
-                    logger.LogInformation("Sorting properties of slide {ID} by name", id);
-                    comments = comments.OrderBy(s => s.Date);
-                    break;
+                sortOrder = "Date";
             }
 
+            var descending = false;
+            if (sortOrder.EndsWith("_desc"))
+            {
+                sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
+                descending = true;
+            }
+
+            comments = descending ?
+                comments.OrderByDescending(e => EF.Property<object>(e, sortOrder))
+                : comments.OrderBy(e => EF.Property<object>(e, sortOrder));
 
             var defaultPageSize = 15;
 
-            var paginatedProperties = await PaginatedList<Comment>.
+            var paginatedComments = await PaginatedList<Comment>.
                 CreateAsync(comments.AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
-            var viewModel = new CommentsViewModel(slide.Name, paginatedProperties);
+            var viewModel = new CommentsViewModel(slide.Name, paginatedComments);
             return View(viewModel);
         }
 
         public async Task<IActionResult> CreateComment()
         {
-            var username = Request.Form["commentUserName"].ToString();
-            var appUser = context.Users.FirstAsync(user => user.UserName == username).Result;
+            try
+            {
+                var username = Request.Form["commentUserName"].ToString();
+                var appUser = context.Users.FirstAsync(s => s.Email == username).Result;
 
-            var slideName = Request.Form["commentSlideName"].ToString();
-            var slide = context.Slides.FirstAsync(s => s.Name == slideName).Result;
+                var slideName = Request.Form["commentSlideName"].ToString();
+                var slide = context.Slides.FirstAsync(s => s.Name == slideName).Result;
 
-            var commentText = Request.Form["commentText"].ToString();
+                var commentText = Request.Form["commentText"].ToString();
+                //TODO: validation of comment fields
 
-            var comment = new Comment() {AppUser = appUser.Id, SlideId = slide.Id, Text = commentText};
+                var comment = new Comment() { AppUserId = appUser.Id, SlideId = slide.Id, Text = commentText };
 
-            context.Add(comment);
-            await context.SaveChangesAsync(); 
+                context.Add(comment);
+                await context.SaveChangesAsync();
+
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, INSERT_COMMENT_SUCCESS);
+            }
+            catch
+            {
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, INSERT_COMMENT_FAILED);
+            }
+
             return RedirectToAction("Index", "Slides");
         }
 
