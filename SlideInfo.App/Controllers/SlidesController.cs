@@ -41,51 +41,51 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Index(int? id, string sortOrder,
             string currentFilter, string searchString)
         {
-            if (signInManager.IsSignedIn(User))
+            if (!signInManager.IsSignedIn(User))
+                return RedirectToAction("Login", "Account");
+
+            logger.LogInformation("Getting all slides...");
+
+            ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
+            ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "Vendor_desc" : "Vendor";
+            ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "Width_desc" : "Width";
+            ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "Height_desc" : "Height";
+            ViewData[CURRENT_FILTER] = searchString;
+            ViewData[SLIDE_ID] = null;
+            HttpContext.Session.Remove(SLIDE_ID);
+            ViewData[HAS_ASSOCIATED_IMAGES] = null;
+            ViewData[HAS_COMMENTS] = null;
+
+            HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
+
+            var slides = from s in context.Slides
+                select s;
+
+            if (!string.IsNullOrEmpty(searchString))
             {
-                logger.LogInformation("Getting all slides...");
-
-                ViewData[NAME_SORT_PARAM] = String.IsNullOrEmpty(sortOrder) ? "Name_desc" : "";
-                ViewData[VENDOR_SORT_PARAM] = sortOrder == "Vendor" ? "Vendor_desc" : "Vendor";
-                ViewData[WIDTH_SORT_PARAM] = sortOrder == "Width" ? "Width_desc" : "Width";
-                ViewData[HEIGHT_SORT_PARAM] = sortOrder == "Height" ? "Height_desc" : "Height";
-                ViewData[CURRENT_FILTER] = searchString;
-                ViewData[SLIDE_ID] = null;
-                ViewData[HAS_ASSOCIATED_IMAGES] = null;
-                ViewData[HAS_COMMENTS] = null;
-
-                HttpContext.Session.Remove(SessionConstants.CURRENT_SLIDE);
-
-                var slides = from s in context.Slides
-                             select s;
-
-                if (!String.IsNullOrEmpty(searchString))
-                {
-                    slides = slides.Where(s => s.Name.Contains(searchString)
-                                                   || s.Vendor.Contains(searchString));
-                }
-
-                if (string.IsNullOrEmpty(sortOrder))
-                {
-                    sortOrder = "Name";
-                }
-
-                var descending = false;
-                if (sortOrder.EndsWith("_desc"))
-                {
-                    sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
-                    descending = true;
-                }
-
-                slides = @descending ?
-                    slides.OrderByDescending(e => EF.Property<object>(e, sortOrder))
-                    : slides.OrderBy(e => EF.Property<object>(e, sortOrder));
-
-                var finalSlides = await slides.AsNoTracking().ToListAsync();
-                GetSlideThumbnails(finalSlides);
-                return View(finalSlides);
+                slides = slides.Where(s => s.Name.Contains(searchString)
+                                           || s.Vendor.Contains(searchString));
             }
-            return RedirectToAction("Login", "Account");
+
+            if (string.IsNullOrEmpty(sortOrder))
+            {
+                sortOrder = "Name";
+            }
+
+            var descending = false;
+            if (sortOrder.EndsWith("_desc"))
+            {
+                sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
+                @descending = true;
+            }
+
+            slides = @descending ?
+                slides.OrderByDescending(e => EF.Property<object>(e, sortOrder))
+                : slides.OrderBy(e => EF.Property<object>(e, sortOrder));
+
+            var finalSlides = await slides.AsNoTracking().ToListAsync();
+            GetSlideThumbnails(finalSlides);
+            return View(finalSlides);
         }
 
         // GET: Slides/Display/5
@@ -108,6 +108,7 @@ namespace SlideInfo.App.Controllers
 
             HttpContext.Session.Set(SessionConstants.CURRENT_SLIDE, slide);
             ViewData[SLIDE_ID] = slide.Id.ToString();
+            HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
             ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
@@ -148,6 +149,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
             ViewData[SLIDE_ID] = slide.Id.ToString();
+            HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
             ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
@@ -202,6 +204,7 @@ namespace SlideInfo.App.Controllers
             }
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[SLIDE_ID] = id.ToString();
+            HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
             ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
             var osr = new OpenSlide(slide.FilePath);
@@ -255,7 +258,9 @@ namespace SlideInfo.App.Controllers
             {
                 return NotFound();
             }
+
             ViewData[SLIDE_ID] = slide.Id.ToString();
+            HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
             ViewData[HAS_ASSOCIATED_IMAGES] = slide.HasAssociatedImages;
             ViewData[HAS_COMMENTS] = slide.Comments != null && slide.Comments.Any();
@@ -291,11 +296,21 @@ namespace SlideInfo.App.Controllers
             return View(viewModel);
         }
 
-        public IActionResult CreateComment()
+        public async Task<IActionResult> CreateComment()
         {
-            var slideId = ViewData[SLIDE_ID];
-            HttpContext.Session.SetInt32(ViewDataConstants.SLIDE_ID, (int)slideId);
-            return RedirectToAction("Create", "Comments");
+            var username = Request.Form["commentUserName"].ToString();
+            var appUser = context.Users.FirstAsync(user => user.UserName == username).Result;
+
+            var slideName = Request.Form["commentSlideName"].ToString();
+            var slide = context.Slides.FirstAsync(s => s.Name == slideName).Result;
+
+            var commentText = Request.Form["commentText"].ToString();
+
+            var comment = new Comment() {AppUser = appUser.Id, SlideId = slide.Id, Text = commentText};
+
+            context.Add(comment);
+            await context.SaveChangesAsync(); 
+            return RedirectToAction("Index", "Slides");
         }
 
         // GET: Slides/Edit/5
@@ -350,9 +365,5 @@ namespace SlideInfo.App.Controllers
             return context.Slides.Any(e => e.Id == id);
         }
 
-        public IActionResult Comments()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

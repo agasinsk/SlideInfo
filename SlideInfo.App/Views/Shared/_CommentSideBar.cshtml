@@ -1,29 +1,28 @@
 ﻿@using SlideInfo.App.Helpers
-@model SlideInfo.App.Models.Comment
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <form asp-controller="Comments" asp-action="Create">
-        <div id="mySidenav" class="sidenav">
+    <div id="mySidenav" class="sidenav">
+        <form asp-controller="Slides" asp-action="CreateComment" method="post">
             <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
             <div class="col-xs-12 form-group">
                 <label class="sidenav-text">User name:</label>
-                <input class="form-control" id="commentUserName" type="text" placeholder="@UserManager.GetUserName(User)" disabled>
+                <input class="form-control" name="commentUserName" type="text" value="@UserManager.GetUserName(User)" readonly>
             </div>
 
             <div class="col-xs-12 form-group">
                 <label class="sidenav-text">Slide name:</label>
-                <input class="form-control" id="commentSlideName" type="text" placeholder="@ViewData[ViewDataConstants.SLIDE_NAME]" disabled>
+                <input class="form-control" name="commentSlideName" type="text" value="@ViewData[ViewDataConstants.SLIDE_NAME]" readonly>
             </div>
 
             <div class="col-xs-12 form-group">
                 <label class="sidenav-text">Comment:</label>
-                <textarea class="form-control" id="commentText"  asp-items="ViewBag.CommentText" rows="6" placeholder="Your observations about this slide..." required></textarea>
+                <textarea class="form-control" name="commentText" type="text" rows="6" placeholder="Your observations about this slide..." required></textarea>
                 <br />
                 <input type="submit" value="Submit" class="btn btn-success sidenav-button" />
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 }

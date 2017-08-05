@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SlideInfo.App.Data;
 using SlideInfo.App.Helpers;
@@ -51,22 +49,20 @@ namespace SlideInfo.App.Controllers
         // GET: Comments/Create
         public IActionResult Create()
         {
-            var appUserId = context.Users.FirstOrDefaultAsync(user => user.UserName == userManager.GetUserName(User));
-            var slideId = int.Parse(HttpContext.Session.GetString(ViewDataConstants.SLIDE_ID));
-            var comment = new Comment() { AppUserId = appUserId.Id, SlideId = slideId };
-            return View(comment);
+            return View();
         }
 
         // POST: Comments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Comment comment)
-        {
-            if (!ModelState.IsValid) return View(comment);
+        { 
+            if (!ModelState.IsValid)
+                throw new ArgumentNullException();
 
             context.Add(comment);
             await context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Slides");
         }
 
         // GET: Comments/Edit/5

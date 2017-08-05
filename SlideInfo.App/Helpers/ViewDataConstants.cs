@@ -7,6 +7,7 @@ namespace SlideInfo.App.Helpers
 {
     public static class ViewDataConstants
     {
+        public const string COMMENT_TEXT_PLACEHOLDER = "Your observations about the slide...";
         public const string SLIDE_ID = "SlideId";
         public const string SLIDE_NAME = "SlideName";
         public const string HAS_ASSOCIATED_IMAGES = "HasAssociated";
