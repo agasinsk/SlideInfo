@@ -121,7 +121,7 @@ namespace SlideInfo.App.Controllers
                 var callbackUrl = Url.Action(nameof(ConfirmEmail), "Account",
                     new { userId = user.Id, code = token }, protocol: HttpContext.Request.Scheme);
                 var confirmationEmailBody =
-                    MessageConstants.ConfirmationEmailBody.Replace("callbackUrl", callbackUrl);
+                    MessageConstants.ConfirmationEmailBodyTemplate.Replace("callbackUrl", callbackUrl);
                 await emailSender.SendEmailAsync(model.Email, "Confirm your account", confirmationEmailBody);
 
                 logger.LogInformation(3, "User created a new account with password.");

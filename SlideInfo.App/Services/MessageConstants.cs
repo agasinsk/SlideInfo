@@ -8,7 +8,7 @@ namespace SlideInfo.App.Services
     public static class MessageConstants
     {
         public const string APP_NAME = "SlideInfo";
-        public const string APP_EMAIL = "arturgasinski@gmail.com";
+        public const string APP_EMAIL = "slide.info.pwr@gmail.com";
 
         public const string EMAIL_LOCAL_DOMAIN = "SlideInfo";
 
@@ -18,7 +18,7 @@ namespace SlideInfo.App.Services
         public const string EMAIL_HOST = "smtp.gmail.com";
         public const int EMAIL_PORT = 465;
 
-        public static string ConfirmationEmailBody =
+        public static string ConfirmationEmailBodyTemplate =
                 "Welcome to SlideInfo, <br/><br/> thank you for registering. " +
                 "<br/>Please confirm your account by clicking this link: <a href = 'callbackUrl'>confirmation link</a>." +
                 "<br/><br/> If you can't click the link, copy and paste this to the adress bar: callbackUrl . " +

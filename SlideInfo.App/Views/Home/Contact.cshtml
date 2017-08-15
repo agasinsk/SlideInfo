@@ -1,7 +1,15 @@
 ﻿@model SlideInfo.App.Models.ContactViewModels.ContactForm
+@using Microsoft.AspNetCore.Http
 @using SlideInfo.App.Helpers
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
 @{
     ViewData["Title"] = "Contact";
+}
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+{
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
 }
 <h2>@ViewData["Title"]</h2>
 <p>
@@ -16,8 +24,29 @@
         <div class="form-group">
             <label class="col-md-2 control-label">Name</label>
             <div class="col-md-10">
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                @if (string.IsNullOrEmpty(Model.Name))
+                {
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                }
+                else
+                {
+                    <input asp-for="Name" class="form-control" readonly />
+                }
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Email</label>
+            <div class="col-md-10">
+                @if (string.IsNullOrEmpty(Model.Email))
+                {
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                }
+                else
+                {
+                    <input asp-for="Email" class="form-control" readonly />
+                }
             </div>
         </div>
         <div class="form-group">
@@ -32,7 +61,7 @@
         <div class="form-group">
             <label asp-for="Message" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <input asp-for="Message" class="form-control" />
+                <textarea rows="4" resize="vertical" asp-for="Message" class="form-control"></textarea>
                 <span asp-validation-for="Message" class="text-danger"></span>
             </div>
         </div>

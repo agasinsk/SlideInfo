@@ -2,15 +2,13 @@
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace SlideInfo.App.Services
 {
     public class EmailSender
     {
-        static SecureSocketOptions secureSocketOptions = SecureSocketOptions.SslOnConnect;
+        static readonly SecureSocketOptions secureSocketOptions = SecureSocketOptions.SslOnConnect;
 
         public static async void SendEmailAsync(string fromEmailAddress, string toEmailAddress, string subject, string bodyText, int retryCount = 4)
         {
