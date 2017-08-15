@@ -7,6 +7,9 @@ namespace SlideInfo.App.Helpers
 {
     public static class ViewDataConstants
     {
+        public const string APP_EMAIL = "slide.info.pwr@gmail.com";
+        public const string EMAIL_SENT = "Your email was sent succesfully";
+        public const string EMAIL_ERROR = "There was an error when sending your email";
 
         public const string INSERT_COMMENT_FAILED = "There was an error when adding comment";
         public const string INSERT_COMMENT_SUCCESS = "Comment added successfully";

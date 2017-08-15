@@ -19,9 +19,9 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-2 control-label">Slide</label>
+            <label class="col-md-2 control-label">Subject</label>
             <div class="col-md-10">
-                <select asp-for="SlideId" class ="form-control" asp-items="ViewBag.SlideId"></select>
+                <select asp-for="Subject" class="form-control" asp-items="Html.GetEnumSelectList<ContactEmailSubject>()"></select>
             </div>
         </div>
         <div class="form-group">

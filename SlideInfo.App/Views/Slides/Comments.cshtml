@@ -44,7 +44,7 @@
                 @foreach (var item in Model.Comments)
                 {
                     <tr>
-                        <td>@item.AppUser.FullName</td>
+                        <td><a href="mailto:@item.AppUser.Email?Subject=[SlideInfo_Comment]" target="_top" title="Send mail to this user">@item.AppUser.FullName</a></td>
                         <td>@item.Text</td>
                         <td>@item.Date</td>
                     </tr>

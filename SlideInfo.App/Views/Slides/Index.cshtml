@@ -77,7 +77,7 @@
 
                     </div>
 
-                    @{var imgName = slide.Id + ".jpeg";}
+                    @{var imgName = slide.Name.ToUrlSlug() + ".jpeg";}
                     <img src="/images/slideThumbs/@imgName" alt="@slide.Name">
                 </div>
                         }

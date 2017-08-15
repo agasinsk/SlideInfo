@@ -7,8 +7,8 @@ namespace SlideInfo.App.Services
 {
     public static class MessageConstants
     {
-        public const string EMAIL_FROM_NAME = "SlideInfo";
-        public const string EMAIL_FROM_ADDRESS = "arturgasinski@gmail.com";
+        public const string APP_NAME = "SlideInfo";
+        public const string APP_EMAIL = "arturgasinski@gmail.com";
 
         public const string EMAIL_LOCAL_DOMAIN = "SlideInfo";
 
