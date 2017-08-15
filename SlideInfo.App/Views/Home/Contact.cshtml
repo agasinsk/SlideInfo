@@ -12,10 +12,18 @@
     Context.Session.Remove(SessionConstants.ALERT);
 }
 <h2>@ViewData["Title"]</h2>
-<p>
-    Contact us to report a bug, suggest a new feature or tell us what you would like us to improve in the app.
-    You can use the form below or send a message with your email client by clicking <a href="mailto:slide.info.pwr@gmail.com" title="Contact us">here</a>.
-</p>
+<dl>
+    <dt>
+        Contact us
+    </dt>
+    <dd>Report a bug, suggest a new feature or tell us what you would like us to improve in the app.</dd>
+    <dt>
+        Your choice
+    </dt>
+    <dd>
+        You can use the form below or send a message with your email client by clicking <a href="mailto:slide.info.pwr@gmail.com" title="Contact us">here</a>.
+    </dd>
+</dl>
 
 <form asp-action="Contact">
     <div class="form-horizontal">
@@ -50,7 +58,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-2 control-label">Slide</label>
+            <label class="col-md-2 control-label">Subject</label>
             <div class="col-md-10">
                 <select asp-for="Subject" class="form-control" asp-items="@Html.GetEnumSelectList<ContactEmailSubject>()">
                     <option selected="selected" value="">-- Select subject --</option>
