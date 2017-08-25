@@ -72,7 +72,6 @@ namespace SlideInfo.Core
                 Close();
                 throw;
             }
-
         }
 
         private void CheckVendorIsValid(string fileName)
@@ -280,20 +279,21 @@ namespace SlideInfo.Core
             var downsample = Math.Max(Dimensions.Width / size.Width, Dimensions.Height / size.Height);
             var level = GetBestLevelForDownsample(downsample);
             var thumbnailSize = LevelDimensions[level];
-            SizeL regionSize;
+            SizeL startLocation;
 
             try
             {
                 float.TryParse(Properties[PROPERTY_NAME_BOUNDS_X], out float xBound);
                 float.TryParse(Properties[PROPERTY_NAME_BOUNDS_Y], out float yBound);
-                regionSize = new SizeL((long)xBound, (long)yBound);
+                startLocation = new SizeL((long)xBound, (long)yBound);
             }
             catch
             {
-                regionSize = new SizeL(0, 0);
+                startLocation = new SizeL(0, 0);
             }
 
-            var thumbnail = ReadRegion(regionSize, level, thumbnailSize);
+            var thumbnail = ReadRegion(startLocation, level, thumbnailSize);
+            thumbnail.Save(Path.GetFileNameWithoutExtension(FilePath), ImageFormat.Jpeg);
             if (size.Equals(thumbnailSize))
                 return thumbnail;
 

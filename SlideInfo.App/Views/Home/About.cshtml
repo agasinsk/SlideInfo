@@ -5,39 +5,34 @@
 <div class="row">
     <div class="col-md-4 ">
         <h2>Project details</h2>
-        <p class="well well-sm">
-            <i class="glyphicon glyphicon-book"></i> Diploma thesis project at Wroclaw University of Technology
-        </p>
-        <p class="well well-sm">
-            <i class="glyphicon glyphicon-user"></i> Developed by Artur Gasiński
-        </p>
-        <p class="well well-sm">
-            <i class="glyphicon glyphicon-open"></i> Supervisor: Ph.D. Łukasz Jeleń
-        </p>
-
+        <ul class="list-group">
+            <li class="list-group-item"><i class="glyphicon glyphicon-education"></i> Diploma thesis project at Wroclaw University of Technology</li>
+            <li class="list-group-item"><i class="glyphicon glyphicon-user"></i> Developed by Artur Gasiński</li>
+            <li class="list-group-item"><i class="glyphicon glyphicon-open"></i> Supervisor: Ph.D. Łukasz Jeleń</li>
+        </ul>
     </div>
     <div class="col-md-4">
         <h2>Browse the slides</h2>
-        <p class="well well-sm"><i class="glyphicon glyphicon-th"></i> Display, zoom, rotate the slides</p>
-        <p class="well well-sm"><i class="glyphicon glyphicon-cog"></i> Check, find, sort slide properties</p>
-        <p class="well well-sm"><i class="glyphicon glyphicon-picture"></i> Look at associated images</p>
+
+        <ul class="list-group">
+            <li class="list-group-item"><i class="glyphicon glyphicon-th"></i> Display, zoom, rotate the slides</li>
+            <li class="list-group-item"><i class="glyphicon glyphicon-cog"></i> Check, find, sort slide properties</li>
+            <li class="list-group-item"><i class="glyphicon glyphicon-picture"></i> Display all associated images</li>
+        </ul>
         <p>
             <a class="btn btn-primary" asp-controller="Slides" asp-action="Index">Browse slides &raquo;</a>
         </p>
     </div>
     <div class="col-md-4">
 
-        <h2>Share what you think</h2>
-
-        <p class="well well-sm">
-            <i class="glyphicon glyphicon-comment"></i> Leave your comments about the slides
-        </p>
-        <p class="well well-sm">
-            <i class="glyphicon glyphicon-user"></i> Exchange emails between app users
-        </p>
-        <p class="well well-sm">
-            <i class="glyphicon glyphicon-th"></i> Real time chat with other users
-        </p>
+        <h2>Social aspect</h2>
+        <ul class="list-group">
+            <li class="list-group-item"><i class="glyphicon glyphicon-comment"></i> Leave your comments about the slides</li>
+            <li class="list-group-item"><i class="glyphicon glyphicon-user"></i> Exchange emails between app users</li>
+            <li class="list-group-item">
+                <i class="glyphicon glyphicon-th"></i> Real time chat with other users
+            </li>
+        </ul>
         <p>
             <a class="btn btn-primary" asp-controller="Account" asp-action="Login">Login &raquo;</a>
         </p>

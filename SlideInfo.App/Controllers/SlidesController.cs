@@ -323,13 +323,13 @@ namespace SlideInfo.App.Controllers
                 await context.SaveChangesAsync();
 
                 new AlertFactory(HttpContext).CreateAlert(AlertType.Success, INSERT_COMMENT_SUCCESS);
+                return RedirectToAction("Comments", "Slides", new { id = slide.Id });
             }
             catch
             {
                 new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, INSERT_COMMENT_FAILED);
+                return RedirectToAction("Index", "Slides");
             }
-
-            return RedirectToAction("Index", "Slides");
         }
 
         // GET: Slides/Edit/5

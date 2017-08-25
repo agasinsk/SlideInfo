@@ -46,7 +46,8 @@
                         @if (ViewData[ViewDataConstants.SLIDE_ID] != null)
                         {
                             <li class="dropdown @Html.IsSlideChosen("Slides", ViewData["SlideId"] as string)">
-                                <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">Slides<span class="caret"></span>
+                                <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
+                                    Slides<span class="caret"></span>
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
@@ -57,7 +58,9 @@
                                         <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Display</a>
                                     </li>
                                     <li>
-                                        <a href="#" onclick="openNav()"><span class="btn btn-default">Add new comment</span></a>
+                                        <a href="#" onclick="showCommentForm()">
+                                            <span class="btn btn-default">Add new comment</span>
+                                        </a>
                                     </li>
                                     <li class="divider"></li>
                                     <li>
@@ -141,11 +144,13 @@
 
     });
 
-    function openNav() {
+    function showCommentForm() {
         document.getElementById("mySidenav").style.width = "250px";
+        document.getElementById("main").style.marginLeft = "250px";
     }
 
-    function closeNav() {
+    function hideCommentForm() {
         document.getElementById("mySidenav").style.width = "0";
+        document.getElementById("main").style.marginLeft = "0";
     }
 </script>
