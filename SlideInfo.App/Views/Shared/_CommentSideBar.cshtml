@@ -4,7 +4,7 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    <div id="mySidenav" class="sidenav">
+    <div id="commentSideForm" class="sidenav">
         <form asp-controller="Slides" asp-action="CreateComment" method="post">
             <a href="javascript:void(0)" class="closebtn" onclick="hideCommentForm()">&times;</a>
             <div class="col-xs-12 form-group">

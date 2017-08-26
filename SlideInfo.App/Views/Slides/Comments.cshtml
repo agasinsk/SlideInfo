@@ -10,7 +10,7 @@
     @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
     Context.Session.Remove(SessionConstants.ALERT);
 }
-<div class="container" id="comments">
+<div class="container-fluid" id="comments">
     <h2>@Model.Name comments</h2>
     @if (Model.Comments != null)
     {

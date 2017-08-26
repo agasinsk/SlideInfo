@@ -4,7 +4,7 @@
 	ViewData["Title"] = Model.Name;
 }
 <style type="text/css">
-	div#view {
+    .slide-display-container {
 		position: fixed;
 		left: 0;
 		width: 100%;
@@ -14,7 +14,7 @@
 	}
 </style>
 
-<div id="view"></div>
+<div id="displayContainer" class="slide-display-container"></div>
 
 <script type="text/javascript" src="~/js/jquery.js"></script>
 <script type="text/javascript" src="~/js/openseadragon.js"></script>
@@ -22,7 +22,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
     var viewer = new OpenSeadragon({
-        id: "view",
+        id: "displayContainer",
 		tileSources: "@Model.SlideDziUrl",
 		prefixUrl: "/images/",
         showNavigator: true,
