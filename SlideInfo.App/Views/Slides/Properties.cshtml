@@ -17,8 +17,8 @@
         <form asp-action="Properties" method="get">
             <div class="form-inline no-color">
                 <p>
-                    <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]"/>
-                    <input type="submit" value="Search" class="btn btn-success"/>
+                    <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]" />
+                    <input type="submit" value="Search" class="btn btn-success" />
                     @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
                     {
                         <a asp-action="Properties" class="btn btn-default" role="button">Refresh</a>
@@ -30,7 +30,10 @@
             <thead>
                 <tr>
                     <th class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
-                        <a asp-action="Properties" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Property</a>
+                        <a asp-action="Properties" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">
+                            Property
+                            <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.NAME_SORT_PARAM])"></i>
+                        </a>
                     </th>
                     <th>
                         Value
@@ -59,13 +62,13 @@
            class="btn btn-default @prevDisabled">
             Previous
         </a>
-            <a asp-action="Properties"
-               asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
-               asp-route-page="@(Model.Properties.PageIndex + 1)"
-               asp-route-currentFilter= "@ViewData[ViewDataConstants.CURRENT_FILTER]"
-               class="btn btn-default @nextDisabled">
-                Next
-            </a>
+        <a asp-action="Properties"
+           asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
+           asp-route-page="@(Model.Properties.PageIndex + 1)"
+           asp-route-currentFilter="@ViewData[ViewDataConstants.CURRENT_FILTER]"
+           class="btn btn-default @nextDisabled">
+            Next
+        </a>
     }
 
 </div>

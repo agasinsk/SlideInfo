@@ -20,12 +20,18 @@
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu">
-            <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Name</a></li>
             <li>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.VENDOR_SORT_PARAM]">Vendor</a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Name <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.NAME_SORT_PARAM])"></i></a>
             </li>
-            <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.WIDTH_SORT_PARAM]">Width</a></li>
-            <li><a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM]">Height</a></li>
+            <li>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.VENDOR_SORT_PARAM]">Vendor <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.VENDOR_SORT_PARAM])"></i></a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.WIDTH_SORT_PARAM]">Width <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.WIDTH_SORT_PARAM])"></i></a>
+            </li>
+            <li>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM]">Height <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM])"></i></a>
+            </li>
         </ul>
     </div>
     <a asp-action="Update" class="btn btn-default">Rescan slides</a>

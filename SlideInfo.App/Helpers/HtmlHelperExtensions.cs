@@ -96,5 +96,21 @@ namespace SlideInfo.App.Helpers
 
             return isActive ? "active" : "";
         }
+
+        public static string IsSortedDesc(this IHtmlHelper html,
+            object sortOrderParam)
+        {
+            var sortOrderString = sortOrderParam as string;
+
+            return sortOrderString != null ? html.IsSortedDesc(sortOrderString) : "glyphicon-sort";
+        }
+
+        public static string IsSortedDesc(this IHtmlHelper html,
+            string sortOrderParam)
+        {
+            var isDescending = sortOrderParam.Contains("desc");
+
+            return isDescending ? "glyphicon-menu-up" : "glyphicon-menu-down";
+        }
     }
 }

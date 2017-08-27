@@ -108,7 +108,7 @@ ul {
     text-decoration: none;
 }
 
- /* The side navigation menu */
+/* The side navigation menu */
 .sidenav {
     height: 100%; /* 100% Full-height */
     width: 0; /* 0 width - change this with JavaScript */
@@ -136,10 +136,10 @@ ul {
     transition: 0.3s;
 }
 
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover, .offcanvas a:focus{
-    color: #f1f1f1;
-}
+    /* When you mouse over the navigation links, change their color */
+    .sidenav a:hover, .offcanvas a:focus {
+        color: #f1f1f1;
+    }
 
 .sidenav-button {
     padding: 8px 8px 8px;
@@ -164,11 +164,18 @@ ul {
 
 /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
 @media screen and (max-height: 450px) {
-    .sidenav {padding-top: 15px;}
-    .sidenav a {font-size: 18px;}
-} 
+    .sidenav {
+        padding-top: 15px;
+    }
+
+        .sidenav a {
+            font-size: 18px;
+        }
+}
 
 .slide-name {
     text-align: center;
     font-weight: bold;
+    min-width: 20rem;
+    word-break: keep-all;
 }
