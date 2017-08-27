@@ -62,15 +62,28 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            var allowPassOnEmailVerfication = false;
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
+                {
+                    allowPassOnEmailVerfication = true;
+                }
+            }
             if (ModelState.IsValid)
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     logger.LogInformation(1, "User logged in.");
                     return RedirectToLocal(returnUrl);
+                }
+                if (result.IsNotAllowed)
+                {
+                    return allowPassOnEmailVerfication ? RedirectToLocal(returnUrl) : RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -248,6 +261,17 @@ namespace SlideInfo.App.Controllers
                 return View("Error");
             }
             var result = await userManager.ConfirmEmailAsync(user, code);
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
+                {
+                    user.Email = user.UnconfirmedEmail;
+                    user.UserName = user.UnconfirmedEmail;
+                    user.UnconfirmedEmail = "";
+
+                    await userManager.UpdateAsync(user);
+                }
+            }
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 

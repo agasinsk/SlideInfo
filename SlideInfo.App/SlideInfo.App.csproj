@@ -35,6 +35,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Manage - Copy\**" />
+    <Content Remove="Views\Manage - Copy\**" />
+    <EmbeddedResource Remove="Views\Manage - Copy\**" />
+    <None Remove="Views\Manage - Copy\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="wwwroot\images\fullpage_grouphover.png">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

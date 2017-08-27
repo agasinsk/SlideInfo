@@ -1,9 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Http
 @using SlideInfo.App.Helpers
-@model SlideInfo.App.Models.SlideViewModels.CommentsViewModel
+@model SlideInfo.App.Models.ManageViewModels.UserCommentsViewModel
 
 @{
-    ViewData["Title"] = "Comments | " + Model.Name;
+    ViewData["Title"] = "Comments | " + Model.UserName;
 }
 @if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
@@ -11,7 +11,7 @@
     Context.Session.Remove(SessionConstants.ALERT);
 }
 <div class="container-fluid" id="comments">
-    <h2>@Model.Name comments</h2>
+    <h2>Your comments</h2>
     @if (Model.Comments != null)
     {
         <form asp-action="Comments" method="get">
@@ -23,9 +23,6 @@
                     {
                         <a asp-action="Comments" class="btn btn-default" role="button">Refresh</a>
                     }
-                    <a href="#" onclick="showCommentForm()">
-                        <span class="btn btn-default">Add new comment</span>
-                    </a>
                 </p>
             </div>
         </form>
@@ -33,7 +30,7 @@
             <thead>
                 <tr>
                     <th class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
-                        <a asp-action="Comments" asp-route-sortOrder="@ViewData[ViewDataConstants.USER_SORT_PARAM]">User <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.USER_SORT_PARAM])"></i></a>
+                        <a asp-action="Comments" asp-route-sortOrder="@ViewData[ViewDataConstants.SLIDE_SORT_PARAM]">Slide <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.SLIDE_SORT_PARAM])"></i></a>
                     </th>
                     <th class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
                         <a asp-action="Comments" asp-route-sortOrder="@ViewData[ViewDataConstants.TEXT_SORT_PARAM]">Content <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.TEXT_SORT_PARAM])"></i></a>
@@ -47,7 +44,7 @@
                 @foreach (var item in Model.Comments)
                 {
                     <tr>
-                        <td><a href="mailto:@item.AppUser.Email?Subject=[SlideInfo_Comment]" target="_top" title="Send mail to this user">@item.AppUser.FullName</a></td>
+                        <td><a asp-action="Display" asp-controller="Slides" asp-route-id="@item.Slide.Id">@item.Slide.Name</a></td>
                         <td>@item.Text</td>
                         <td>@item.Date</td>
                     </tr>

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace SlideInfo.App.Models.ManageViewModels
@@ -10,12 +7,20 @@ namespace SlideInfo.App.Models.ManageViewModels
     {
         public bool HasPassword { get; set; }
 
+        public string FullName { get; set; }
+
+        public string Email { get; set; }
+        public string UnconfirmedEmail { get; set; }
+        public bool EmailConfirmed { get; set; }
+
+
         public IList<UserLoginInfo> Logins { get; set; }
 
-        public string PhoneNumber { get; set; }
-
-        public bool TwoFactor { get; set; }
-
         public bool BrowserRemembered { get; set; }
+
+        public int CommentsCount { get; set; }
+
+        public IEnumerable<Comment> Comments { get; set; }
+
     }
 }

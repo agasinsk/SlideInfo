@@ -3,25 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SlideInfo.App.Data;
+using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.ManageViewModels;
+using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Services;
+using static SlideInfo.App.Helpers.ViewDataConstants;
 
 namespace SlideInfo.App.Controllers
 {
     [Authorize]
     public class ManageController : Controller
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly string _externalCookieScheme;
-        private readonly IEmailSender _emailSender;
-        private readonly ISmsSender _smsSender;
-        private readonly ILogger _logger;
+        private readonly UserManager<AppUser> userManager;
+        private readonly SignInManager<AppUser> signInManager;
+        private readonly SlideInfoDbContext context;
+        private readonly string externalCookieScheme;
+        private readonly IEmailSender emailSender;
+        private readonly ISmsSender smsSender;
+        private readonly ILogger logger;
 
         public ManageController(
           UserManager<AppUser> userManager,
@@ -29,17 +36,17 @@ namespace SlideInfo.App.Controllers
           IOptions<IdentityCookieOptions> identityCookieOptions,
           IEmailSender emailSender,
           ISmsSender smsSender,
-          ILoggerFactory loggerFactory)
+          ILoggerFactory loggerFactory, SlideInfoDbContext context)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
-            _emailSender = emailSender;
-            _smsSender = smsSender;
-            _logger = loggerFactory.CreateLogger<ManageController>();
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+            externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
+            this.emailSender = emailSender;
+            this.smsSender = smsSender;
+            this.context = context;
+            logger = loggerFactory.CreateLogger<ManageController>();
         }
 
-        //
         // GET: /Manage/Index
         [HttpGet]
         public async Task<IActionResult> Index(ManageMessageId? message = null)
@@ -58,13 +65,17 @@ namespace SlideInfo.App.Controllers
             {
                 return View("Error");
             }
+
             var model = new IndexViewModel
             {
-                HasPassword = await _userManager.HasPasswordAsync(user),
-                PhoneNumber = await _userManager.GetPhoneNumberAsync(user),
-                TwoFactor = await _userManager.GetTwoFactorEnabledAsync(user),
-                Logins = await _userManager.GetLoginsAsync(user),
-                BrowserRemembered = await _signInManager.IsTwoFactorClientRememberedAsync(user)
+                FullName = user.FullName,
+                Email = user.Email,
+                UnconfirmedEmail = user.UnconfirmedEmail,
+                EmailConfirmed = user.EmailConfirmed,
+                HasPassword = await userManager.HasPasswordAsync(user),
+                Logins = await userManager.GetLoginsAsync(user),
+                BrowserRemembered = await signInManager.IsTwoFactorClientRememberedAsync(user),
+                CommentsCount = context.Comments.Count(c => c.AppUserId == user.Id)
             };
             return View(model);
         }
@@ -79,136 +90,216 @@ namespace SlideInfo.App.Controllers
             var user = await GetCurrentUserAsync();
             if (user != null)
             {
-                var result = await _userManager.RemoveLoginAsync(user, account.LoginProvider, account.ProviderKey);
+                var result = await userManager.RemoveLoginAsync(user, account.LoginProvider, account.ProviderKey);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await signInManager.SignInAsync(user, isPersistent: false);
                     message = ManageMessageId.RemoveLoginSuccess;
                 }
             }
             return RedirectToAction(nameof(ManageLogins), new { Message = message });
         }
 
-        //
-        // GET: /Manage/AddPhoneNumber
-        public IActionResult AddPhoneNumber()
-        {
-            return View();
-        }
 
-        //
-        // POST: /Manage/AddPhoneNumber
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddPhoneNumber(AddPhoneNumberViewModel model)
+        // GET: Slides/Comments/5
+        public async Task<IActionResult> Comments(string sortOrder,
+            string currentFilter, string searchString, int? pageSize, int? page)
         {
-            if (!ModelState.IsValid)
+            ViewData[CURRENT_SORT] = sortOrder;
+            ViewData[DATE_SORT_PARAM] = string.IsNullOrEmpty(sortOrder) ? "Date_desc" : "";
+            ViewData[TEXT_SORT_PARAM] = sortOrder == "Text" ? "Text_desc" : "Text";
+            ViewData[SLIDE_SORT_PARAM] = sortOrder == "SlideId" ? "SlideId_desc" : "SlideId";
+            ViewData[CURRENT_FILTER] = searchString;
+
+            if (searchString != null)
             {
-                return View(model);
+                page = 1;
             }
-            // Generate the token and send it
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData[CURRENT_FILTER] = searchString;
             var user = await GetCurrentUserAsync();
             if (user == null)
             {
                 return View("Error");
             }
-            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, model.PhoneNumber);
-            await _smsSender.SendSmsAsync(model.PhoneNumber, "Your security code is: " + code);
-            return RedirectToAction(nameof(VerifyPhoneNumber), new { PhoneNumber = model.PhoneNumber });
-        }
+            logger.LogInformation("Getting comments of user {ID}", user.Id);
 
-        //
-        // POST: /Manage/EnableTwoFactorAuthentication
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EnableTwoFactorAuthentication()
-        {
-            var user = await GetCurrentUserAsync();
-            if (user != null)
+            var comments = context.Comments.Where(c => c.AppUserId == user.Id);
+              
+
+            //filtering
+            if (!String.IsNullOrEmpty(searchString))
             {
-                await _userManager.SetTwoFactorEnabledAsync(user, true);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                _logger.LogInformation(1, "User enabled two-factor authentication.");
+                logger.LogInformation("Searching for comments containing {searchString}", searchString);
+                comments = comments.Where(s => s.Text.Contains(searchString) || s.AppUser.FullName.Contains(searchString));
             }
-            return RedirectToAction(nameof(Index), "Manage");
-        }
 
-        //
-        // POST: /Manage/DisableTwoFactorAuthentication
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DisableTwoFactorAuthentication()
-        {
-            var user = await GetCurrentUserAsync();
-            if (user != null)
+            if (string.IsNullOrEmpty(sortOrder))
             {
-                await _userManager.SetTwoFactorEnabledAsync(user, false);
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                _logger.LogInformation(2, "User disabled two-factor authentication.");
+                sortOrder = "Date";
             }
-            return RedirectToAction(nameof(Index), "Manage");
+
+            var descending = false;
+            if (sortOrder.EndsWith("_desc"))
+            {
+                sortOrder = sortOrder.Substring(0, sortOrder.Length - 5);
+                descending = true;
+            }
+
+            comments = descending ?
+                comments.OrderByDescending(e => EF.Property<object>(e, sortOrder))
+                : comments.OrderBy(e => EF.Property<object>(e, sortOrder));
+
+            var defaultPageSize = 15;
+
+            var paginatedComments = await PaginatedList<Comment>.
+                CreateAsync(comments.Include(c => c.Slide).AsNoTracking(), page ?? 1, pageSize ?? defaultPageSize);
+            var viewModel = new UserCommentsViewModel(user.FullName, paginatedComments);
+            return View(viewModel);
         }
 
-        //
-        // GET: /Manage/VerifyPhoneNumber
+        // GET: /Manage/ChangeEmail
         [HttpGet]
-        public async Task<IActionResult> VerifyPhoneNumber(string phoneNumber)
+        public async Task<IActionResult> ChangeEmail()
         {
             var user = await GetCurrentUserAsync();
-            if (user == null)
+            var model = new ChangeEmailViewModel()
             {
-                return View("Error");
-            }
-            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, phoneNumber);
-            // Send an SMS to verify the phone number
-            return phoneNumber == null ? View("Error") : View(new VerifyPhoneNumberViewModel { PhoneNumber = phoneNumber });
-        }
-
-        //
-        // POST: /Manage/VerifyPhoneNumber
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyPhoneNumber(VerifyPhoneNumberViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-            var user = await GetCurrentUserAsync();
-            if (user != null)
-            {
-                var result = await _userManager.ChangePhoneNumberAsync(user, model.PhoneNumber, model.Code);
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction(nameof(Index), new { Message = ManageMessageId.AddPhoneSuccess });
-                }
-            }
-            // If we got this far, something failed, redisplay the form
-            ModelState.AddModelError(string.Empty, "Failed to verify phone number");
+                OldEmail = await userManager.GetEmailAsync(user)
+            };
             return View(model);
         }
 
         //
-        // POST: /Manage/RemovePhoneNumber
+        // POST: /Manage/ChangeEmail
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemovePhoneNumber()
+        public async Task<IActionResult> ChangeEmail(ChangeEmailViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
             var user = await GetCurrentUserAsync();
             if (user != null)
             {
-                var result = await _userManager.SetPhoneNumberAsync(user, null);
+                //doing a quick swap so we can send the appropriate confirmation email
+                user.UnconfirmedEmail = user.Email;
+                user.Email = model.NewEmail;
+                user.EmailConfirmed = false;
+                var result = await userManager.UpdateAsync(user);
+
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction(nameof(Index), new { Message = ManageMessageId.RemovePhoneSuccess });
+                    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var callbackUrl = Url.Action("ConfirmEmail", "Manage",
+                        new { userId = user.Id, code = token }, protocol: HttpContext.Request.Scheme);
+                    var confirmationEmailBody =
+                        MessageConstants.ConfirmationEmailBodyTemplate.Replace("callbackUrl", callbackUrl);
+                    await emailSender.SendEmailAsync(model.NewEmail, "Confirm your account", confirmationEmailBody);
+
+                    logger.LogInformation(3, "User was sent a new confirmation link.");
+                    return View("ConfirmationEmailSent");
                 }
             }
             return RedirectToAction(nameof(Index), new { Message = ManageMessageId.Error });
         }
 
+
+        public async Task<ActionResult> ConfirmEmail(string userId, string code)
+        {
+            if (userId == null || code == null)
+            {
+                return View("Error");
+            }
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return View("Error");
+            }
+            var result = await userManager.ChangeEmailAsync(user, user.UnconfirmedEmail, code);
+            if (result.Succeeded)
+            {
+                if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
+                {
+                    user.UserName = user.UnconfirmedEmail;
+                    user.UnconfirmedEmail = "";
+
+                    await userManager.UpdateAsync(user);
+                }
+            }
+            return RedirectToAction("Index", "Manage");
+        }
+
+        public async Task<ActionResult> CancelUnconfirmedEmail(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            if (user != null)
+            {
+                user.UnconfirmedEmail = "";
+                user.EmailConfirmed = true;
+                await userManager.UpdateAsync(user);
+            }
+            else
+            {
+                return View("Error");
+            }
+
+            return RedirectToAction("Index", "Manage");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangeName()
+        {
+            var user = await GetCurrentUserAsync();
+            var model = new ChangeNameViewModel()
+            {
+                OldFirstName = user.FirstMidName,
+                OldLastName = user.LastName
+            };
+            return View(model);
+        }
+
         //
+        // POST: /Manage/ChangeEmail
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeName(ChangeNameViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await GetCurrentUserAsync();
+
+            if (user == null)
+                return RedirectToAction(nameof(Index), new { Message = ManageMessageId.Error });
+
+            if (!string.IsNullOrEmpty(model.NewFirstName))
+            {
+                user.FirstMidName = model.NewFirstName;
+            }
+            if (!string.IsNullOrEmpty(model.NewLastName))
+            {
+                user.LastName = model.NewLastName;
+            }
+
+            var result = await userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                await signInManager.SignInAsync(user, isPersistent: false);
+                logger.LogInformation(3, "User changed their name successfully.");
+                return RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangeNameSuccess });
+            }
+            AddErrors(result);
+            return View(model);
+        }
+
         // GET: /Manage/ChangePassword
         [HttpGet]
         public IActionResult ChangePassword()
@@ -229,11 +320,11 @@ namespace SlideInfo.App.Controllers
             var user = await GetCurrentUserAsync();
             if (user != null)
             {
-                var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                var result = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation(3, "User changed their password successfully.");
+                    await signInManager.SignInAsync(user, isPersistent: false);
+                    logger.LogInformation(3, "User changed their password successfully.");
                     return RedirectToAction(nameof(Index), new { Message = ManageMessageId.ChangePasswordSuccess });
                 }
                 AddErrors(result);
@@ -264,10 +355,10 @@ namespace SlideInfo.App.Controllers
             var user = await GetCurrentUserAsync();
             if (user != null)
             {
-                var result = await _userManager.AddPasswordAsync(user, model.NewPassword);
+                var result = await userManager.AddPasswordAsync(user, model.NewPassword);
                 if (result.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    await signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction(nameof(Index), new { Message = ManageMessageId.SetPasswordSuccess });
                 }
                 AddErrors(result);
@@ -290,8 +381,8 @@ namespace SlideInfo.App.Controllers
             {
                 return View("Error");
             }
-            var userLogins = await _userManager.GetLoginsAsync(user);
-            var otherLogins = _signInManager.GetExternalAuthenticationSchemes().Where(auth => userLogins.All(ul => auth.AuthenticationScheme != ul.LoginProvider)).ToList();
+            var userLogins = await userManager.GetLoginsAsync(user);
+            var otherLogins = signInManager.GetExternalAuthenticationSchemes().Where(auth => userLogins.All(ul => auth.AuthenticationScheme != ul.LoginProvider)).ToList();
             ViewData["ShowRemoveButton"] = user.PasswordHash != null || userLogins.Count > 1;
             return View(new ManageLoginsViewModel
             {
@@ -307,11 +398,11 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> LinkLogin(string provider)
         {
             // Clear the existing external cookie to ensure a clean login process
-            await HttpContext.Authentication.SignOutAsync(_externalCookieScheme);
+            await HttpContext.Authentication.SignOutAsync(externalCookieScheme);
 
             // Request a redirect to the external login provider to link a login for the current user
             var redirectUrl = Url.Action(nameof(LinkLoginCallback), "Manage");
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, userManager.GetUserId(User));
             return Challenge(properties, provider);
         }
 
@@ -325,18 +416,18 @@ namespace SlideInfo.App.Controllers
             {
                 return View("Error");
             }
-            var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
+            var info = await signInManager.GetExternalLoginInfoAsync(await userManager.GetUserIdAsync(user));
             if (info == null)
             {
                 return RedirectToAction(nameof(ManageLogins), new { Message = ManageMessageId.Error });
             }
-            var result = await _userManager.AddLoginAsync(user, info);
+            var result = await userManager.AddLoginAsync(user, info);
             var message = ManageMessageId.Error;
             if (result.Succeeded)
             {
                 message = ManageMessageId.AddLoginSuccess;
                 // Clear the existing external cookie to ensure a clean login process
-                await HttpContext.Authentication.SignOutAsync(_externalCookieScheme);
+                await HttpContext.Authentication.SignOutAsync(externalCookieScheme);
             }
             return RedirectToAction(nameof(ManageLogins), new { Message = message });
         }
@@ -356,6 +447,8 @@ namespace SlideInfo.App.Controllers
             AddPhoneSuccess,
             AddLoginSuccess,
             ChangePasswordSuccess,
+            ChangeEmailSuccess,
+            ChangeNameSuccess,
             SetTwoFactorSuccess,
             SetPasswordSuccess,
             RemoveLoginSuccess,
@@ -365,7 +458,7 @@ namespace SlideInfo.App.Controllers
 
         private Task<AppUser> GetCurrentUserAsync()
         {
-            return _userManager.GetUserAsync(HttpContext.User);
+            return userManager.GetUserAsync(HttpContext.User);
         }
 
         #endregion
