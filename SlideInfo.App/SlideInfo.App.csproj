@@ -11,11 +11,12 @@
 
   <PropertyGroup>
     <UserSecretsId>aspnet-SlideInfo.App-6ac40fb1-9323-43c1-b22a-63bbaddbacca</UserSecretsId>
-    <ApplicationIcon>wwwroot\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>rounded-info-button.ico</ApplicationIcon>
     <Authors>Artur Gasinski</Authors>
     <Version>0.5.0</Version>
     <OutputTypeEx>exe</OutputTypeEx>
     <StartupObject />
+    <Win32Resource />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

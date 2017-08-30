@@ -26,8 +26,9 @@ namespace SlideInfo.App.Controllers
             return RedirectToAction("Index");
         }
 
-        private void GetSlideThumbnails(ICollection<Slide> slides)
+        private void GenerateSlideThumbnails(ICollection<Slide> slides)
         {
+            Directory.CreateDirectory(AppDirectories.SlideThumbs);
             var existingThumbs = from file in Directory.EnumerateFiles(AppDirectories.SlideThumbs, "*.jpeg")
                                  select file;
             var existingThumbsCount = existingThumbs.Count();
@@ -107,16 +108,17 @@ namespace SlideInfo.App.Controllers
             return new FileContentResult(new byte[] { }, "");
         }
 
-        private void GetAssociatedImagesThumbnails(int parentSlideId, SlideDictionary<AssociatedImage> associated)
+        private void GenerateAssociatedImagesThumbnails(int slideId, SlideDictionary<AssociatedImage> associated)
         {
-            if (Directory.EnumerateFiles(AppDirectories.AssociatedImagesThumbs, $"{parentSlideId}*").Any())
+            Directory.CreateDirectory(AppDirectories.AssociatedImagesThumbs);
+            if (Directory.EnumerateFiles(AppDirectories.AssociatedImagesThumbs, $"{slideId}*").Any())
                 return;
 
-            logger.LogInformation("Generating thumbnails of associated images of slide {ID}...", parentSlideId);
+            logger.LogInformation("Generating thumbnails of associated images of slide {ID}...", slideId);
             foreach (var image in associated)
             {
                 var thumb = image.Value.GetThumbnail(new Size(400, 400));
-                thumb.Save($@"{AppDirectories.AssociatedImagesThumbs}{parentSlideId}_{image.Key}.jpeg", ImageFormat.Jpeg);
+                thumb.Save($@"{AppDirectories.AssociatedImagesThumbs}{slideId}_{image.Key}.jpeg", ImageFormat.Jpeg);
             }
         }
 

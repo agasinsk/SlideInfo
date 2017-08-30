@@ -86,7 +86,7 @@ namespace SlideInfo.App.Controllers
                 : slides.OrderBy(e => EF.Property<object>(e, sortOrder));
 
             var finalSlides = await slides.AsNoTracking().ToListAsync();
-            GetSlideThumbnails(finalSlides);
+            GenerateSlideThumbnails(finalSlides);
             return View(finalSlides);
         }
 
@@ -226,7 +226,7 @@ namespace SlideInfo.App.Controllers
 
             var associated = osr.ReadAssociatedImages();
 
-            GetAssociatedImagesThumbnails(id.Value, associated);
+            GenerateAssociatedImagesThumbnails(id.Value, associated);
 
             var viewModel = new AssociatedImagesViewModel(slide.Name, associated);
 

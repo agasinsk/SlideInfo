@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +11,8 @@ using SlideInfo.App.Data;
 using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.ManageViewModels;
-using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Services;
-using static SlideInfo.App.Helpers.ViewDataConstants;
+using static SlideInfo.App.Constants.ViewDataConstants;
 
 namespace SlideInfo.App.Controllers
 {
@@ -129,7 +126,7 @@ namespace SlideInfo.App.Controllers
             logger.LogInformation("Getting comments of user {ID}", user.Id);
 
             var comments = context.Comments.Where(c => c.AppUserId == user.Id);
-              
+
 
             //filtering
             if (!String.IsNullOrEmpty(searchString))
