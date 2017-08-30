@@ -1,4 +1,4 @@
-﻿namespace SlideInfo.App.Helpers
+﻿namespace SlideInfo.App.Constants
 {
     public static class SessionConstants
     {

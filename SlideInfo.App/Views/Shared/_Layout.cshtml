@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+﻿@using SlideInfo.App.Constants
 @using SlideInfo.App.Helpers
 @inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
 @inject SignInManager<AppUser> SignInManager
@@ -73,7 +73,7 @@
                                     </li>
                                 }
                                 <li>
-                                    <a href="#" onclick="showCommentForm()">
+                                    <a href="#" onclick="showCommentSubmitForm()">
                                         Add new comment
                                     </a>
                                 </li>
@@ -145,7 +145,7 @@
 
     });
 
-    function showCommentForm() {
+    function showCommentSubmitForm() {
         document.getElementById("commentSideForm").style.width = "300px";
         if (!document.getElementById("displayContainer")) {
             document.getElementById("main").style.paddingLeft = "315px";

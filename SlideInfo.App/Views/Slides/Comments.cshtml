@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Http
-@using SlideInfo.App.Helpers
+@using SlideInfo.App.Constants
 @model SlideInfo.App.Models.SlideViewModels.CommentsViewModel
 
 @{
@@ -15,7 +15,7 @@
     @if (Model.Comments != null)
     {
         <form asp-action="Comments" method="get">
-            <div class="form-inline no-color">
+            <div class="form-inline">
                 <p>
                     <input type="text" name="searchString" class="form-control" placeholder="Find comment..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]" />
                     <input type="submit" value="Search" class="btn btn-success" />
@@ -23,7 +23,7 @@
                     {
                         <a asp-action="Comments" class="btn btn-default" role="button">Refresh</a>
                     }
-                    <a href="#" onclick="showCommentForm()">
+                    <a href="#" onclick="showCommentSubmitForm()">
                         <span class="btn btn-default">Add new comment</span>
                     </a>
                 </p>

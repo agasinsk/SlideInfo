@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace SlideInfo.App.Helpers
+﻿namespace SlideInfo.App.Constants
 {
     public static class ViewDataConstants
     {
