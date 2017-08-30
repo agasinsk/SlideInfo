@@ -19,7 +19,7 @@
             <div class="form-inline no-color">
                 <p>
                     <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]" />
-                    <input type="submit" value="Search" class="btn btn-success" />
+                    <input type="submit" value="Search" class="btn btn-success green-button" />
                     @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
                     {
                         <a asp-action="Properties" class="btn btn-default" role="button">Refresh</a>
