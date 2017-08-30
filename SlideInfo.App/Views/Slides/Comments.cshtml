@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Http
-@using SlideInfo.App.Helpers
+@using SlideInfo.App.Constants
 @model SlideInfo.App.Models.SlideViewModels.CommentsViewModel
 
 @{
@@ -23,7 +23,7 @@
                     {
                         <a asp-action="Comments" class="btn btn-default" role="button">Refresh</a>
                     }
-                    <a href="#" onclick="showCommentForm()">
+                    <a href="#" onclick="showCommentSubmitForm()">
                         <span class="btn btn-default">Add new comment</span>
                     </a>
                 </p>

@@ -10,13 +10,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SlideInfo.App.Constants;
 using SlideInfo.App.Data;
 using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Repositories;
 using SlideInfo.Core;
-using static SlideInfo.App.Helpers.ViewDataConstants;
+using static SlideInfo.App.Constants.ViewDataConstants;
 
 namespace SlideInfo.App.Controllers
 {
