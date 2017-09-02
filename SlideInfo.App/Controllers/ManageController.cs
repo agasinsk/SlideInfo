@@ -181,17 +181,13 @@ namespace SlideInfo.App.Controllers
             var user = await GetCurrentUserAsync();
             if (user != null)
             {
-                //doing a quick swap so we can send the appropriate confirmation email
-                user.UnconfirmedEmail = user.Email;
-                user.Email = model.NewEmail;
-                user.EmailConfirmed = false;
+                user.UnconfirmedEmail = model.NewEmail;
                 var result = await userManager.UpdateAsync(user);
-
                 if (result.Succeeded)
                 {
-                    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var callbackUrl = Url.Action("ConfirmEmail", "Manage",
-                        new { userId = user.Id, code = token }, protocol: HttpContext.Request.Scheme);
+                    var tokenForNewEmail = await userManager.GenerateChangeEmailTokenAsync(user, user.UnconfirmedEmail);
+                    var callbackUrl = Url.Action("UpdateEmail", "Manage",
+                        new { userId = user.Id, code = tokenForNewEmail }, protocol: HttpContext.Request.Scheme);
                     var confirmationEmailBody =
                         MessageConstants.ConfirmationEmailBodyTemplate.Replace("callbackUrl", callbackUrl);
                     await emailSender.SendEmailAsync(model.NewEmail, "Confirm your account", confirmationEmailBody);
@@ -199,53 +195,38 @@ namespace SlideInfo.App.Controllers
                     logger.LogInformation(3, "User was sent a new confirmation link.");
                     return View("ConfirmationEmailSent");
                 }
+
             }
             new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
             return RedirectToAction(nameof(Index));
         }
 
 
-        public async Task<ActionResult> ConfirmEmail(string userId, string code)
+        public async Task<ActionResult> UpdateEmail(string userId, string code)
         {
-            if (userId == null || code == null)
+            if (userId != null && code != null)
             {
-                return View("Error");
-            }
-            var user = await userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return View("Error");
-            }
-            var result = await userManager.ChangeEmailAsync(user, user.UnconfirmedEmail, code);
-            if (result.Succeeded)
-            {
-                if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
+                var user = await userManager.FindByIdAsync(userId);
+                if (user != null)
                 {
-                    user.UserName = user.UnconfirmedEmail;
-                    user.UnconfirmedEmail = "";
+                    var result = await userManager.ChangeEmailAsync(user, user.UnconfirmedEmail, code);
+                    if (result.Succeeded)
+                    {
+                        if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
+                        {
+                            user.Email = user.UnconfirmedEmail;
+                            user.UserName = user.Email;
+                            user.UnconfirmedEmail = "";
 
-                    await userManager.UpdateAsync(user);
+                            await userManager.UpdateAsync(user);
+                        }
+                        await signInManager.SignOutAsync();
+                        return View("EmailConfirmed");
+                    }
                 }
             }
-            return RedirectToAction("Index", "Manage");
-        }
-
-        public async Task<ActionResult> CancelUnconfirmedEmail(string email)
-        {
-            var user = await userManager.FindByEmailAsync(email);
-
-            if (user != null)
-            {
-                user.UnconfirmedEmail = "";
-                user.EmailConfirmed = true;
-                await userManager.UpdateAsync(user);
-            }
-            else
-            {
-                return View("Error");
-            }
-
-            return RedirectToAction("Index", "Manage");
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]

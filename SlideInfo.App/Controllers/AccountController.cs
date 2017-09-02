@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SlideInfo.App.Constants;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.AccountViewModels;
 using SlideInfo.App.Services;
@@ -261,18 +260,7 @@ namespace SlideInfo.App.Controllers
                 return View("Error");
             }
             var result = await userManager.ConfirmEmailAsync(user, code);
-            if (result.Succeeded)
-            {
-                if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
-                {
-                    user.Email = user.UnconfirmedEmail;
-                    user.UserName = user.UnconfirmedEmail;
-                    user.UnconfirmedEmail = "";
-
-                    await userManager.UpdateAsync(user);
-                }
-            }
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
+            return View(result.Succeeded ? "EmailConfirmed" : "Error");
         }
 
         //

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
+using SlideInfo.App.Constants;
 
 namespace SlideInfo.App.Services
 {
@@ -20,9 +21,9 @@ namespace SlideInfo.App.Services
                 {
                     using (var client = new SmtpClient())
                     {
-                        await client.ConnectAsync(MessageConstants.EMAIL_HOST, MessageConstants.EMAIL_PORT,
+                        await client.ConnectAsync(MessageConstants.EmailHost, MessageConstants.EmailPort,
                             secureSocketOptions).ConfigureAwait(false);
-                        await client.AuthenticateAsync(MessageConstants.EMAIL_USERNAME, MessageConstants.EMAIL_PASSWORD);
+                        await client.AuthenticateAsync(MessageConstants.EmailUsername, MessageConstants.EmailPassword);
                         await client.SendAsync(message).ConfigureAwait(false);
                         await client.DisconnectAsync(true).ConfigureAwait(false);
                         return;
@@ -68,9 +69,9 @@ namespace SlideInfo.App.Services
                 {
                     using (var client = new SmtpClient())
                     {
-                        await client.ConnectAsync(MessageConstants.EMAIL_HOST, MessageConstants.EMAIL_PORT,
+                        await client.ConnectAsync(MessageConstants.EmailHost, MessageConstants.EmailPort,
                                 secureSocketOptions).ConfigureAwait(false);
-                        await client.AuthenticateAsync(MessageConstants.EMAIL_USERNAME, MessageConstants.EMAIL_PASSWORD);
+                        await client.AuthenticateAsync(MessageConstants.EmailUsername, MessageConstants.EmailPassword);
                         await client.SendAsync(message).ConfigureAwait(false);
                         await client.DisconnectAsync(true).ConfigureAwait(false);
                         return;
@@ -92,8 +93,8 @@ namespace SlideInfo.App.Services
         {
             var message = new MimeMessage();
 
-            var fromMailboxAddress = new MailboxAddress(MessageConstants.APP_NAME,
-                MessageConstants.APP_EMAIL);
+            var fromMailboxAddress = new MailboxAddress(MessageConstants.AppName,
+                MessageConstants.AppEmail);
             message.From.Add(fromMailboxAddress);
 
             var toMailboxAdress = new MailboxAddress(toName, toEmailAddress);
@@ -117,10 +118,10 @@ namespace SlideInfo.App.Services
                 {
                     using (var client = new SmtpClient())
                     {
-                        await client.ConnectAsync(MessageConstants.EMAIL_HOST, MessageConstants.EMAIL_PORT,
+                        await client.ConnectAsync(MessageConstants.EmailHost, MessageConstants.EmailPort,
                                 secureSocketOptions)
                             .ConfigureAwait(false);
-                        await client.AuthenticateAsync(MessageConstants.EMAIL_USERNAME, MessageConstants.EMAIL_PASSWORD);
+                        await client.AuthenticateAsync(MessageConstants.EmailUsername, MessageConstants.EmailPassword);
                         await client.SendAsync(message).ConfigureAwait(false);
                         await client.DisconnectAsync(true).ConfigureAwait(false);
                         return;
@@ -141,8 +142,8 @@ namespace SlideInfo.App.Services
         {
             var message = new MimeMessage();
 
-            var fromMailboxAddress = new MailboxAddress(MessageConstants.APP_NAME,
-                MessageConstants.APP_EMAIL);
+            var fromMailboxAddress = new MailboxAddress(MessageConstants.AppName,
+                MessageConstants.AppEmail);
             message.From.Add(fromMailboxAddress);
 
             var toMailboxAdress = new MailboxAddress(toEmailAddress);
