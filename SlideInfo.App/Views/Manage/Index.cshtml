@@ -1,6 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Http
 @using SlideInfo.App.Constants
-@using SlideInfo.App.Helpers
 @model IndexViewModel
 @{
     ViewData["Title"] = "Manage your account";
@@ -16,34 +15,49 @@
 <div>
     <h4>Change your account settings</h4>
     <hr />
-    <dl class="dl-horizontal">
-        <dt>Name: </dt>
-        <dd>
-            @Model.FullName
-            <a asp-controller="Manage" asp-action="ChangeName" class="btn-bracketed">Change</a>
 
-        </dd>
-      
-        <dt>Password:</dt>
-        <dd>
-            @if (Model.HasPassword)
-            {
-                <a asp-controller="Manage" asp-action="ChangePassword" class="btn-bracketed">Change</a>
-            }
-            else
-            {
-                <a asp-controller="Manage" asp-action="SetPassword" class="btn-bracketed">Create</a>
-            }
-        </dd>
-        <dt>External Logins:</dt>
-        <dd>
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-md-2 control-label">Name</label>
+            <div class="col-md-2">
+                <input class="form-control" value="@Model.FullName" readonly />
+            </div>
+            <div class="col-md-4">
+                <a asp-controller="Manage" asp-action="ChangeName" class="btn btn-success green-button">Change</a>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label">Password</label>
+            <div class="col-md-10">
+                @if (Model.HasPassword)
+                {
+                    <a asp-controller="Manage" asp-action="ChangePassword" class="btn btn-success green-button">Change</a>
+                }
+                else
+                {
+                    <a asp-controller="Manage" asp-action="SetPassword" class="btn btn-success green-button">Create</a>
+                }
+            </div>
+        </div>
 
-            @Model.Logins.Count <a asp-controller="Manage" asp-action="ManageLogins" class="btn-bracketed">Manage</a>
-        </dd>
-        <dt>Your comments:</dt>
-        <dd>
-            @Model.CommentsCount 
-            <a asp-controller="Manage" asp-action="Comments" class="btn-bracketed">Show</a>
-        </dd>
-    </dl>
+        <div class="form-group">
+            <label class="col-md-2 control-label">External Logins</label>
+            <div class="col-md-10">
+                <h4 style="display: inline;">
+                    <span class="badge">@Model.Logins.Count</span>
+                </h4>
+                <a asp-controller="Manage" asp-action="ManageLogins" class="btn btn-success green-button">Manage</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">Your comments</label>
+            <div class="col-md-10">
+                <h4 style="display: inline;">
+                    <span class="badge">@Model.CommentsCount</span>
+                </h4>
+                <a asp-controller="Manage" asp-action="Comments" class="btn btn-success green-button">Show</a>
+            </div>
+        </div>
+    </div>
 </div>
