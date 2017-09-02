@@ -6,10 +6,10 @@
 @{
     ViewData["Title"] = "Comments | " + Model.Name;
 }
-@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+@if (Context.Session.GetString(SessionConstants.Alert) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
-    Context.Session.Remove(SessionConstants.ALERT);
+    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
+    Context.Session.Remove(SessionConstants.Alert);
 }
 <div class="container-fluid" id="comments">
     <h2>@Model.Name comments</h2>

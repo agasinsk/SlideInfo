@@ -60,7 +60,7 @@ namespace SlideInfo.App.Controllers
             try
             {
                 logger.LogInformation("Getting {slug}.dzi metadata...", slug);
-                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE) ?? slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CurrentSlide) ?? slideRepository.Get(m => m.Url == slug).FirstOrDefault();
 
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
@@ -72,7 +72,7 @@ namespace SlideInfo.App.Controllers
             catch (Exception)
             {
                 logger.LogError("Error while getting {slug}.dzi", slug);
-                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.NO_ACCESS);
+                HttpContext.Session.SetString(SessionConstants.Alert, SessionConstants.NoAccess);
             }
             return "";
         }
@@ -84,7 +84,7 @@ namespace SlideInfo.App.Controllers
             {
                 logger.LogInformation("Getting tile: {level}, col: {col}, row: {row}", level, col, row);
 
-                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE) ?? slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CurrentSlide) ?? slideRepository.Get(m => m.Url == slug).FirstOrDefault();
 
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
@@ -103,7 +103,7 @@ namespace SlideInfo.App.Controllers
             catch (OpenSlideException)
             {
                 logger.LogError("Error while getting tile lev: {level}, col: {col}, row: {row}", level, col, row);
-                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.CANT_LOAD);
+                HttpContext.Session.SetString(SessionConstants.Alert, SessionConstants.CantLoadData);
             }
             return new FileContentResult(new byte[] { }, "");
         }
@@ -141,7 +141,7 @@ namespace SlideInfo.App.Controllers
             catch (Exception)
             {
                 logger.LogError("Error while getting {slug}.dzi", imageName);
-                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.NO_ACCESS);
+                HttpContext.Session.SetString(SessionConstants.Alert, SessionConstants.NoAccess);
             }
             return "";
         }
@@ -171,7 +171,7 @@ namespace SlideInfo.App.Controllers
             catch (OpenSlideException)
             {
                 logger.LogError("Error while getting tile | lev: {level}, col: {col}, row: {row}", level, col, row);
-                HttpContext.Session.SetString(SessionConstants.ALERT, SessionConstants.CANT_LOAD);
+                HttpContext.Session.SetString(SessionConstants.Alert, SessionConstants.CantLoadData);
             }
             return new FileContentResult(new byte[] { }, "");
         }

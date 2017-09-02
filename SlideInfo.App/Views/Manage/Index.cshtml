@@ -8,10 +8,10 @@
 
 <h2>@ViewData["Title"]</h2>
 <p class="text-success">@ViewData["StatusMessage"]</p>
-@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+@if (Context.Session.GetString(SessionConstants.Alert) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
-    Context.Session.Remove(SessionConstants.ALERT);
+    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
+    Context.Session.Remove(SessionConstants.Alert);
 }
 <div>
     <h4>Change your account settings</h4>

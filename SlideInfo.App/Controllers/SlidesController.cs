@@ -108,7 +108,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            HttpContext.Session.Set(SessionConstants.CURRENT_SLIDE, slide);
+            HttpContext.Session.Set(SessionConstants.CurrentSlide, slide);
             ViewData[SLIDE_ID] = slide.Id.ToString();
             HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
