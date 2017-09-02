@@ -190,7 +190,7 @@ namespace SlideInfo.App.Controllers
                         new { userId = user.Id, code = tokenForNewEmail }, protocol: HttpContext.Request.Scheme);
                     var confirmationEmailBody =
                         MessageConstants.ConfirmationEmailBodyTemplate.Replace("callbackUrl", callbackUrl);
-                    await emailSender.SendEmailAsync(model.NewEmail, "Confirm your account", confirmationEmailBody);
+                    await emailSender.SendEmailAsync(model.NewEmail, "Confirm your new email", confirmationEmailBody);
 
                     logger.LogInformation(3, "User was sent a new confirmation link.");
                     return View("ConfirmationEmailSent");

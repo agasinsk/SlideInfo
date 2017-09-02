@@ -20,5 +20,12 @@
                 "<br/><br/> Best regards, <br/> SlideInfo"
             ;
 
+        public static string ResetPasswordEmailBodyTemplate =
+                "This is SlideInfo, <br/> " +
+                "<br/>please reset your password by clicking this link: <a href = 'callbackUrl'>reset password</a>." +
+                "<br/><br/> If you can't click the link, copy and paste this to the adress bar: callbackUrl . " +
+                "<br/><br/> Best regards, <br/> SlideInfo"
+            ;
+        
     }
 }
