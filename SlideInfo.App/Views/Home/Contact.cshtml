@@ -7,10 +7,10 @@
 @{
     ViewData["Title"] = "Contact";
 }
-@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+@if (Context.Session.GetString(SessionConstants.Alert) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
-    Context.Session.Remove(SessionConstants.ALERT);
+    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
+    Context.Session.Remove(SessionConstants.Alert);
 }
 <h2>@ViewData["Title"]</h2>
 <dl>
@@ -75,7 +75,7 @@
         </div>
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Send" class="btn btn-default" />
+                <input type="submit" value="Send" class="btn btn-success green-button" />
             </div>
         </div>
     </div>

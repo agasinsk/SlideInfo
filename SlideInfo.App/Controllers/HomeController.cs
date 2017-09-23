@@ -54,7 +54,7 @@ namespace SlideInfo.App.Controllers
         {
             try
             {
-                EmailSender.SendEmailAsync(contactForm.Email, MessageConstants.APP_EMAIL, contactForm.Subject.GetDisplayName(), contactForm.Message);
+                EmailSender.SendEmailAsync(contactForm.Email, MessageConstants.AppEmail, contactForm.Subject.GetDisplayName(), contactForm.Message);
 
                 new AlertFactory(HttpContext).CreateAlert(AlertType.Success, ViewDataConstants.EMAIL_SENT);
             }

@@ -6,10 +6,10 @@
 @{
     ViewData["Title"] = "Properties | " + Model.Name;
 }
-@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+@if (Context.Session.GetString(SessionConstants.Alert) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
-    Context.Session.Remove(SessionConstants.ALERT);
+    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
+    Context.Session.Remove(SessionConstants.Alert);
 }
 <div class="container" id="properties">
     <h2>@Model.Name properties</h2>
@@ -19,7 +19,7 @@
             <div class="form-inline no-color">
                 <p>
                     <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]" />
-                    <input type="submit" value="Search" class="btn btn-success" />
+                    <input type="submit" value="Search" class="btn btn-success green-button" />
                     @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
                     {
                         <a asp-action="Properties" class="btn btn-default" role="button">Refresh</a>

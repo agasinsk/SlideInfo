@@ -4,40 +4,42 @@
 @{
     ViewData["Title"] = "Home";
 }
-@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+@if (Context.Session.GetString(SessionConstants.Alert) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
-    Context.Session.Remove(SessionConstants.ALERT);
+    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
+    Context.Session.Remove(SessionConstants.Alert);
 }
 <div class="jumbotron">
     <div class="row">
-        <div class="col-sm-3"><img class="img-responsive" src="images/SlideInfoLogo.png" alt="Slide Info Logo" height="250"> </div>
-        <div class="col-sm-6"><h1 align="right">SlideInfo</h1></div>
+        <div class="col-sm-2">
+            <img class="img-responsive" src="images/rounded-info-button.svg" alt="Slide Info Logo">
+        </div>
+        <div class="col-sm-10">
+            <div class="page-header"><h1>SlideInfo <small>Whole-slide images organizer</small></h1></div>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-3">
         <h2>About the project</h2>
-        <p>
-            SlideInfo is a engineering degree project.
-        </p>
-        <p>Artur Gasiński | 218685</p>
-  
+        <p>SlideInfo is a diploma thesis project at Wroclaw University of Technology.</p>
+        <p>Developed by Artur Gasiński.</p>
+
     </div>
     <div class="col-md-3">
         <h2>Browse whole-slide images</h2>
         <p>Not only this app allows you to browse the slides, but also their metadata and associated images!</p>
-        <p><a class="btn btn-default" asp-controller="Slides" asp-action="Index">Browse slides &raquo;</a></p>
+        <p><a class="btn btn-success green-button" asp-controller="Slides" asp-action="Index">Browse slides &raquo;</a></p>
     </div>
     <div class="col-md-3">
         <h2>Share what you think</h2>
         <p>You can leave comments about your observations of the slides directly on the page or you can contact - email or message - the other users as well!</p>
-        <p><a class="btn btn-default" asp-controller="Account" asp-action="Login">Login &raquo;</a></p>
+        <p><a class="btn btn-success green-button" asp-controller="Account" asp-action="Login">Login &raquo;</a></p>
     </div>
     <div class="col-md-3">
         <h2>Register</h2>
         <p>Register now to access the community!</p>
-        <p><a class="btn btn-default" asp-controller="Account" asp-action="Register">Register! &raquo;</a></p>
+        <p><a class="btn btn-success green-button" asp-controller="Account" asp-action="Register">Register! &raquo;</a></p>
     </div>
 </div>

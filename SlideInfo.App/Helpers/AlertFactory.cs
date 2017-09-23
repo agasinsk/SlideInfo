@@ -15,14 +15,14 @@ namespace SlideInfo.App.Helpers
         public void CreateAlert(AlertType alertType, string alertContent)
         {
             var alertTemplate = GetAlertTemplate(alertType, alertContent);
-            httpContext.Session.SetString(SessionConstants.ALERT, alertTemplate);
+            httpContext.Session.SetString(SessionConstants.Alert, alertTemplate);
         }
 
         public static string GetAlertTemplate(AlertType alertType, string alertContent)
         {
             var htmlAlertType = GetAlertType(alertType);
             var htmlAlertTitle = GetAlertTitle(alertType);
-            var alert = SessionConstants.ALERT_TEMPLATE.Replace("alert-type", htmlAlertType)
+            var alert = SessionConstants.AlertTemplate.Replace("alert-type", htmlAlertType)
                 .Replace("alert-title", htmlAlertTitle).Replace("alert-content", alertContent);
             return alert;
         }

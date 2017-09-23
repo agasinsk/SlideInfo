@@ -1,0 +1,48 @@
+﻿@model ChangeNameViewModel
+@{
+    ViewData["Title"] = "Change Name";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-controller="Manage" asp-action="ChangeName" method="post" class="form-horizontal">
+    <hr />
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="OldFirstName" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <input asp-for="OldFirstName" class="form-control" value="@Model.OldFirstName" readonly/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewFirstName" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <input asp-for="NewFirstName" class="form-control" />
+            <span asp-validation-for="NewFirstName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="OldLastName" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <input asp-for="OldLastName" class="form-control" value="@Model.OldLastName" readonly/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="NewLastName" class="col-md-2 control-label"></label>
+        <div class="col-md-10">
+            <input asp-for="NewLastName" class="form-control" />
+            <span asp-validation-for="NewLastName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-success green-button">Change name</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SlideInfo.App.Constants;
+using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.AccountViewModels;
 using SlideInfo.App.Services;
@@ -62,15 +62,28 @@ namespace SlideInfo.App.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            var allowPassOnEmailVerfication = false;
+            var user = await userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                if (!string.IsNullOrWhiteSpace(user.UnconfirmedEmail))
+                {
+                    allowPassOnEmailVerfication = true;
+                }
+            }
             if (ModelState.IsValid)
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     logger.LogInformation(1, "User logged in.");
                     return RedirectToLocal(returnUrl);
+                }
+                if (result.IsNotAllowed)
+                {
+                    return allowPassOnEmailVerfication ? RedirectToLocal(returnUrl) : RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
                 }
                 if (result.RequiresTwoFactor)
                 {
@@ -248,7 +261,7 @@ namespace SlideInfo.App.Controllers
                 return View("Error");
             }
             var result = await userManager.ConfirmEmailAsync(user, code);
-            return View(result.Succeeded ? "ConfirmEmail" : "Error");
+            return View(result.Succeeded ? "EmailConfirmed" : "Error");
         }
 
         //
@@ -272,20 +285,17 @@ namespace SlideInfo.App.Controllers
                 var user = await userManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
                     return View("ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
-                // Send an email with this link
                 var code = await userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
-                await emailSender.SendEmailAsync(model.Email, "Reset Password",
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+                var resetPasswordEmailBody = MessageConstants.ResetPasswordEmailBodyTemplate.Replace("callbackUrl", callbackUrl);
+                await emailSender.SendEmailAsync(model.Email, "Reset Password", resetPasswordEmailBody);
                 return View("ForgotPasswordConfirmation");
             }
 
-            // If we got this far, something failed, redisplay form
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
             return View(model);
         }
 

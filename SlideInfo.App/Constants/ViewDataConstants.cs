@@ -2,6 +2,7 @@
 {
     public static class ViewDataConstants
     {
+
         public const string APP_EMAIL = "slide.info.pwr@gmail.com";
         public const string EMAIL_SENT = "Your email was sent succesfully";
         public const string EMAIL_ERROR = "There was an error when sending your email";
@@ -20,6 +21,7 @@
         public const string SIZE_SORT_PARAM = "SizeSortParm";
         public const string WIDTH_SORT_PARAM = "WidthSortParm";
         public const string HEIGHT_SORT_PARAM = "HeightSortParm";
+        public const string SLIDE_SORT_PARAM = "SlideSortParm";
 
         public const string DATE_SORT_PARAM = "DateSortParam";
         public const string USER_SORT_PARAM = "UserSortParam";
