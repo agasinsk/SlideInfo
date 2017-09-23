@@ -8,10 +8,10 @@
 @{
     ViewData["Title"] = "Associated Images | " + Model.Name;
 }
-@if (Context.Session.GetString(SessionConstants.Alert) != null)
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
-    Context.Session.Remove(SessionConstants.Alert);
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
 }
 <div id="images">
 

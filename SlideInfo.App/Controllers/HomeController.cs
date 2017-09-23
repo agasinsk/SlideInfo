@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using SlideInfo.App.Constants;
 using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
@@ -16,7 +13,7 @@ namespace SlideInfo.App.Controllers
     public class HomeController : Controller
     {
         private readonly SignInManager<AppUser> signInManager;
-        private UserManager<AppUser> userManager;
+        private readonly UserManager<AppUser> userManager;
 
         public HomeController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
@@ -56,11 +53,11 @@ namespace SlideInfo.App.Controllers
             {
                 EmailSender.SendEmailAsync(contactForm.Email, MessageConstants.AppEmail, contactForm.Subject.GetDisplayName(), contactForm.Message);
 
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, ViewDataConstants.EMAIL_SENT);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, ViewConstants.EMAIL_SENT);
             }
             catch (Exception)
             {
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, ViewDataConstants.EMAIL_ERROR);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, ViewConstants.EMAIL_ERROR);
             }
 
             return RedirectToAction("Contact", "Home");

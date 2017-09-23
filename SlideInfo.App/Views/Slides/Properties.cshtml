@@ -6,10 +6,10 @@
 @{
     ViewData["Title"] = "Properties | " + Model.Name;
 }
-@if (Context.Session.GetString(SessionConstants.Alert) != null)
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
-    Context.Session.Remove(SessionConstants.Alert);
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
 }
 <div class="container" id="properties">
     <h2>@Model.Name properties</h2>
@@ -18,9 +18,9 @@
         <form asp-action="Properties" method="get">
             <div class="form-inline no-color">
                 <p>
-                    <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewDataConstants.CURRENT_FILTER]" />
+                    <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewConstants.CURRENT_FILTER]" />
                     <input type="submit" value="Search" class="btn btn-success green-button" />
-                    @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
+                    @if (ViewData[ViewConstants.CURRENT_FILTER] != null)
                     {
                         <a asp-action="Properties" class="btn btn-default" role="button">Refresh</a>
                     }
@@ -31,9 +31,9 @@
             <thead>
                 <tr>
                     <th class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
-                        <a asp-action="Properties" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">
+                        <a asp-action="Properties" asp-route-sortOrder="@ViewData[ViewConstants.NAME_SORT_PARAM]">
                             Property
-                            <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.NAME_SORT_PARAM])"></i>
+                            <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewConstants.NAME_SORT_PARAM])"></i>
                         </a>
                     </th>
                     <th>
@@ -57,16 +57,16 @@
 
 
         <a asp-action="Properties"
-           asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
+           asp-route-sortOrder="@ViewData[ViewConstants.CURRENT_SORT]"
            asp-route-page="@(Model.Properties.PageIndex - 1)"
-           asp-route-currentFilter="@ViewData[ViewDataConstants.CURRENT_FILTER]"
+           asp-route-currentFilter="@ViewData[ViewConstants.CURRENT_FILTER]"
            class="btn btn-default @prevDisabled">
             Previous
         </a>
         <a asp-action="Properties"
-           asp-route-sortOrder="@ViewData[ViewDataConstants.CURRENT_SORT]"
+           asp-route-sortOrder="@ViewData[ViewConstants.CURRENT_SORT]"
            asp-route-page="@(Model.Properties.PageIndex + 1)"
-           asp-route-currentFilter="@ViewData[ViewDataConstants.CURRENT_FILTER]"
+           asp-route-currentFilter="@ViewData[ViewConstants.CURRENT_FILTER]"
            class="btn btn-default @nextDisabled">
             Next
         </a>

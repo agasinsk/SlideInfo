@@ -41,18 +41,6 @@
     <EmbeddedResource Remove="Views\Manage - Copy\**" />
     <None Remove="Views\Manage - Copy\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="wwwroot\js\jquery.js">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="wwwroot\js\openseadragon-scalebar.js">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Include="wwwroot\js\openseadragon.js">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.1.3" />
     <PackageReference Include="MailKit" Version="1.16.2" />

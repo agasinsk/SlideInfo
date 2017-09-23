@@ -6,10 +6,10 @@
 @{
     ViewData["Title"] = "Slides";
 }
-@if (Context.Session.GetString(SessionConstants.Alert) != null)
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
-    Context.Session.Remove(SessionConstants.Alert);
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
 }
 <h2>Whole-slide images</h2>
 
@@ -22,27 +22,27 @@
         </button>
         <ul class="dropdown-menu">
             <li>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.NAME_SORT_PARAM]">Name <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.NAME_SORT_PARAM])"></i></a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewConstants.NAME_SORT_PARAM]">Name <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewConstants.NAME_SORT_PARAM])"></i></a>
             </li>
             <li>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.VENDOR_SORT_PARAM]">Vendor <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.VENDOR_SORT_PARAM])"></i></a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewConstants.VENDOR_SORT_PARAM]">Vendor <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewConstants.VENDOR_SORT_PARAM])"></i></a>
             </li>
             <li>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.WIDTH_SORT_PARAM]">Width <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.WIDTH_SORT_PARAM])"></i></a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewConstants.WIDTH_SORT_PARAM]">Width <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewConstants.WIDTH_SORT_PARAM])"></i></a>
             </li>
             <li>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM]">Height <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewDataConstants.HEIGHT_SORT_PARAM])"></i></a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData[ViewConstants.HEIGHT_SORT_PARAM]">Height <i class="glyphicon @Html.IsSortedDesc(@ViewData[ViewConstants.HEIGHT_SORT_PARAM])"></i></a>
             </li>
         </ul>
     </div>
     <a asp-action="Update" class="btn btn-default">Rescan slides</a>
 
     <form class="form-inline div-inline-right pull-right" asp-action="Index" method="get">
-        @if (ViewData[ViewDataConstants.CURRENT_FILTER] != null)
+        @if (ViewData[ViewConstants.CURRENT_FILTER] != null)
         {
             <a asp-action="Index" class="btn btn-default" role="button">Refresh</a>
         }
-        <input type="text" class="form-control" placeholder="Find slide..." name="searchString" value="@ViewData[ViewDataConstants.CURRENT_FILTER]">
+        <input type="text" class="form-control" placeholder="Find slide..." name="searchString" value="@ViewData[ViewConstants.CURRENT_FILTER]">
         <input type="submit" value="Search" class="btn btn-success green-button" />
     </form>
 </div>

@@ -4,10 +4,10 @@
 @{
     ViewData["Title"] = "Home";
 }
-@if (Context.Session.GetString(SessionConstants.Alert) != null)
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
-    Context.Session.Remove(SessionConstants.Alert);
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
 }
 <div class="jumbotron">
     <div class="row">
@@ -24,7 +24,7 @@
     <div class="col-md-3">
         <h2>About the project</h2>
         <p>SlideInfo is a diploma thesis project at Wroclaw University of Technology.</p>
-        <p>Developed by Artur Gasiński.</p>
+        <a class="btn btn-success green-button" href="http://www.linkedin.com/in/artur-gasinski">Developed by Artur Gasiński &raquo;</a>
 
     </div>
     <div class="col-md-3">
@@ -34,7 +34,7 @@
     </div>
     <div class="col-md-3">
         <h2>Share what you think</h2>
-        <p>You can leave comments about your observations of the slides directly on the page or you can contact - email or message - the other users as well!</p>
+        <p>You can leave comments about your observations of the slides directly on the page or you can contact the other users as well!</p>
         <p><a class="btn btn-success green-button" asp-controller="Account" asp-action="Login">Login &raquo;</a></p>
     </div>
     <div class="col-md-3">

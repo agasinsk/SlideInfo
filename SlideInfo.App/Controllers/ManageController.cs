@@ -14,7 +14,7 @@ using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.ManageViewModels;
 using SlideInfo.App.Services;
-using static SlideInfo.App.Constants.ViewDataConstants;
+using static SlideInfo.App.Constants.ViewConstants;
 
 namespace SlideInfo.App.Controllers
 {
@@ -26,7 +26,6 @@ namespace SlideInfo.App.Controllers
         private readonly SlideInfoDbContext context;
         private readonly string externalCookieScheme;
         private readonly IEmailSender emailSender;
-        private readonly ISmsSender smsSender;
         private readonly ILogger logger;
 
         public ManageController(
@@ -42,7 +41,6 @@ namespace SlideInfo.App.Controllers
             this.signInManager = signInManager;
             externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
             this.emailSender = emailSender;
-            this.smsSender = smsSender;
             this.context = context;
             logger = loggerFactory.CreateLogger<ManageController>();
         }
@@ -85,12 +83,12 @@ namespace SlideInfo.App.Controllers
                 {
                     await signInManager.SignInAsync(user, isPersistent: false);
 
-                    new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.RemoveLoginSuccess);
+                    new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.REMOVE_LOGIN_SUCCESS);
                 }
             }
             else
             {
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             }
             return RedirectToAction(nameof(ManageLogins));
         }
@@ -197,7 +195,7 @@ namespace SlideInfo.App.Controllers
                 }
 
             }
-            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             return RedirectToAction(nameof(Index));
         }
 
@@ -225,7 +223,7 @@ namespace SlideInfo.App.Controllers
                     }
                 }
             }
-            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             return RedirectToAction(nameof(Index));
         }
 
@@ -255,7 +253,7 @@ namespace SlideInfo.App.Controllers
 
             if (user == null)
             {
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
                 return RedirectToAction(nameof(Index));
             }
 
@@ -273,7 +271,7 @@ namespace SlideInfo.App.Controllers
             {
                 await signInManager.SignInAsync(user, isPersistent: false);
                 logger.LogInformation(3, "User changed their name successfully.");
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.ChangeNameSuccess);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.CHANGE_NAME_SUCCESS);
                 return RedirectToAction(nameof(Index));
             }
             AddErrors(result);
@@ -305,13 +303,13 @@ namespace SlideInfo.App.Controllers
                 {
                     await signInManager.SignInAsync(user, isPersistent: false);
                     logger.LogInformation(3, "User changed their password successfully.");
-                    new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.ChangePasswordSuccess);
+                    new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.CHANGE_PASSWORD_SUCCESS);
                     return RedirectToAction(nameof(Index));
                 }
                 AddErrors(result);
                 return View(model);
             }
-            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             return RedirectToAction(nameof(Index));
         }
 
@@ -342,13 +340,13 @@ namespace SlideInfo.App.Controllers
                 {
                     await signInManager.SignInAsync(user, isPersistent: false);
 
-                    new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.SetPasswordSuccess);
+                    new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.SET_PASSWORD_SUCCESS);
                     return RedirectToAction(nameof(Index));
                 }
                 AddErrors(result);
                 return View(model);
             }
-            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             return RedirectToAction(nameof(Index));
         }
 
@@ -399,20 +397,20 @@ namespace SlideInfo.App.Controllers
             var info = await signInManager.GetExternalLoginInfoAsync(await userManager.GetUserIdAsync(user));
             if (info == null)
             {
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
                 return RedirectToAction(nameof(ManageLogins));
             }
             var result = await userManager.AddLoginAsync(user, info);
             if (result.Succeeded)
             {
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.AddLoginSuccess);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Success, SessionConstants.ADD_LOGIN_SUCCESS);
                 // Clear the existing external cookie to ensure a clean login process
                 await HttpContext.Authentication.SignOutAsync(externalCookieScheme);
 
             }
             else
             {
-                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+                new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             }
             return RedirectToAction(nameof(ManageLogins));
         }

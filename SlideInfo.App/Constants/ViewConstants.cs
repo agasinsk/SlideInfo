@@ -1,6 +1,6 @@
 ﻿namespace SlideInfo.App.Constants
 {
-    public static class ViewDataConstants
+    public static class ViewConstants
     {
 
         public const string APP_EMAIL = "slide.info.pwr@gmail.com";

@@ -15,7 +15,7 @@ namespace SlideInfo.App.Helpers
         public void CreateAlert(AlertType alertType, string alertContent)
         {
             var alertTemplate = GetAlertTemplate(alertType, alertContent);
-            httpContext.Session.SetString(SessionConstants.Alert, alertTemplate);
+            httpContext.Session.SetString(SessionConstants.ALERT, alertTemplate);
         }
 
         public static string GetAlertTemplate(AlertType alertType, string alertContent)

@@ -7,10 +7,10 @@
 
 <h2>@ViewData["Title"]</h2>
 <p class="text-success">@ViewData["StatusMessage"]</p>
-@if (Context.Session.GetString(SessionConstants.Alert) != null)
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
-    @Html.Raw(Context.Session.GetString(SessionConstants.Alert))
-    Context.Session.Remove(SessionConstants.Alert);
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
 }
 <div>
     <h4>Change your account settings</h4>
@@ -49,15 +49,6 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label class="col-md-2 control-label">External Logins</label>
-            <div class="col-md-10">
-                <h4 style="display: inline;">
-                    <span class="badge">@Model.Logins.Count</span>
-                </h4>
-                <a asp-controller="Manage" asp-action="ManageLogins" class="btn btn-success green-button">Manage</a>
-            </div>
-        </div>
         @if (Model.CommentsCount > 0)
         {
             <div class="form-group">

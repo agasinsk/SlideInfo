@@ -295,7 +295,7 @@ namespace SlideInfo.App.Controllers
                 return View("ForgotPasswordConfirmation");
             }
 
-            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.Error);
+            new AlertFactory(HttpContext).CreateAlert(AlertType.Danger, SessionConstants.ERROR);
             return View(model);
         }
 

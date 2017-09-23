@@ -44,7 +44,7 @@
                     <li class="@Html.IsActive("Home", "Index")">
                         <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
-                    @if (ViewData[ViewDataConstants.SLIDE_ID] != null)
+                    @if (ViewData[ViewConstants.SLIDE_ID] != null)
                     {
                         <li class="dropdown @Html.IsSlideChosen("Slides", ViewData["SlideId"] as string)">
                             <a class="dropdown-toggle" data-toggle="dropdown" asp-area="" asp-controller="Slides" asp-action="Index">
@@ -52,26 +52,26 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <div class="slide-name">@ViewData[ViewDataConstants.SLIDE_NAME]</div>
+                                    <div class="slide-name">@ViewData[ViewConstants.SLIDE_NAME]</div>
                                 </li>
                                 <li class="divider"></li>
                                 <li class="@Html.IsActive("Slides", "Display")">
-                                    <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Display</a>
+                                    <a asp-area="" asp-controller="Slides" asp-action="Display" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Display</a>
                                 </li>
                                 <li class="divider"></li>
                                 <li class="@Html.IsActive("Slides", "Properties")">
-                                    <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Properties</a>
+                                    <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Properties</a>
                                 </li>
-                                @if (ViewData[ViewDataConstants.HAS_ASSOCIATED_IMAGES] is string)
+                                @if (ViewData[ViewConstants.HAS_ASSOCIATED_IMAGES] is string)
                                 {
                                     <li class="@Html.IsActive("Slides", "AssociatedImages")">
-                                        <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Associated Images</a>
+                                        <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Associated Images</a>
                                     </li>
                                 }
-                                @if ((bool)ViewData[ViewDataConstants.HAS_COMMENTS])
+                                @if ((bool)ViewData[ViewConstants.HAS_COMMENTS])
                                 {
                                     <li class="@Html.IsActive("Slides", "Comments")">
-                                        <a class="@Html.IsDisabled("Slides", ViewData[ViewDataConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewDataConstants.SLIDE_ID]">Comments</a>
+                                        <a class="@Html.IsDisabled("Slides", ViewData[ViewConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Comments</a>
                                     </li>
                                 }
                                 <li>
@@ -83,7 +83,7 @@
                             </ul>
                         </li>
                     }
-                    @if (ViewData[ViewDataConstants.SLIDE_ID] == null)
+                    @if (ViewData[ViewConstants.SLIDE_ID] == null)
                     {
                         <li class="@Html.IsActiveController("Slides")">
                             <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>

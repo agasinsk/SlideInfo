@@ -17,27 +17,24 @@ using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.App.Repositories;
 using SlideInfo.Core;
-using static SlideInfo.App.Constants.ViewDataConstants;
+using static SlideInfo.App.Constants.ViewConstants;
 
 namespace SlideInfo.App.Controllers
 {
     public partial class SlidesController : Controller
     {
         private readonly SignInManager<AppUser> signInManager;
-        private UserManager<AppUser> userManager;
         private readonly SlideInfoDbContext context;
         private readonly AsyncRepository<Slide> slideRepository;
-        private readonly AlertFactory alertFactory;
         private readonly ILogger logger;
 
 
         public SlidesController(ILogger<SlidesController> logger, SlideInfoDbContext context, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
         {
             this.signInManager = signInManager;
-            this.userManager = userManager;
             this.logger = logger;
             this.context = context;
-            alertFactory = new AlertFactory(HttpContext);
+            new AlertFactory(HttpContext);
             slideRepository = new AsyncRepository<Slide>(context);
         }
 
@@ -108,7 +105,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            HttpContext.Session.Set(SessionConstants.CurrentSlide, slide);
+            HttpContext.Session.Set(SessionConstants.CURRENT_SLIDE, slide);
             ViewData[SLIDE_ID] = slide.Id.ToString();
             HttpContext.Session.SetString(SLIDE_ID, slide.Id.ToString());
             ViewData[SLIDE_NAME] = slide.Name;
