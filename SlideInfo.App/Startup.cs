@@ -38,7 +38,7 @@ namespace SlideInfo.App
         {
             // Add framework services.
             services.AddDbContext<SlideInfoDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("ProductionConnection")));
 
             services.AddIdentity<AppUser, IdentityRole>(config =>
             {
@@ -71,7 +71,7 @@ namespace SlideInfo.App
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-
+            /*
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -82,6 +82,10 @@ namespace SlideInfo.App
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            */
+            app.UseDeveloperExceptionPage();
+            app.UseDatabaseErrorPage();
+            app.UseBrowserLink();
 
             app.UseStaticFiles();
             app.UseSession();

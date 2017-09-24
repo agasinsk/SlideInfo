@@ -41,6 +41,10 @@
     <EmbeddedResource Remove="Views\Manage - Copy\**" />
     <None Remove="Views\Manage - Copy\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Properties\PublishProfiles\SlideInfo - Web Deploy.pubxml" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.1.3" />
     <PackageReference Include="MailKit" Version="1.16.2" />
