@@ -11,11 +11,11 @@
             <li>
                 @if (UserManager.GetUserAsync(User).Result.FullName != null)
                 {
-                    <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello @UserManager.GetUserAsync(User).Result.FullName!</a>
+                    <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello, @UserManager.GetUserAsync(User).Result.FullName!</a>
                 }
                 else
                 {
-                    <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+                    <a asp-area="" asp-controller="Manage" asp-action="Index" title="Manage">Hello, @UserManager.GetUserName(User)!</a>
                 }
             </li>
             <li>

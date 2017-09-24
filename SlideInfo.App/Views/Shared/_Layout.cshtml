@@ -52,6 +52,11 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
+                                    <a asp-area="" asp-controller="Slides" asp-action="Index">
+                                        All Slides &raquo;</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li>
                                     <div class="slide-name">@ViewData[ViewConstants.SLIDE_NAME]</div>
                                 </li>
                                 <li class="divider"></li>
@@ -62,22 +67,20 @@
                                 <li class="@Html.IsActive("Slides", "Properties")">
                                     <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Properties</a>
                                 </li>
-                                @if (ViewData[ViewConstants.HAS_ASSOCIATED_IMAGES] is string)
+                                @if ((bool) ViewData[ViewConstants.HAS_ASSOCIATED_IMAGES])
                                 {
                                     <li class="@Html.IsActive("Slides", "AssociatedImages")">
                                         <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Associated Images</a>
                                     </li>
                                 }
-                                @if ((bool)ViewData[ViewConstants.HAS_COMMENTS])
+                                @if ((bool) ViewData[ViewConstants.HAS_COMMENTS])
                                 {
                                     <li class="@Html.IsActive("Slides", "Comments")">
                                         <a class="@Html.IsDisabled("Slides", ViewData[ViewConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Comments</a>
                                     </li>
                                 }
                                 <li>
-                                    <a href="#" onclick="showCommentSubmitForm()">
-                                        Add new comment
-                                    </a>
+                                    <a href="#" onclick="showCommentSubmitForm()">  Add new comment &raquo; </a>
                                 </li>
 
                             </ul>
