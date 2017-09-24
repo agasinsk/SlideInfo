@@ -138,7 +138,7 @@ namespace SlideInfo.App.Data
 
                 var newSlide = new Slide(osr);
 
-                var existingSlide = context.Slides.First(s => s.FilePath == path);
+                var existingSlide = context.Slides.FirstOrDefault(s => s.FilePath == path);
 
                 if (existingSlide != null)
                 {
