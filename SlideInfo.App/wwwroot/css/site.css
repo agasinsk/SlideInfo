@@ -165,14 +165,15 @@ ul {
 }
 
 .slide-name {
-    text-align: center!important;
+    text-align: center !important;
     font-weight: bold;
     line-height: 1.5em;
     height: 1.5em;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    width: 90%;
+    min-width: 20rem;
+    width: 100%;
 }
 
 .green-button {
