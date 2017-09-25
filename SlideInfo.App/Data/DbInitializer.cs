@@ -23,7 +23,7 @@ namespace SlideInfo.App.Data
             if (context.Slides.Any())
                 return;
 
-            var dirs = FileFilter.FilterFiles(AppDirectories.SlideStorage, FileFilter.OpenSlideExtensions);
+            var dirs = FileFilter.Filter(AppDirectories.SlideStorage, FileFilter.OpenSlideExtensions);
 
             foreach (var path in dirs)
             {
@@ -130,7 +130,7 @@ namespace SlideInfo.App.Data
         {
             context.Database.EnsureCreated();
 
-            var dirs = FileFilter.FilterFiles(AppDirectories.SlideStorage, FileFilter.OpenSlideExtensions);
+            var dirs = FileFilter.Filter(AppDirectories.SlideStorage, FileFilter.OpenSlideExtensions);
 
             foreach (var path in dirs)
             {

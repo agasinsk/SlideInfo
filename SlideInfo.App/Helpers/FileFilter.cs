@@ -8,7 +8,7 @@ namespace SlideInfo.App.Helpers
 {
     public static class FileFilter
     {
-        public static IEnumerable<string> FilterFiles(string path, params string[] exts)
+        public static IEnumerable<string> Filter(string path, params string[] exts)
         {
             return
                 Directory

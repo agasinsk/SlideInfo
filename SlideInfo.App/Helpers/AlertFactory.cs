@@ -49,7 +49,7 @@ namespace SlideInfo.App.Helpers
             switch (alertType)
             {
                 case AlertType.Danger:
-                    return "Danger";
+                    return "Error";
                 case AlertType.Warning:
                     return "Warning";
                 case AlertType.Success:

@@ -80,11 +80,7 @@
                                     <a asp-action="Comments" asp-route-id="@slide.Id">Comments</a>
                                 </li>
                             }
-                            <li>
-                                <a href="#" onclick="showCommentSubmitForm()">  Add new comment &raquo; </a>
-                            </li>
-                        </ul>
-
+                            </ul>
                     </div>
 
                     @{var imgName = slide.Name.ToUrlSlug() + ".jpeg";}

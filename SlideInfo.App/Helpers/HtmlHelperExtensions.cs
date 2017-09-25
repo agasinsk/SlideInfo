@@ -67,6 +67,7 @@ namespace SlideInfo.App.Helpers
             return controller == routeController && item != null ? "disabled" : "";
         }
 
+
         public static string IsDisabled(this IHtmlHelper html,
             string controller,
             bool item)
