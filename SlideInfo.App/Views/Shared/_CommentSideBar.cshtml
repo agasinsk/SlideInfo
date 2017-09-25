@@ -8,15 +8,8 @@
         <form asp-controller="Slides" asp-action="CreateComment" method="post">
             <a href="javascript:void(0)" class="closebtn" onclick="hideCommentForm()">&times;</a>
             <div class="col-xs-12 form-group">
-                <label class="sidenav-text">User name:</label>
-                @if (UserManager.GetUserAsync(User).Result.FullName != null)
-                {
-                    <input class="form-control" name="commentUserName" type="text" value="@UserManager.GetUserAsync(User).Result.FullName" readonly>
-                }
-                else
-                {
-                    <input class="form-control" name="commentUserName" type="text" value="@UserManager.GetUserName(User)" readonly>
-                }
+                <label class="sidenav-text">User:</label>
+                <input class="form-control" name="commentUserName" type="text" value="@UserManager.GetUserName(User)" readonly>
             </div>
 
             <div class="col-xs-12 form-group">
