@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SlideInfo.App.Helpers
+namespace SlideInfo.App.Constants
 {
     public enum ContactEmailSubject
     {

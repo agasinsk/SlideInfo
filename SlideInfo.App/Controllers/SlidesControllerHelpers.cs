@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SlideInfo.App.Constants;
 using SlideInfo.App.Data;
@@ -60,7 +62,7 @@ namespace SlideInfo.App.Controllers
             try
             {
                 logger.LogInformation("Getting {slug}.dzi metadata...", slug);
-                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE) ?? slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE) ?? context.Slides.FirstOrDefault(m => m.Url == slug);
 
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
@@ -84,7 +86,7 @@ namespace SlideInfo.App.Controllers
             {
                 logger.LogInformation("Getting tile: {level}, col: {col}, row: {row}", level, col, row);
 
-                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE) ?? slideRepository.Get(m => m.Url == slug).FirstOrDefault();
+                var slide = HttpContext.Session.Get<Slide>(SessionConstants.CURRENT_SLIDE) ?? context.Slides.FirstOrDefault(m => m.Url == slug);
 
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
@@ -129,7 +131,7 @@ namespace SlideInfo.App.Controllers
             logger.LogInformation("Getting {slug}.dzi metadata...", imageName);
             try
             {
-                var slide = slideRepository.Get(m => m.Id == id).FirstOrDefault();
+                var slide = context.Slides.FirstOrDefault(m => m.Id == id);
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
                     {
@@ -152,7 +154,7 @@ namespace SlideInfo.App.Controllers
             logger.LogInformation("Getting tile of {slug} | lev: {level}, col: {col}, row: {row}", imageName, level, col, row);
             try
             {
-                var slide = slideRepository.Get(m => m.Id == id).FirstOrDefault();
+                var slide = context.Slides.FirstOrDefault(m => m.Id == id);
                 if (slide != null)
                     using (var osr = new OpenSlide(slide.FilePath))
                     {

@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +11,6 @@ using SlideInfo.App.Data;
 using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
-using SlideInfo.App.Repositories;
 using SlideInfo.Core;
 using static SlideInfo.App.Constants.ViewConstants;
 
@@ -25,7 +20,6 @@ namespace SlideInfo.App.Controllers
     {
         private readonly SignInManager<AppUser> signInManager;
         private readonly SlideInfoDbContext context;
-        private readonly AsyncRepository<Slide> slideRepository;
         private readonly ILogger logger;
 
 
@@ -34,8 +28,6 @@ namespace SlideInfo.App.Controllers
             this.signInManager = signInManager;
             this.logger = logger;
             this.context = context;
-            new AlertFactory(HttpContext);
-            slideRepository = new AsyncRepository<Slide>(context);
         }
 
         // GET: Slides
@@ -143,7 +135,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await slideRepository.GetByIdAsync(id.Value);
+            var slide = await context.Slides.FindAsync(id.Value);
             if (slide == null)
             {
                 return NotFound();
@@ -196,7 +188,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await slideRepository.GetByIdAsync(id.Value);
+            var slide = await context.Slides.FindAsync(id.Value);
 
             if (slide == null)
             {
@@ -257,7 +249,7 @@ namespace SlideInfo.App.Controllers
                 return NotFound();
             }
 
-            var slide = await slideRepository.GetByIdAsync(id.Value);
+            var slide = await context.Slides.FindAsync(id.Value);
             if (slide == null)
             {
                 return NotFound();
@@ -329,53 +321,6 @@ namespace SlideInfo.App.Controllers
                 return RedirectToAction("Index", "Slides");
             }
         }
-
-        // GET: Slides/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var slide = await slideRepository.GetByIdAsync(id.Value);
-
-            if (slide == null)
-            {
-                return NotFound();
-            }
-            return View(slide);
-        }
-
-        // POST: Slides/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,FilePath,SlideUrl,SlideDziUrl,SlideMpp")] Slide slide)
-        {
-            if (id != slide.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    await slideRepository.UpdateAsync(slide);
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SlideExists(slide.Id))
-                    {
-                        return NotFound();
-                    }
-                    throw;
-                }
-                return RedirectToAction("Index");
-            }
-            return View(slide);
-        }
-
 
         private bool SlideExists(int id)
         {

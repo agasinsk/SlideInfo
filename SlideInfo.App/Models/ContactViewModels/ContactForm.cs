@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using SlideInfo.App.Helpers;
+using SlideInfo.App.Constants;
 
 namespace SlideInfo.App.Models.ContactViewModels
 {
