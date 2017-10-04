@@ -37,10 +37,8 @@ namespace SlideInfo.Core
 
 	    public abstract Image GetThumbnail(Size size);
 
-        //Returns a thumbnail of the image of the specified maximum size
         public abstract Image GetThumbnail(SizeL size);
-
-
+        
 		public static bool ThumbnailCallback()
 		{
 			return true;

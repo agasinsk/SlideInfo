@@ -78,7 +78,7 @@ namespace SlideInfo.Core
         {
             var vendor = OpenSlideDll.openslide_detect_vendor(fileName);
             if (vendor.ToInt32() != 0)
-                throw new OpenSlideUnsupportedFormatException($"Vendor {Marshal.PtrToStringAnsi(vendor)} unsupported");
+                throw new OpenSlideException($"Vendor {Marshal.PtrToStringAnsi(vendor)} unsupported");
         }
 
         private void CheckError()
@@ -318,7 +318,7 @@ namespace SlideInfo.Core
         private void CheckDisposed()
         {
             if (Osr == null)
-                throw new OpenSlideDisposedException();
+                throw new OpenSlideException("OpenSlide object has been disposed");
         }
 
         public override void Close()

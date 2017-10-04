@@ -91,7 +91,6 @@
     <Compile Include="TestDeepZoomGenerator.cs" />
     <Compile Include="TestImageSlide.cs" />
     <Compile Include="TestOpenSlide.cs" />
-    <Compile Include="TestOpenSlideFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

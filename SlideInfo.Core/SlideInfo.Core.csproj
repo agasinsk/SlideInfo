@@ -106,7 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractSlide.cs" />
-    <Compile Include="AbstractSlideFactory.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssociatedImage.cs" />
     <Compile Include="DeepZoomGenerator.cs" />
