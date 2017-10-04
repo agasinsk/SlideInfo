@@ -17,8 +17,8 @@ namespace SlideInfo.Core
 	}
 
 	[Serializable]
-	public class OpenSlideDisposedException : Exception
-	{
+	public class OpenSlideDisposedException : OpenSlideException
+    {
 		private const string Msg = "OpenSlide object has been disposed";
 
 		public OpenSlideDisposedException() : base(Msg)

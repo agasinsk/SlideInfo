@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace SlideInfo.Core
+namespace SlideInfo.Helpers
 {
 	public class SizeL
 	{
@@ -44,22 +44,11 @@ namespace SlideInfo.Core
 			return Width.Equals(ls.Width) && Height.Equals(ls.Height);
 		}
 
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
+        public override int GetHashCode() => base.GetHashCode();
 
-		public override string ToString()
+        public override string ToString()
 		{
 			return "w " + Width + " h " + Height;
 		}
 	}
-
-    public static class SizeExtension
-    {
-        public static SizeL ToSizeL(this Size size)
-        {
-            return new SizeL(size.Width, size.Height);
-        }
-    }
 }

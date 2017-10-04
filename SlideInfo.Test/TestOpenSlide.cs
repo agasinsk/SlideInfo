@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SlideInfo.Core;
+using SlideInfo.Helpers;
 
 namespace SlideInfo.Test
 {

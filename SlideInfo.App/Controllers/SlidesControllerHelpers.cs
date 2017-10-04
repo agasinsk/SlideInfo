@@ -16,6 +16,7 @@ using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
 using SlideInfo.App.Models.SlideViewModels;
 using SlideInfo.Core;
+using SlideInfo.Helpers;
 
 namespace SlideInfo.App.Controllers
 {
