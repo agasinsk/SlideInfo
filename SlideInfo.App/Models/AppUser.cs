@@ -18,6 +18,5 @@ namespace SlideInfo.App.Models
         public DateTime LastActive { get; set; }
 
         public virtual ICollection<Comment> Comments { get; set; }
-        public ICollection<Connection> Connections { get; set; }
     }
 }

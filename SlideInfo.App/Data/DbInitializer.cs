@@ -157,26 +157,6 @@ namespace SlideInfo.App.Data
                     }
                 }
             }
-
-            context.SaveChanges();
-        }
-
-        public static void CleanUpInvalidMessengerConnections(SlideInfoDbContext context)
-        {
-            context.Database.EnsureCreated();
-
-            var dateTimeNow = DateTime.Now;
-
-            foreach (var connection in context.Connections)
-            {
-                if (connection.IsConnected) continue;
-                var diff = dateTimeNow.Subtract(connection.LastActive);
-                if (diff.Hours > 24)
-                {
-                    context.Connections.Remove(connection);
-                }
-            }
-
             context.SaveChanges();
         }
     }

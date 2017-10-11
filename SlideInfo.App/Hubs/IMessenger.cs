@@ -5,7 +5,7 @@ namespace SlideInfo.App.Hubs
 {
     public interface IMessenger
     {
-        void onConnected(string id, string userName, List<MessengerUser> ConnectedUsers);
+        void onConnected(string id, string userName, List<string> ConnectedUsers);
 
         void onNewUserConnected(string id, string userName);
         void onUserDisconnected(string id, string userName);

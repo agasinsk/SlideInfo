@@ -46,7 +46,7 @@ namespace SlideInfo.App
             })
                 .AddEntityFrameworkStores<SlideInfoDbContext>()
                 .AddDefaultTokenProviders();
-  
+
             services.AddMvc();
 
             // Add application services.
@@ -89,8 +89,8 @@ namespace SlideInfo.App
 
             app.UseStaticFiles();
             app.UseSession();
-            app.UseSignalR2();
             app.UseIdentity();
+            app.UseSignalR2();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
@@ -101,7 +101,7 @@ namespace SlideInfo.App
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-			DbInitializer.Initialize(context);
+            DbInitializer.Initialize(context);
         }
     }
 }

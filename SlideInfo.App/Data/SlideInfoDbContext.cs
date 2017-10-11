@@ -12,7 +12,6 @@ namespace SlideInfo.App.Data
         public DbSet<Property> Properties { get; set; }
 
         public DbSet<Message> Messages { get; set; }
-        public DbSet<Connection> Connections { get; set; }
 
         public SlideInfoDbContext(DbContextOptions options)
 		    : base(options)
