@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Http
+﻿@model SlideInfo.App.Models.MessengerViewModel
+@using Microsoft.AspNetCore.Http
 @using SlideInfo.App.Constants
 @using SlideInfo.App.Helpers
 
@@ -27,27 +28,19 @@
             </div>
 
             <div class="member-list">
-                <div class="member-link" id="person.id">
-                    <div class="media">
-                        <div class="media-left">
-                            <img src="https://lh6.googleusercontent.com/-y-MY2satK-E/AAAAAAAAAAI/AAAAAAAAAJU/ER_hFddBheQ/photo.jpg" alt="User Avatar" width="35" class="img-circle">
-                        </div>
-                        <div class="media-body a">
-                            <h4>Jack Sparrow <small>unavailable</small> <span class="badge pull-right">3</span></h4>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="member-link" id="person.id">
-                    <div class="media">
-                        <div class="media-left">
-                            <img src="https://lh6.googleusercontent.com/-y-MY2satK-E/AAAAAAAAAAI/AAAAAAAAAJU/ER_hFddBheQ/photo.jpg" alt="User Avatar" width="35" class="img-circle">
-                        </div>
-                        <div class="media-body a">
-                            <h4>Jack Sparrow <small>unavailable</small> <span class="badge pull-right">3</span></h4>
+                @foreach (var user in Model.Users)
+                {
+                    <div class="member-link" id="@user.UserName">
+                        <div class="media">
+                            <div class="media-left">
+                                <img src="https://lh6.googleusercontent.com/-y-MY2satK-E/AAAAAAAAAAI/AAAAAAAAAJU/ER_hFddBheQ/photo.jpg" alt="User Avatar" width="35" class="img-circle">
+                            </div>
+                            <div class="media-body a">
+                                <h4>@user.FullName <small>unavailable</small> <span class="badge pull-right">3</span></h4>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         </div>
     </div>

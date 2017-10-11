@@ -22,7 +22,7 @@ namespace SlideInfo.App.Controllers
 
         public IActionResult Messenger()
         {
-            var viewModel = new MessengerViewModel { Users = context.AppUsers };
+            var viewModel = new MessengerViewModel { UserName = userManager.GetUserName(User), Users = context.AppUsers };
 
             return View(viewModel);
         }

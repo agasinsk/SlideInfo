@@ -13,7 +13,7 @@ var Messenger = function () {
         this.messageList = [];
         this.deletedList = [];
 
-        this.me = 1; // completely arbitrary id
+        this.me = 
         this.them = 5; // and another one
 
         this.onReceive = function (message) {
