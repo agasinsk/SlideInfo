@@ -11,12 +11,19 @@ namespace SlideInfo.App.Data
 	    public DbSet<Slide> Slides { get; set; }
         public DbSet<Property> Properties { get; set; }
 
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Connection> Connections { get; set; }
+
         public SlideInfoDbContext(DbContextOptions options)
 		    : base(options)
 	    {
 	    }
 
-	    protected override void OnModelCreating(ModelBuilder builder)
+        public SlideInfoDbContext()
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
 	    {
 		    base.OnModelCreating(builder);
 		    // Customize the ASP.NET Identity model and override the defaults if needed.
