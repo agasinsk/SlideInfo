@@ -38,7 +38,7 @@ namespace SlideInfo.App
         {
             // Add framework services.
             services.AddDbContext<SlideInfoDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("ProductionConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddIdentity<AppUser, IdentityRole>(config =>
             {
@@ -89,6 +89,7 @@ namespace SlideInfo.App
 
             app.UseStaticFiles();
             app.UseSession();
+            app.UseSignalR2();
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
