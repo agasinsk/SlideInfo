@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +21,21 @@ namespace SlideInfo.App.Controllers
             this.context = context;
         }
 
-        public IActionResult Messenger()
+        public IActionResult Messenger(string conversationSubject)
         {
-            var viewModel = new MessengerViewModel { UserName = userManager.GetUserName(User), Users = context.AppUsers };
+            IEnumerable<Message> currentConversation = null;
+            if (conversationSubject != null)
+            {
+                currentConversation = context.Messages.Where(m => m.Subject == conversationSubject);
+            }
+            var viewModel = new MessengerViewModel
+            {
+                UserName = userManager.GetUserName(User),
+                Users = context.AppUsers.AsEnumerable()
+                    .Select(u => new MessengerUser() { UserName = u.UserName, FullName = u.FullName }),
+                CurrentConversation = currentConversation
+
+            };
 
             return View(viewModel);
         }
