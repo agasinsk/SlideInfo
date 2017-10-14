@@ -21,12 +21,6 @@ namespace SlideInfo.App.Hubs
             {
                 Clients.Client(connectionId).addNewMessageToPage(userName, message);
             }
-
-            //sending message to all sender connections
-            foreach (var connectionId in Connections.GetConnections(userName))
-            {
-                Clients.Client(connectionId).addNewMessageToPage(userName, message);
-            }
         }
 
         public override Task OnConnected()

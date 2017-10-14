@@ -29,32 +29,22 @@ namespace SlideInfo.App.Controllers
             }
 
             IEnumerable<Message> currentConversation = null;
+            string receiver = null;
             if (conversationSubject != null)
             {
                 currentConversation = context.Messages.Where(m => m.Subject == conversationSubject);
+                receiver = conversationSubject;
             }
             var viewModel = new MessengerViewModel
             {
                 UserName = userManager.GetUserName(User),
-                Users = context.AppUsers.AsEnumerable()
-                    .Select(u => new MessengerUser() { UserName = u.UserName, FullName = u.FullName }),
-                ReceiverUserName = context.AppUsers.AsEnumerable().Last().UserName,
+                Users = context.AppUsers.Where(u => u.UserName != userManager.GetUserName(User)).AsEnumerable()
+                    .Select(u => new MessengerUser() { UserName = u.UserName, FullName = u.FullName, Status = MessengerUserStatus.Unavailable }),
+                ReceiverUserName = receiver,
                 CurrentConversation = currentConversation
             };
 
             return View(viewModel);
-        }
-
-        public JsonResult GetUserName()
-        {
-            var userName = userManager.GetUserName(User);
-            return Json(userName);
-        }
-
-        public JsonResult GeserName()
-        {
-            var userName = userManager.GetUserName(User);
-            return Json(userName);
         }
     }
 }

@@ -13,8 +13,8 @@ var Messenger = function () {
         this.messageList = [];
         this.deletedList = [];
 
-        this.me = 
-        this.them = 5; // and another one
+        this.me =
+            this.them = 5; // and another one
 
         this.onReceive = function (message) {
             return console.log('Received: ' + message.text);
@@ -129,20 +129,22 @@ $(function () {
     var chat = $.connection.messenger;
     // Start Hub
     $.connection.hub.start().done(function () {
-
-        console.log("Testing after signal r start");
-
+        console.log("Testing after signalR start");
     });
+
     var messenger = new Messenger();
     var buildHtml = new BuildHtml();
+
     var currentUsername = model.userName;
-    
+    console.log("current user name: " + currentUsername);
+    var receiverUsername = model.receiverUserName;
+    console.log("current receiver name: " + receiverUsername);
+
     chat.client.addNewMessageToPage = function (name, message) {
-        console.log("name test: ", name);
-        console.log("message test: ", message);
+
         var messageObj = {
             'text': message
-        }
+        };
         if (currentUsername === name) {
             buildSent(messageObj);
         } else {
@@ -155,7 +157,6 @@ $(function () {
     var $content = $('#content');
     var $inner = $('#messages-inner');
 
-
     function saveText(text) {
         $content.find('.message-wrapper').last().find('.text-wrapper').text(text);
     }
@@ -163,20 +164,18 @@ $(function () {
     function animateText() {
         setTimeout(function () {
             $content.find('.message-wrapper').last().find('.text-wrapper').addClass('animated fadeIn');
-        },
-            350);
+        }, 350);
     }
 
     function scrollBottom() {
         $($inner).animate({
             scrollTop: $($content).offset().top + $($content).outerHeight(true)
-        },
-            {
+        }, {
                 queue: false,
                 duration: 'ease'
             });
     }
-
+    
     function buildSent(message) {
         console.log('sending: ', message.text);
 
@@ -198,9 +197,10 @@ $(function () {
     }
 
     function sendMessage() {
-        var text = $input.val();
+        var messageText = $input.val();
+        messenger.send(messageText);
         // Call the Send method on the hub.
-        chat.server.send(model.receiverUserName, text);
+        chat.server.send(receiverUsername, messageText);
 
         $input.val('');
         $input.focus();

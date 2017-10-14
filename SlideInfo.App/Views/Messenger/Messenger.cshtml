@@ -30,13 +30,22 @@
             <div class="member-list">
                 @foreach (var user in Model.Users)
                 {
-                    <div class="member-link" id="@user.UserName">
+                    <div class="member-link @(user.UserName == Model.ReceiverUserName ? "selected" : "")" id="@user.UserName">
                         <div class="media">
                             <div class="media-left">
                                 <img src="https://lh6.googleusercontent.com/-y-MY2satK-E/AAAAAAAAAAI/AAAAAAAAAJU/ER_hFddBheQ/photo.jpg" alt="User Avatar" width="35" class="img-circle">
                             </div>
                             <div class="media-body a">
-                                <h4>@user.FullName <small>unavailable</small> <span class="badge pull-right">@user.UnreadMessagesCount</span></h4>
+                                <h4>
+                                    @Html.ActionLink(
+                                        user.FullName,
+                                        "Messenger",
+                                        "Messenger",
+                                        new { conversationSubject = user.UserName },
+                                        null
+                                        )
+                                    <small>@user.Status</small> <span class="badge pull-right">@user.UnreadMessagesCount</span>
+                                </h4>
                             </div>
                         </div>
                     </div>
@@ -44,7 +53,7 @@
             </div>
         </div>
     </div>
-    <!--chat_sidebar-->
+
     <!--chat_sidebar-->
     <div class="col-sm-9 message_section">
         <div class="row">
@@ -67,7 +76,7 @@
             </div>
 
             <!--new_message_head-->
-            <div class="chat-area">
+            <div class="chat-area" id="chat-area">
                 <div class="messages-inner" id="messages-inner">
                     <div class="messages-content" id="content"></div>
                 </div>
@@ -99,6 +108,6 @@
     <!--SignalR script to update the chat page and send messages.-->
     <script src="/js/messenger.js"></script>
     <script type="text/javascript">
-        getViewModelData(@Html.Raw(Json.Serialize(Model))); //execute the function     
+        getViewModelData(@Html.Raw(Json.Serialize(Model))); //execute the function
     </script>
 }
