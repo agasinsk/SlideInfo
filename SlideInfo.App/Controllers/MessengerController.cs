@@ -23,6 +23,11 @@ namespace SlideInfo.App.Controllers
 
         public IActionResult Messenger(string conversationSubject)
         {
+            if (!signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             IEnumerable<Message> currentConversation = null;
             if (conversationSubject != null)
             {
@@ -33,11 +38,23 @@ namespace SlideInfo.App.Controllers
                 UserName = userManager.GetUserName(User),
                 Users = context.AppUsers.AsEnumerable()
                     .Select(u => new MessengerUser() { UserName = u.UserName, FullName = u.FullName }),
+                ReceiverUserName = context.AppUsers.AsEnumerable().Last().UserName,
                 CurrentConversation = currentConversation
-
             };
 
             return View(viewModel);
+        }
+
+        public JsonResult GetUserName()
+        {
+            var userName = userManager.GetUserName(User);
+            return Json(userName);
+        }
+
+        public JsonResult GeserName()
+        {
+            var userName = userManager.GetUserName(User);
+            return Json(userName);
         }
     }
 }

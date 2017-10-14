@@ -98,7 +98,7 @@
                             <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>
                         </li>
                     }
-                    <li class="@Html.IsActive("Home", "Messenger")"><a asp-area="" asp-controller="Home" asp-action="Messenger">Messenger</a></li>
+                    <li class="@Html.IsActive("Messenger", "Messenger")"><a asp-area="" asp-controller="Messenger" asp-action="Messenger">Messenger</a></li>
                     <li class="@Html.IsActive("Home", "About")"><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li class="@Html.IsActive("Home", "Contact")"><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
                 </ul>

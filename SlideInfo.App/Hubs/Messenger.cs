@@ -16,7 +16,14 @@ namespace SlideInfo.App.Hubs
         {
             var userName = Context.User.Identity.Name;
 
+            //sending message to receiver connections
             foreach (var connectionId in Connections.GetConnections(who))
+            {
+                Clients.Client(connectionId).addNewMessageToPage(userName, message);
+            }
+
+            //sending message to all sender connections
+            foreach (var connectionId in Connections.GetConnections(userName))
             {
                 Clients.Client(connectionId).addNewMessageToPage(userName, message);
             }

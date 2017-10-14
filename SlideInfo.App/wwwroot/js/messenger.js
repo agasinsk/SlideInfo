@@ -119,6 +119,12 @@ var BuildHtml = function () {
     return BuildHtml;
 }();
 
+var model;
+
+function getViewModelData(response) {
+    model = response;
+}
+
 $(function () {
     var chat = $.connection.messenger;
     // Start Hub
@@ -129,8 +135,8 @@ $(function () {
     });
     var messenger = new Messenger();
     var buildHtml = new BuildHtml();
-    var currentUsername = prompt('Enter your name:', '');
-
+    var currentUsername = model.userName;
+    
     chat.client.addNewMessageToPage = function (name, message) {
         console.log("name test: ", name);
         console.log("message test: ", message);
@@ -194,7 +200,7 @@ $(function () {
     function sendMessage() {
         var text = $input.val();
         // Call the Send method on the hub.
-        chat.server.send(currentUsername, text);
+        chat.server.send(model.receiverUserName, text);
 
         $input.val('');
         $input.focus();
