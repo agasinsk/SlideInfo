@@ -167,6 +167,15 @@ $(function () {
         userLink.find('.status-icon').css("background", "red");
     };
 
+    chat.client.onConnected = function (userNames) {
+        console.log("User list: " + userNames);
+
+        userNames.forEach(function (userName) {
+            console.log(userName);
+            chat.client.onNewUserConnected(userName);
+        });
+    };
+
     var $input = $('#message-input');
     var $send = $('#send-message');
     var $content = $('#content');

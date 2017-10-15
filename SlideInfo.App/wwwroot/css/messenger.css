@@ -5,7 +5,7 @@
     height: 8px;
     width: 8px;
     border-radius: 50%;
-    background: black;
+    background: rgba(0,0,0, 0.1);
 }
 
 .messenger {

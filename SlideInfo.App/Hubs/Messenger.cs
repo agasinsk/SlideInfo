@@ -28,6 +28,7 @@ namespace SlideInfo.App.Hubs
             var userName = Context.User.Identity.Name;
 
             Connections.Add(userName, Context.ConnectionId);
+            Clients.Caller.onConnected(Connections.GetKeys());
             Clients.AllExcept(Context.ConnectionId).onNewUserConnected(userName);
 
             return base.OnConnected();

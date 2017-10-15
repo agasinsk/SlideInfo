@@ -37,6 +37,11 @@ namespace SlideInfo.App.Hubs
             return Enumerable.Empty<string>();
         }
 
+        public IEnumerable<T> GetKeys()
+        {
+            return _connections.Keys;
+        }
+
         public void Remove(T key, string connectionId)
         {
             lock (_connections)
