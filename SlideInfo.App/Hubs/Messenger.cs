@@ -28,6 +28,7 @@ namespace SlideInfo.App.Hubs
             var userName = Context.User.Identity.Name;
 
             Connections.Add(userName, Context.ConnectionId);
+            Clients.AllExcept(Context.ConnectionId).onNewUserConnected(userName);
 
             return base.OnConnected();
         }
@@ -37,6 +38,7 @@ namespace SlideInfo.App.Hubs
             var userName = Context.User.Identity.Name;
 
             Connections.Remove(userName, Context.ConnectionId);
+            Clients.AllExcept(Context.ConnectionId).onUserDisconnected(userName);
 
             return base.OnDisconnected(stopCalled);
         }

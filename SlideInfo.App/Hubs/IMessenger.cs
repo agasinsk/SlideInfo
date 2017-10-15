@@ -7,8 +7,8 @@ namespace SlideInfo.App.Hubs
     {
         void onConnected(string id, string userName, List<string> ConnectedUsers);
 
-        void onNewUserConnected(string id, string userName);
-        void onUserDisconnected(string id, string userName);
+        void onNewUserConnected(string userName);
+        void onUserDisconnected(string userName);
 
         void sendPrivateMessage(string id, string message);
 

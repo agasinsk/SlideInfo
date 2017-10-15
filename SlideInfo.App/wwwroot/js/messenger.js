@@ -152,6 +152,21 @@ $(function () {
         }
     };
 
+    chat.client.onNewUserConnected = function (userName) {
+        console.log("User available: " + userName);
+
+        var userLink = $(document.getElementById(userName));
+
+        userLink.find('.status-icon').css("background", "green");
+    };
+
+    chat.client.onUserDisconnected = function (userName) {
+        console.log("User disconnected: " + userName);
+        var userLink = $(document.getElementById(userName));
+
+        userLink.find('.status-icon').css("background", "red");
+    };
+
     var $input = $('#message-input');
     var $send = $('#send-message');
     var $content = $('#content');
@@ -175,7 +190,7 @@ $(function () {
                 duration: 'ease'
             });
     }
-    
+
     function buildSent(message) {
         console.log('sending: ', message.text);
 
