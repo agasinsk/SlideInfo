@@ -3,10 +3,12 @@
     angular.module("messenger")
         .controller("messengerController", messengerController);
 
-    messengerController.$inject = ["$scope", "messengerService", "messengerHub", "htmlBuilder"];
+    messengerController.$inject = ["$scope", "$anchorScroll", "messengerService", "messengerHub"];
 
-    function messengerController($scope, messengerService, messengerHub, htmlBuilder) {
+    function messengerController($scope, $anchorScroll, messengerService, messengerHub) {
         var vm = this;
+
+        vm.autoScrollDown = true;
 
         vm.currentUserName = {};
         vm.currentReceiverName = {};
@@ -15,9 +17,11 @@
         vm.users = [];
         vm.currentConversation = [];
 
+        vm.messageList = angular.element("message-content");
+
         //controller functions
         vm.getUsers = getUsers;
-        vm.getcurrentUserName = getcurrentUserName;
+        vm.getCurrentUserName = getCurrentUserName;
         vm.getUsers = getUsers;
         vm.getConversation = getConversation;
         vm.getConversationByUserName = getConversationByUserName;
@@ -25,13 +29,28 @@
         vm.sendMessage = sendMessage;
         vm.receiveMessage = receiveMessage;
 
+        vm.listDidRender = listDidRender;
+
         init();
         /////////////////
+
+        var hasScrollReachedBottom = function () {
+            return vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop('scrollHeight');
+        };
+
+        var watchScroll = function () {
+            scope.autoScrollDown = hasScrollReachedBottom();
+        };
+
+        var hasScrollReachedTop = function () {
+            return vm.messageList.scrollTop() === 0;
+        };
 
         function init() {
 
             vm.getUsers();
-            vm.getcurrentUserName();
+            vm.getCurrentUserName();
+            vm.messageList.bind("scroll", _.throttle(watchScroll, 250));
 
             messengerHub.client.addNewMessageToPage = function (name, message) {
                 var messageObj = {
@@ -73,7 +92,7 @@
                 });
         }
 
-        function getcurrentUserName() {
+        function getCurrentUserName() {
             messengerService.getCurrentUser()
                 .then(function (user) {
                     console.log("current user: ", user);
@@ -85,6 +104,7 @@
             messengerService.getConversation(subject)
                 .then(function (conversation) {
                     vm.currentConversation = conversation;
+                    scrollToBottom();
                 });
         }
 
@@ -94,6 +114,7 @@
                 .then(function (conversation) {
                     console.log('new conversation : ', conversation);
                     vm.currentConversation = conversation;
+                    scrollToBottom();
                 });
         }
 
@@ -102,7 +123,7 @@
             // Create the new message for sending
             var message = {};
 
-            message.Id = vm.currentConversation[vm.currentConversation.length - 1].Id + 1;
+            message.Id = _.last(vm.currentConversation).Id + 1;
             message.FromId = vm.currentUserName;
             message.ToId = vm.currentReceiverName;
             message.Subject = vm.currentUserName;
@@ -111,7 +132,7 @@
             console.log('sending: ', message);
 
             vm.currentConversation.push(message);
-
+            scrollToBottom();
             // Send data to server
             messengerHub.server.send(JSON.stringify(message));
             vm.messageText = "";
@@ -141,5 +162,19 @@
             //TODO: check subject && sender
             vm.currentConversation.push(message);
         }
+
+        function scrollToBottom() {
+            var lastMessageId = _.last(vm.currentConversation).Id;
+            var container = document.getElementById("messages-content");
+            var scrollTo = document.getElementById(lastMessageId);
+            container.scrollTop = scrollTo.offsetTop;
+        };
+
+        function listDidRender() {
+            if (vm.autoScrollDown) {
+                scrollToBottom();
+            }
+        };
+
     }
 })();
