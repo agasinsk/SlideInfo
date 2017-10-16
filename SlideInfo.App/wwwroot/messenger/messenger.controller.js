@@ -1,182 +1,145 @@
 ﻿(function () {
-    'use strict';
-    angular.module('messenger').controller('messengerController', messengerController);
+    "use strict";
+    angular.module("messenger")
+        .controller("messengerController", messengerController);
 
-    messengerController.$inject = ['$scope', 'productsService', 'productMessageHub'];
+    messengerController.$inject = ["$scope", "messengerService", "messengerHub", "htmlBuilder"];
 
-    function messengerController($scope, productsService, productMessageHub) {
+    function messengerController($scope, messengerService, messengerHub, htmlBuilder) {
         var vm = this;
 
-        vm.applicationBlocked = false;
-        vm.tableBlocked = false;
-        vm.selectedProduct = null;
-        vm.newProductAdded = false;
+        vm.currentUserName = {};
+        vm.currentReceiverName = {};
+        vm.messageText = "";
 
-        vm.messagesList = [];
+        vm.users = [];
+        vm.currentConversation = [];
 
-        vm.tableRowClick = tableRowClick;
-        vm.addNewProduct = addNewProduct;
-        vm.saveProduct = saveProduct;
-        vm.deleteProduct = deleteProduct;
+        //controller functions
+        vm.getUsers = getUsers;
+        vm.getcurrentUserName = getcurrentUserName;
+        vm.getUsers = getUsers;
+        vm.getConversation = getConversation;
+        vm.getConversationByUserName = getConversationByUserName;
+
+        vm.sendMessage = sendMessage;
+        vm.receiveMessage = receiveMessage;
 
         init();
+        /////////////////
 
         function init() {
-            productsService.get()
-                .then(function (products) {
-                    vm.products = products;
-                });
 
-            // Method which receives data.
-            productMessageHub.client.handleProductMessage = function (message) {
-                // Method which handles messages.
-                receivedMessageHandler(message);
+            vm.getUsers();
+            vm.getcurrentUserName();
+
+            messengerHub.client.addNewMessageToPage = function (name, message) {
+                var messageObj = {
+                    'text': message
+                };
+                if (vm.currentUserName.userName === name) {
+                    buildSent(messageObj);
+                } else {
+                    buildReceived(messageObj);
+                }
+            };
+
+            messengerHub.client.onNewUserConnected = function (userName) {
+                console.log("User connected: " + userName);
+
+                var userLink = $(document.getElementById(userName));
+                userLink.find('.status-icon').css("background", "green");
+            };
+
+            messengerHub.client.onUserDisconnected = function (userName) {
+                console.log("User disconnected: " + userName);
+
+                var userLink = $(document.getElementById(userName));
+                userLink.find('.status-icon').css("background", "red");
+            };
+
+            messengerHub.client.onConnected = function (userNames) {
+                console.log("Messenger users list: " + userNames);
+                userNames.forEach(function (userName) {
+                    messengerHub.client.onNewUserConnected(userName);
+                });
             };
         }
 
-        function tableRowClick(product) {
-            if (vm.tableBlocked === true) {
-                return;
-            }
-
-            if (vm.newProductAdded === true && vm.tableBlocked === false) {
-                vm.tableBlocked = true;
-                return;
-            }
-
-            vm.selectedProduct = product;
+        function getUsers() {
+            messengerService.getUsers()
+                .then(function (users) {
+                    vm.users = users;
+                });
         }
 
-        function addNewProduct() {
-            var newProduct = { id: null, name: null, description: null };
-            vm.products.push(newProduct);
-            vm.selectedProduct = newProduct;
-            vm.newProductAdded = true;
-            vm.tableBlocked = true;
+        function getcurrentUserName() {
+            messengerService.getCurrentUser()
+                .then(function (user) {
+                    console.log("current user: ", user);
+                    vm.currentUserName = user;
+                });
         }
 
-        function saveProduct() {
-            vm.applicationBlocked = true;
-
-            if (vm.newProductAdded === true) {
-                // Message type – 1, data for insert.
-                sendProductDataMessage(1);
-            } else {
-                // Message type – 2, data for update.
-                sendProductDataMessage(2);
-            }
+        function getConversation(subject) {
+            messengerService.getConversation(subject)
+                .then(function (conversation) {
+                    vm.currentConversation = conversation;
+                });
         }
 
-        function deleteProduct() {
-            vm.applicationBlocked = true;
-
-            if (vm.newProductAdded === true) {
-                vm.removeProductById(vm.selectedProduct.id);
-                vm.resetState();
-            } else {
-                // Message type – 3, data for delete.
-                sendProductDataMessage(3);
-            }
+        function getConversationByUserName(userName) {
+            vm.currentReceiverName = userName;
+            messengerService.getConversationByUserName(userName)
+                .then(function (conversation) {
+                    console.log('new conversation : ', conversation);
+                    vm.currentConversation = conversation;
+                });
         }
 
-        function sendProductDataMessage(messageType) {
+        function sendMessage() {
 
-            // Create the new message for sending.
-            var productDataMessage = {};
-            productDataMessage.Product = {};
+            // Create the new message for sending
+            var message = {};
 
-            // Set message type.
-            productDataMessage.MessageType = messageType;
+            message.Id = vm.currentConversation[vm.currentConversation.length - 1].Id + 1;
+            message.FromId = vm.currentUserName;
+            message.ToId = vm.currentReceiverName;
+            message.Subject = vm.currentUserName;
+            message.Content = vm.messageText;
+            message.DateReceived = new Date();
+            console.log('sending: ', message);
 
-            // Set message data.
-            productDataMessage.Product.Id = vm.selectedProduct.id;
-            productDataMessage.Product.Name = vm.selectedProduct.name;
-            productDataMessage.Product.Description = vm.selectedProduct.description;
+            vm.currentConversation.push(message);
 
-            // Send data to server.
-            productMessageHub.server.handleProductMessage(JSON.stringify(productDataMessage));
+            // Send data to server
+            messengerHub.server.send(JSON.stringify(message));
+            vm.messageText = "";
         }
 
-        function receivedMessageHandler(productDataMessageJsonString) {
-            var productDataMessage = JSON.parse(productDataMessageJsonString);
-            vm.applicationBlocked = false;
-
-            if (productDataMessage.DataProcessedSuccessfully) {
-
-                switch (productDataMessage.MessageType) {
-                    case 1: // New record.
-                        insertProduct(productDataMessage.Product);
-                        break;
-                    case 2: // Update existing record.
-                        updateProduct(productDataMessage.Product);
-                        break;
-                    case 3: // Delete record.
-                        removeProductById(productDataMessage.Product.Id);
-                        resetState();
-                        break;
-                    default:
-                        return;
-                }
-            }
-
-            setOperationResulStatus(productDataMessage.ResponseMessage);
-        }
-
-        function resetState() {
-            vm.tableBlocked = false;
-            vm.selectedProduct = null;
-            vm.newProductAdded = false;
-        }
-
-        function setOperationResulStatus(statusString) {
-            var date = new Date();
-            var dateString = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-            vm.messagesList.push({ dateString: dateString, statusString: statusString });
-            $scope.$apply();
-        }
-
-        function insertProduct(product) {
-            if (getProductById(product.Id) === null) {
-                var newProduct = {
-                    id: product.Id,
-                    name: product.Name,
-                    description: product.Description
-                };
-                vm.products.push(newProduct);
-            } else {
-                updateProduct(product);
-                vm.tableBlocked = false;
-                vm.newProductAdded = false;
+        function checkEnterPressed($event) {
+            var keyCode = $event.which || $event.keyCode;
+            //if enter was pressed
+            if (keyCode === 13) {
+                $event.preventDefault();
+                sendMessage();
             }
         }
 
-        function updateProduct(updatedProduct) {
-            var product = getProductById((updatedProduct.Id));
-            product.name = updatedProduct.Name;
-            product.description = updatedProduct.Description;
+        function generateMessageSubject() {
+            // TODO: find a better way to id conversation subject
+
+            console.debug("subject: " + subject);
+            return subject;
         }
 
-        function removeProductById(productId) {
-            var i = vm.products.length;
-            var copy = vm.products.slice();
+        function receiveMessage(messageJson) {
 
-            while (i--) {
-                if (copy[i].id === productId) {
-                    copy.splice(i, 1);
-                    vm.products = copy;
-                    return;
-                }
-            }
-        }
-
-        function getProductById(productId) {
-            for (var i = 0; i < vm.products.length; i++) {
-                if (vm.products[i].id === productId) {
-                    return vm.products[i];
-                }
-            }
-
-            return null;
+            // Create the new message for sending
+            var message = JSON.parse(messageJson);
+            console.log('receiving: ', message);
+            //TODO: check subject && sender
+            vm.currentConversation.push(message);
         }
     }
 })();

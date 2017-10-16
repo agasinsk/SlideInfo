@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace SlideInfo.App.Models
 {
@@ -11,12 +12,14 @@ namespace SlideInfo.App.Models
         public string Subject { get; set; }
         public string Content { get; set; }
 
-        public Attachment Attachment { get; set; }//, -- can be null or default to a 0
+        //public Attachment Attachment { get; set; }//, -- can be null or default to a 0
 
         public DateTime DateReceived { get; set; }// -- can be null or default to 1901 or sumin'
         public DateTime DateRead { get; set; }
 
+        [JsonIgnore]
         public AppUser From { get; set; }
+        [JsonIgnore]
         public AppUser To { get; set; }
     }
 }

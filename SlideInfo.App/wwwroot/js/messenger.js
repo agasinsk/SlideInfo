@@ -13,8 +13,8 @@ var Messenger = function () {
         this.messageList = [];
         this.deletedList = [];
 
-        this.me =
-            this.them = 5; // and another one
+        this.me = 1;
+        this.them = 5; // and another one
 
         this.onReceive = function (message) {
             return console.log('Received: ' + message.text);
@@ -88,19 +88,19 @@ var BuildHtml = function () {
     function BuildHtml() {
         _classCallCheck(this, BuildHtml);
 
-        this.messageWrapper = 'message-wrapper';
-        this.circleWrapper = 'circle-wrapper';
-        this.textWrapper = 'text-wrapper';
+        this.messageWrapper = "message-wrapper";
+        this.circleWrapper = "circle-wrapper";
+        this.textWrapper = "text-wrapper";
 
-        this.meClass = 'me';
-        this.themClass = 'them';
+        this.meClass = "me";
+        this.themClass = "them";
     }
 
     BuildHtml.prototype._build = function build(text, who) {
         return '<div class="' +
             this.messageWrapper +
-            ' ' +
-            this[who + 'Class'] +
+            " " +
+            this[who + "Class"] +
             '">\n              <div class="' +
             this.circleWrapper +
             ' animated bounceIn"></div>\n              <div class="' +
@@ -109,11 +109,11 @@ var BuildHtml = function () {
     };
 
     BuildHtml.prototype.me = function me(text) {
-        return this._build(text, 'me');
+        return this._build(text, "me");
     };
 
     BuildHtml.prototype.them = function them(text) {
-        return this._build(text, 'them');
+        return this._build(text, "them");
     };
 
     return BuildHtml;
@@ -123,6 +123,10 @@ var model;
 
 function getViewModelData(response) {
     model = response;
+}
+
+function setReceiver(userName) {
+    receiverUsername = userName;
 }
 
 $(function () {
@@ -148,12 +152,13 @@ $(function () {
         if (currentUsername === name) {
             buildSent(messageObj);
         } else {
+
             buildReceived(messageObj);
         }
     };
 
     chat.client.onNewUserConnected = function (userName) {
-        console.log("User available: " + userName);
+        console.debug("User available: " + userName);
 
         var userLink = $(document.getElementById(userName));
 
@@ -161,17 +166,16 @@ $(function () {
     };
 
     chat.client.onUserDisconnected = function (userName) {
-        console.log("User disconnected: " + userName);
+        console.debug("User disconnected: " + userName);
         var userLink = $(document.getElementById(userName));
 
         userLink.find('.status-icon').css("background", "red");
     };
 
     chat.client.onConnected = function (userNames) {
-        console.log("User list: " + userNames);
+        console.debug("User list: " + userNames);
 
         userNames.forEach(function (userName) {
-            console.log(userName);
             chat.client.onNewUserConnected(userName);
         });
     };
@@ -247,7 +251,6 @@ $(function () {
             if (key === 13) {
                 // enter key
                 e.preventDefault();
-
                 sendMessage();
             }
         });

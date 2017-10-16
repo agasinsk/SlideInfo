@@ -1,20 +1,67 @@
 ﻿(function () {
-    'use strict';
-    angular.module('messenger')
-        .factory('messengerService', messengerService);
+    "use strict";
+    angular.module("messenger")
+        .factory("messengerService", messengerService);
 
-    messengerService.$inject = ['$http'];
+    messengerService.$inject = ["$http"];
 
     function messengerService($http) {
         var service = {
             getUsers: getUsers,
+            getCurrentUser: getCurrentUser,
             getConversation: getConversation,
+            getConversationByUserName: getConversationByUserName,
             getMessage: getMessage,
-            get: get
+            saveMessage: saveMessage,
+            deleteMessage: deleteMessage
         };
 
-        function get() {
-            return $http.get('/api/Products')
+        ///////////////
+
+        function getUsers() {
+            return $http.get("/Messenger/Users")
+                .then(function (response) {
+                    return response.data;
+                });
+        }
+
+        function getCurrentUser() {
+            return $http.get("/Messenger/CurrentUser")
+                .then(function (response) {
+                    return response.data;
+                });
+        }
+
+        function getConversation(subject) {
+            return $http.get("/Messenger/Conversation/" + subject)
+                .then(function (response) {
+                    return response.data;
+                });
+        }
+
+        function getConversationByUserName(subject) {
+            return $http.get("/Messenger/Conversation/" + subject)
+                .then(function (response) {
+                    return response.data;
+                });
+        }
+
+        function getMessage() {
+            return $http.get("/Messenger/Conversation")
+                .then(function (response) {
+                    return response.data;
+                });
+        }
+
+        function saveMessage() {
+            return $http.get("/Messenger/Conversation")
+                .then(function (response) {
+                    return response.data;
+                });
+        }
+
+        function deleteMessage() {
+            return $http.get("/Messenger/Conversation")
                 .then(function (response) {
                     return response.data;
                 });

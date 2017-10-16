@@ -1,0 +1,6 @@
+﻿<!DOCTYPE html>
+<div class="message-wrapper" ng-class="{them: sender != vm.currentUserName, me : sender == vm.currentUserName}}">
+    <div class="circle-wrapper animated bounceIn"></div>
+    <div class="text-wrapper animated fadeIn">{{ content }}</div>
+    {{ date | date: "dd.MM.yyyy h:mma"}}<br />
+</div>

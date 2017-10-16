@@ -14,86 +14,85 @@
 }
 <h2>@ViewData["Title"]</h2>
 <hr />
-
-<div class="messenger">
-    <div class="col-sm-3">
-        <div class="row">
-            <div id="custom-search-input">
-                <div class="input-group col-md-12">
-                    <input type="text" class="search-query form-control" placeholder="Search..." />
-                    <button class="btn btn-danger" type="button">
-                        <span class="glyphicon glyphicon-search"></span>
-                    </button>
+<div ng-app="messenger">
+    <div class="messenger" ng-controller="messengerController as vm">
+        <div class="col-sm-3">
+            <div class="row">
+                <div id="custom-search-input">
+                    <div class="input-group col-md-12">
+                        <input type="text" class="search-query form-control" placeholder="Search..." />
+                        <button class="btn btn-danger" type="button">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="member-list">
-                @foreach (var user in Model.Users)
-                {
-                    <div class="member-link @(user.UserName == Model.ReceiverUserName ? "selected" : "")" id="@user.UserName">
-                        <div class="media">
+                <div class="member-list">
+                    <div class="member-link" ng-repeat="user in vm.users" id="{{user.UserName}}">
+                        <div class="media" ng-click="vm.getConversationByUserName(user.UserName)">
                             <div class="media-left">
-                                <img src="https://lh6.googleusercontent.com/-y-MY2satK-E/AAAAAAAAAAI/AAAAAAAAAJU/ER_hFddBheQ/photo.jpg" alt="User Avatar" width="35" class="img-circle">
+                                <img src="~/images/messenger_user.png" alt="User Avatar" width="40" class="img-circle">
                             </div>
                             <div class="media-body a">
                                 <h4>
-                                    @Html.ActionLink(
-                                        user.FullName,
-                                        "Messenger",
-                                        "Messenger",
-                                        new { conversationSubject = user.UserName },
-                                        null
-                                        )
+                                    {{user.FullName}}
                                     <span class="status-icon"></span>
-                                    <span class="badge pull-right">@user.UnreadMessagesCount</span>
                                 </h4>
                             </div>
                         </div>
                     </div>
-                }
+                </div>
             </div>
         </div>
-    </div>
 
-    <!--chat_sidebar-->
-    <div class="col-sm-9 message_section">
-        <div class="row">
-            <div class="new_message_head">
-                <div class="pull-left">
-                    <button><i class="glyphicon glyphicon-plus" aria-hidden="true"></i> New Message</button>
-                </div><div class="pull-right">
-                    <div class="dropdown">
-                        <button class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="glyphicon glyphicon-cog" aria-hidden="true"></i> Settings
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
-                            <li><a href="#">Action</a></li>
-                            <li><a href="#">Profile</a></li>
-                            <li><a href="#">Logout</a></li>
-                        </ul>
+        <!--chat_sidebar-->
+        <div class="col-sm-9 message_section">
+            <div class="row">
+                <div class="new_message_head">
+                    <div class="pull-left">
+                        <button><i class="glyphicon glyphicon-plus" aria-hidden="true"></i> New Message</button>
+                    </div><div class="pull-right">
+                        <div class="dropdown">
+                            <button class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="glyphicon glyphicon-cog" aria-hidden="true"></i> Settings
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenu1">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Profile</a></li>
+                                <li><a href="#">Logout</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!--new_message_head-->
-            <div class="chat-area" id="chat-area">
-                <div class="messages-inner" id="messages-inner">
-                    <div class="messages-content" id="content"></div>
+                <!--new_message_head-->
+                <div class="chat-area" id="chat-area">
+                    <div class="messages-inner" id="messages-inner">
+                        <div class="messages-content" id="content">
+                            <div ng-repeat="message in vm.currentConversation track by message.Id">
+                                <div class="message-wrapper" ng-class="message.FromId === vm.currentUserName ? 'me' : 'them'">
+                                    <div class="circle-wrapper animated bounceIn"></div>
+                                    <div class="text-wrapper animated fadeIn">{{ message.Content }}</div>
+                                    <div class="date-wrapper animated fadeIn">{{ message.DateReceived | date: "dd.MM.yyyy h:mm:ss"}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!--chat_area-->
-            <div class="message-write">
-                <textarea class="form-control message-input" id="message-input" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER"></textarea>
-                <div class="clearfix"></div>
-                <div class="chat-bottom">
-                    <a href="#" class="btn btn-default pull-left" role="button">
-                        <i class="glyphicon glyphicon-upload" aria-hidden="true"></i> @ViewConstants.MESSAGE_ADD_ATTACHMENT
-                    </a>
-                    <a href="#" id="send-message" class="pull-right btn btn-success green-button">
-                        @ViewConstants.SEND_MESSAGE
-                    </a>
+                <!--chat_area-->
+                <div class="message-write">
+                    <textarea class="form-control message-input" id="message-input" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keypress="vm.checkEnterPressed($event)"></textarea>
+                    <div class="clearfix"></div>
+                    <div class="chat-bottom">
+                        <a href="#" class="btn btn-default pull-left" role="button">
+                            <i class="glyphicon glyphicon-upload" aria-hidden="true"></i> @ViewConstants.MESSAGE_ADD_ATTACHMENT
+                        </a>
+                        <a href="#" id="send-message" class="pull-right btn btn-success green-button" ng-click="vm.sendMessage()">
+                            @ViewConstants.SEND_MESSAGE
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -107,8 +106,8 @@
     <!--Reference the autogenerated SignalR hub script. -->
     <script src="~/signalr/hubs"></script>
     <!--SignalR script to update the chat page and send messages.-->
-    <script src="/js/messenger.js"></script>
-    <script type="text/javascript">
-        getViewModelData(@Html.Raw(Json.Serialize(Model))); //execute the function
-    </script>
+    <script src="/messenger/messenger.module.js"></script>
+    <script src="/messenger/messenger.controller.js"></script>
+    <script src="/messenger/messenger.service.js"></script>
+    <script src="/messenger/htmlBuilder.service.js"></script>
 }
