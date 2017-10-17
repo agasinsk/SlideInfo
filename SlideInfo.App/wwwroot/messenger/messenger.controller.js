@@ -27,6 +27,7 @@
         vm.getConversationByUserName = getConversationByUserName;
 
         vm.sendMessage = sendMessage;
+        vm.checkEnterPressed = checkEnterPressed;
         vm.receiveMessage = receiveMessage;
 
         vm.listDidRender = listDidRender;
@@ -126,7 +127,7 @@
             message.Id = _.last(vm.currentConversation).Id + 1;
             message.FromId = vm.currentUserName;
             message.ToId = vm.currentReceiverName;
-            message.Subject = vm.currentUserName;
+            message.Subject = generateMessageSubject();
             message.Content = vm.messageText;
             message.DateReceived = new Date();
             console.log('sending: ', message);
@@ -149,7 +150,7 @@
 
         function generateMessageSubject() {
             // TODO: find a better way to id conversation subject
-
+            var subject = String(vm.currentUserName).split("@")[0] + String(vm.currentReceiverName).split("@")[0];
             console.debug("subject: " + subject);
             return subject;
         }
@@ -164,10 +165,7 @@
         }
 
         function scrollToBottom() {
-            var lastMessageId = _.last(vm.currentConversation).Id;
-            var container = document.getElementById("messages-content");
-            var scrollTo = document.getElementById(lastMessageId);
-            container.scrollTop = scrollTo.offsetTop;
+            //TODO
         };
 
         function listDidRender() {

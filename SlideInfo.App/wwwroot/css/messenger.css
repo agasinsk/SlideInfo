@@ -133,10 +133,13 @@
     width: 100%;
 }
 
-.message-time {
-    font-size: smaller;
+.date-wrapper {
+    font-size: 1rem;
     opacity: 0.5;
+    color: grey;
+    display: block;
 }
+
 
 .message-input {
     resize: vertical;
@@ -187,6 +190,7 @@
     overflow: hidden;
     width: 100%;
     padding: 15px;
+    padding-bottom: 2px;
 }
 
     .message-wrapper .circle-wrapper {
@@ -221,17 +225,26 @@
         color: #ffffff;
     }
 
+    .message-wrapper.them .circle-wrapper {
+        clear: left;
+    }
+
     .message-wrapper.them .text-wrapper {
         background: #449d44
     }
 
-        .message-wrapper.them .text-wrapper:before {
-            border-width: 0 10px 10px 0;
-            border-color: transparent #449d44 transparent transparent;
-            position: absolute;
-            top: 0;
-            left: -9px;
-        }
+    .message-wrapper.them .date-wrapper {
+        float: left;
+        margin-left: 50px;
+    }
+
+    .message-wrapper.them .text-wrapper:before {
+        border-width: 0 10px 10px 0;
+        border-color: transparent #449d44 transparent transparent;
+        position: absolute;
+        top: 0;
+        left: -9px;
+    }
 
     .message-wrapper.me .circle-wrapper, .message-wrapper.me .text-wrapper {
         background: rgba(87, 87, 87, 0.5);
@@ -243,27 +256,19 @@
         background: #ffffff;
     }
 
-        .message-wrapper.me .text-wrapper:before {
-            border-width: 10px 10px 0 0;
-            border-color: #ffffff transparent transparent transparent;
-            position: absolute;
-            top: 0;
-            right: -9px;
-        }
-
-@media (max-width: 560px) {
-    .wrapper {
-        width: 100%;
-        height: 100%;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        -webkit-transform: translateX(0);
-        transform: translateX(0);
+    .message-wrapper.me .circle-wrapper {
+        clear: right;
     }
 
-        .wrapper .inner {
-            height: 100%;
-            height: 100vh;
-        }
-}
+    .message-wrapper.me .date-wrapper {
+        margin-right: 50px;
+        float: right;
+    }
+
+    .message-wrapper.me .text-wrapper:before {
+        border-width: 10px 10px 0 0;
+        border-color: #ffffff transparent transparent transparent;
+        position: absolute;
+        top: 0;
+        right: -9px;
+    }
