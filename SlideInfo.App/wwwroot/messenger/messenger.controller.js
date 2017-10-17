@@ -3,28 +3,27 @@
     angular.module("messenger")
         .controller("messengerController", messengerController);
 
-    messengerController.$inject = ["$scope", "$anchorScroll", "messengerService", "messengerHub"];
+    messengerController.$inject = ["$scope", "$anchorScroll", "messengerService", "messengerHub", "ngNotify"];
 
-    function messengerController($scope, $anchorScroll, messengerService, messengerHub) {
+    function messengerController($scope, $anchorScroll, messengerService, messengerHub, ngNotify) {
         var vm = this;
 
         vm.autoScrollDown = true;
 
-        vm.currentUserName = {};
-        vm.currentReceiverName = {};
+        vm.currentUserName = "";
+        vm.currentReceiverName = "";
         vm.messageText = "";
 
         vm.users = [];
         vm.currentConversation = [];
 
-        vm.messageList = angular.element("message-content");
+        vm.messageList = $(document.getElementById("message-content"));
 
         //controller functions
         vm.getUsers = getUsers;
         vm.getCurrentUserName = getCurrentUserName;
         vm.getUsers = getUsers;
         vm.getConversation = getConversation;
-        vm.getConversationByUserName = getConversationByUserName;
 
         vm.sendMessage = sendMessage;
         vm.checkEnterPressed = checkEnterPressed;
@@ -35,16 +34,28 @@
         init();
         /////////////////
 
-        var hasScrollReachedBottom = function () {
-            return vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop('scrollHeight');
+        function hasScrollReachedBottom() {
+            var bool = vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop("scrollHeight");
+            return bool;
         };
 
-        var watchScroll = function () {
-            scope.autoScrollDown = hasScrollReachedBottom();
-        };
-
-        var hasScrollReachedTop = function () {
+        function hasScrollReachedTop() {
             return vm.messageList.scrollTop() === 0;
+        };
+
+        function watchScroll() {
+            if (hasScrollReachedTop()) {
+
+                ngNotify.set("All the messages have been loaded", {
+                    type: "grimace",
+                    target: "#message-content"
+                });
+
+                //fetchPreviousMessages();
+
+            }
+            vm.autoScrollDown = hasScrollReachedBottom();
+            console.log("vm.autoScrollDown = ", vm.autoScrollDown);
         };
 
         function init() {
@@ -53,15 +64,9 @@
             vm.getCurrentUserName();
             vm.messageList.bind("scroll", _.throttle(watchScroll, 250));
 
-            messengerHub.client.addNewMessageToPage = function (name, message) {
-                var messageObj = {
-                    'text': message
-                };
-                if (vm.currentUserName.userName === name) {
-                    buildSent(messageObj);
-                } else {
-                    buildReceived(messageObj);
-                }
+            messengerHub.client.addNewMessageToPage = function (message) {
+                console.log("adding message to the page...");
+                receiveMessage(message);
             };
 
             messengerHub.client.onNewUserConnected = function (userName) {
@@ -78,9 +83,9 @@
                 userLink.find('.status-icon').css("background", "red");
             };
 
-            messengerHub.client.onConnected = function (userNames) {
-                console.log("Messenger users list: " + userNames);
-                userNames.forEach(function (userName) {
+            messengerHub.client.onConnected = function (connectedUsers) {
+                console.log("Messenger users list: " + connectedUsers);
+                connectedUsers.forEach(function (userName) {
                     messengerHub.client.onNewUserConnected(userName);
                 });
             };
@@ -93,6 +98,7 @@
                 });
         }
 
+
         function getCurrentUserName() {
             messengerService.getCurrentUser()
                 .then(function (user) {
@@ -104,19 +110,24 @@
         function getConversation(subject) {
             messengerService.getConversation(subject)
                 .then(function (conversation) {
-                    vm.currentConversation = conversation;
-                    scrollToBottom();
+                    vm.currentSubject = conversation.Subject;
+                    vm.currentConversation = conversation.Messages;
+                    vm.currentReceiverName = subject;
                 });
         }
 
-        function getConversationByUserName(userName) {
-            vm.currentReceiverName = userName;
-            messengerService.getConversationByUserName(userName)
-                .then(function (conversation) {
-                    console.log('new conversation : ', conversation);
-                    vm.currentConversation = conversation;
-                    scrollToBottom();
-                });
+        function fetchPreviousMessages() {
+            ngNotify.set("Loading previous messages...", {
+                type: "success",
+                target: "#message-content"
+            });
+            var firstLoadedMessageId = vm.currentConversation[0].Id.toString();
+
+            //scope.messages.$load(10).then(function (m) {
+            //    // Scroll to the previous message 
+            //    _.defer(function () { $anchorScroll(currentMessage) });
+            //});
+            console.log("loading more messages/// bakcend working hard");
         }
 
         function sendMessage() {
@@ -126,33 +137,29 @@
 
             message.Id = _.last(vm.currentConversation).Id + 1;
             message.FromId = vm.currentUserName;
+            console.log("message.FromId = ", vm.currentReceiverName);
             message.ToId = vm.currentReceiverName;
-            message.Subject = generateMessageSubject();
+            console.log("message.ToId = ", vm.currentReceiverName);
+            message.Subject = vm.conversationSubject;
             message.Content = vm.messageText;
             message.DateReceived = new Date();
-            console.log('sending: ', message);
+            console.log("sending: ", message);
 
             vm.currentConversation.push(message);
-            scrollToBottom();
             // Send data to server
             messengerHub.server.send(JSON.stringify(message));
+            // clear the input
             vm.messageText = "";
         }
 
         function checkEnterPressed($event) {
             var keyCode = $event.which || $event.keyCode;
-            //if enter was pressed
+
+            //if enter was pressed, send the message
             if (keyCode === 13) {
                 $event.preventDefault();
                 sendMessage();
             }
-        }
-
-        function generateMessageSubject() {
-            // TODO: find a better way to id conversation subject
-            var subject = String(vm.currentUserName).split("@")[0] + String(vm.currentReceiverName).split("@")[0];
-            console.debug("subject: " + subject);
-            return subject;
         }
 
         function receiveMessage(messageJson) {
@@ -160,19 +167,26 @@
             // Create the new message for sending
             var message = JSON.parse(messageJson);
             console.log('receiving: ', message);
-            //TODO: check subject && sender
-            vm.currentConversation.push(message);
+            if (message.Subject === vm.currentSubject && message.FromId === vm.currentReceiverName) {
+                vm.currentConversation.push(message);
+            } else {
+                var sender = _.find(vm.users, function (user) { return user.UserName === message.FromId });
+                sender.UnreadMessagesCount++;
+                console.log("sender ", sender);
+                $scope.$apply();
+            }
         }
 
         function scrollToBottom() {
-            //TODO
-        };
+            var lastMessageId = _.last(vm.currentConversation).Id;
+            $anchorScroll(lastMessageId);
+        }
 
         function listDidRender() {
             if (vm.autoScrollDown) {
                 scrollToBottom();
             }
-        };
+        }
 
     }
 })();

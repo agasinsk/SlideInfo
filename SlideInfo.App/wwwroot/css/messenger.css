@@ -13,12 +13,20 @@
     max-height: 70vh;
 }
 
-#custom-search-input {
+.custom-search-input {
     margin: 0;
     padding: 14px;
 }
 
-    #custom-search-input .search-query {
+.dropdown-container {
+    padding: 0 14px 7px;
+}
+
+.dropdown-container button{
+    width: 100%
+}
+
+    .custom-search-input .search-query {
         background: #fff none repeat scroll 0 0 !important;
         border-radius: 4px;
         height: 33px;
@@ -27,7 +35,7 @@
         padding-right: 7px;
     }
 
-    #custom-search-input button {
+    .custom-search-input button {
         background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
         border: 0 none;
         border-radius: 3px;

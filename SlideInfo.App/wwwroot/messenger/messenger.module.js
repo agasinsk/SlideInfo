@@ -1,6 +1,6 @@
 ﻿(function () {
     "use strict";
-    angular.module("messenger", []);
+    angular.module("messenger", ["ngNotify"]);
 
     // SignalR's hub object.
     var messengerHub = $.connection.messenger;

@@ -1,25 +1,31 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using Newtonsoft.Json;
+using SlideInfo.App.Models;
 
 namespace SlideInfo.App.Hubs
 {
     [Authorize]
     [HubName("messenger")]
-    public class Messenger : Hub<IMessenger>
+    public class MessengerHub : Hub<IMessenger>
     {
         private static readonly ConnectionMapping<string> Connections =
             new ConnectionMapping<string>();
 
-        public void Send(string who, string message)
+        public void Send(string messageJson)
         {
-            var userName = Context.User.Identity.Name;
+            Console.WriteLine(messageJson);
 
+            var message = JsonConvert.DeserializeObject<Message>(messageJson);
+
+            //TODO: add message to db
             //sending message to receiver connections
-            foreach (var connectionId in Connections.GetConnections(who))
+            foreach (var connectionId in Connections.GetConnections(message.ToId))
             {
-                Clients.Client(connectionId).addNewMessageToPage(userName, message);
+                Clients.Client(connectionId).addNewMessageToPage(messageJson);
             }
         }
 

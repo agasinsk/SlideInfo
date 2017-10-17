@@ -37,9 +37,13 @@
 
   <ItemGroup>
     <Compile Remove="Views\Manage - Copy\**" />
+    <Compile Remove="wwwroot\messenger\templates\**" />
     <Content Remove="Views\Manage - Copy\**" />
+    <Content Remove="wwwroot\messenger\templates\**" />
     <EmbeddedResource Remove="Views\Manage - Copy\**" />
+    <EmbeddedResource Remove="wwwroot\messenger\templates\**" />
     <None Remove="Views\Manage - Copy\**" />
+    <None Remove="wwwroot\messenger\templates\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -82,9 +86,6 @@
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.1" />
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.1" />
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0-msbuild3-final" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="wwwroot\messenger\templates\message-item.html" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SlideInfo.Core\SlideInfo.Core.csproj" />

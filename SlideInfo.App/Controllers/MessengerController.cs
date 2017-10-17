@@ -44,7 +44,6 @@ namespace SlideInfo.App.Controllers
                     {
                         UserName = u.UserName,
                         FullName = u.FullName,
-                        Status = MessengerUserStatus.Unavailable
                     }),
                 CurrentConversation = currentConversation
             };
@@ -60,7 +59,6 @@ namespace SlideInfo.App.Controllers
                 {
                     UserName = u.UserName,
                     FullName = u.FullName,
-                    Status = MessengerUserStatus.Unavailable,
                     UnreadMessagesCount = 0,
                 });
             var usersJson = JsonConvert.SerializeObject(users);
@@ -76,24 +74,23 @@ namespace SlideInfo.App.Controllers
         [Route("[controller]/Conversation/{conversationSubject}")]
         public string GetConversation(string conversationSubject)
         {
-            var mockConversation = new List<Message>();
-            for (var i = 0; i < 10; i++)
+            var messageList = new List<Message>();
+            for (var i = 0; i < 11; i++)
             {
                 var message = new Message
                 {
                     Id = i,
                     Content = "content of " + i + "vip",
-                    FromId = "arturgasinski@rmail.com",
+                    FromId = "arturgasinski@gmail.com",
                     ToId = "arturgasinski@hotmail.com",
-                    Subject = "Subject1",
-                    DateReceived = DateTime.Now.AddSeconds(i)
+                    Subject = "mink",
+                    DateReceived = DateTime.Now.AddMinutes(i).AddSeconds(0.5 * i)
                 };
-                mockConversation.Add(message);
+                messageList.Add(message);
             }
+            var mockConversation = new Conversation { Id = 1000, Messages = messageList, MessagesCount = 22, Subject = "mink" };
 
             return JsonConvert.SerializeObject(mockConversation);
-
-
             /*
             IEnumerable<Message> currentConversation = null;
             if (conversationSubject != null)

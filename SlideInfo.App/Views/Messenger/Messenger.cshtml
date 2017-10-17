@@ -18,18 +18,19 @@
     <div class="messenger" ng-controller="messengerController as vm">
         <div class="col-sm-3">
             <div class="row">
-                <div id="custom-search-input">
+                <div class="custom-search-input">
                     <div class="input-group col-md-12">
                         <input type="text" class="search-query form-control" placeholder="Search..." />
                         <button class="btn btn-danger" type="button">
                             <span class="glyphicon glyphicon-search"></span>
                         </button>
                     </div>
+
                 </div>
 
                 <div class="member-list">
-                    <div class="member-link" ng-repeat="user in vm.users" id="{{user.UserName}}">
-                        <div class="media" ng-click="vm.getConversationByUserName(user.UserName)">
+                    <div class="member-link" ng-class="{user.UserName === vm.currentReceiverName : 'selected'}" ng-repeat="user in vm.users" id="{{user.UserName}}">
+                        <div class="media" ng-click="vm.getConversation(user.UserName)">
                             <div class="media-left">
                                 <img src="~/images/messenger_user.png" alt="User Avatar" width="40" class="img-circle">
                             </div>
@@ -37,6 +38,7 @@
                                 <h4>
                                     {{user.FullName}}
                                     <span class="status-icon"></span>
+                                    <span class="badge pull-right flash animated" ng-show="user.UnreadMessagesCount > 0">{{user.UnreadMessagesCount}}</span>
                                 </h4>
                             </div>
                         </div>
@@ -51,7 +53,8 @@
                 <div class="new_message_head">
                     <div class="pull-left">
                         <button><i class="glyphicon glyphicon-plus" aria-hidden="true"></i> New Message</button>
-                    </div><div class="pull-right">
+                    </div>
+                    <div class="pull-right">
                         <div class="dropdown">
                             <button class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="glyphicon glyphicon-cog" aria-hidden="true"></i> Settings
@@ -69,7 +72,7 @@
                 <!--new_message_head-->
                 <div class="chat-area" id="chat-area">
                     <div class="messages-inner" id="messages-inner">
-                        <div class="messages-content" id="content">
+                        <div class="messages-content" id="message-content">
                             <div class="message-wrapper" ng-repeat="message in vm.currentConversation track by message.Id" repeat-complete="vm.listDidRender()" id="{{message.Id}}" ng-class="message.FromId === vm.currentUserName ? 'me' : 'them'">
                                 <div class="date-wrapper animated fadeIn">{{ message.DateReceived | date: "dd.MM.yyyy h:mm:ss"}}</div>
                                 <div class="circle-wrapper animated bounceIn"></div>
@@ -97,6 +100,7 @@
     </div>
 </div>
 @section scripts {
+
     <!-- jQuery -->
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <!-- SignalR -->
@@ -107,4 +111,5 @@
     <script src="/messenger/messenger.module.js"></script>
     <script src="/messenger/messenger.controller.js"></script>
     <script src="/messenger/messenger.service.js"></script>
+    <script src="/messenger/repeat-complete-directive.js"></script>
 }

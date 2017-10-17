@@ -6,11 +6,11 @@
     messengerService.$inject = ["$http"];
 
     function messengerService($http) {
+
         var service = {
             getUsers: getUsers,
             getCurrentUser: getCurrentUser,
             getConversation: getConversation,
-            getConversationByUserName: getConversationByUserName,
             getMessage: getMessage,
             saveMessage: saveMessage,
             deleteMessage: deleteMessage
@@ -33,13 +33,6 @@
         }
 
         function getConversation(subject) {
-            return $http.get("/Messenger/Conversation/" + subject)
-                .then(function (response) {
-                    return response.data;
-                });
-        }
-
-        function getConversationByUserName(subject) {
             return $http.get("/Messenger/Conversation/" + subject)
                 .then(function (response) {
                     return response.data;

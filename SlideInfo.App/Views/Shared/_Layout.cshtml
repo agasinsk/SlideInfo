@@ -17,7 +17,7 @@
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
         <link rel="stylesheet" href="~/css/messenger.css" />
-        <link rel="stylesheet" href="~/css/font-awesome.css">
+        <link rel="stylesheet" href="~/css/ng-notify.min.css">
     </environment>
     <environment names="Staging,Production">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
@@ -25,7 +25,7 @@
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/messenger.min.css" asp-append-version="true" />
-        <link rel="stylesheet" href="~/css/font-awesome.min.css" asp-append-version="true" />>
+        <link rel="stylesheet" href="~/css/ng-notify.min.css" asp-append-version="true" />>
     </environment>
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
@@ -122,6 +122,7 @@
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
         <script src="~/lib/angular/dist/angular.js"></script>
         <script src="~/lib/underscore/dist/underscore.js"></script>
+        <script src="~/lib/ng-notify/dist/ng-notify.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
@@ -142,6 +143,7 @@
                 asp-fallback-test="window.angular">
         </script>
         <script src="~/lib/underscore/dist/underscore.min.js"></script>
+        <script src="~/lib/ng-notify/dist/ng-notify.min.js"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
     <script>
