@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="member-list">
-                    <div class="member-link" ng-class="{user.UserName === vm.currentReceiverName : 'selected'}" ng-repeat="user in vm.users" id="{{user.UserName}}">
+                    <div class="member-link" ng-class="{'selected' : user.UserName === vm.currentReceiverName}" ng-repeat="user in vm.users" id="{{user.UserName}}">
                         <div class="media" ng-click="vm.getConversation(user.UserName)">
                             <div class="media-left">
                                 <img src="~/images/messenger_user.png" alt="User Avatar" width="40" class="img-circle">
@@ -74,7 +74,7 @@
                     <div class="messages-inner" id="messages-inner">
                         <div class="messages-content" id="message-content">
                             <div class="message-wrapper" ng-repeat="message in vm.currentConversation track by message.Id" repeat-complete="vm.listDidRender()" id="{{message.Id}}" ng-class="message.FromId === vm.currentUserName ? 'me' : 'them'">
-                                <div class="date-wrapper animated fadeIn">{{ message.DateReceived | date: "dd.MM.yyyy h:mm:ss"}}</div>
+                                <div class="date-wrapper animated fadeIn">{{ message.DateReceived | date: "dd.MM.yyyy HH:mm:ss"}}</div>
                                 <div class="circle-wrapper animated bounceIn"></div>
                                 <div class="text-wrapper animated fadeIn">{{ message.Content }}</div>
                             </div>

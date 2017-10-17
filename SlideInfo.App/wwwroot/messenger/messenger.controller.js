@@ -163,18 +163,16 @@
         }
 
         function receiveMessage(messageJson) {
-
-            // Create the new message for sending
             var message = JSON.parse(messageJson);
             console.log('receiving: ', message);
-            if (message.Subject === vm.currentSubject && message.FromId === vm.currentReceiverName) {
+
+            if (message.FromId === vm.currentReceiverName && !_.isEmpty(vm.currentConversation)) {
                 vm.currentConversation.push(message);
             } else {
                 var sender = _.find(vm.users, function (user) { return user.UserName === message.FromId });
                 sender.UnreadMessagesCount++;
-                console.log("sender ", sender);
-                $scope.$apply();
             }
+            $scope.$apply();
         }
 
         function scrollToBottom() {
