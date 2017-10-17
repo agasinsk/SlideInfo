@@ -15,6 +15,7 @@ namespace SlideInfo.App.Data
             InsertSlides(context);
             InsertUsers(context);
             InsertComments(context);
+            InsertMessages(context);
             context.SaveChanges();
         }
 
@@ -53,7 +54,8 @@ namespace SlideInfo.App.Data
             {
                 FirstMidName = "Marcin",
                 LastName = "Kowalski",
-                Email = "spolecznosciowy@wp.eu",
+                Email = "mail@interia.eu",
+                UserName = "mail@interia.eu",
                 LastActive = DateTime.Now,
                 EmailConfirmed = true,
             };
@@ -62,7 +64,8 @@ namespace SlideInfo.App.Data
             {
                 FirstMidName = "Jan",
                 LastName = "Kowalczuk",
-                Email = "niepotrzebne@wp.eu",
+                Email = "mail@onet.pl",
+                UserName = "mail@onet.pl",
                 LastActive = DateTime.Now,
                 EmailConfirmed = true,
             };
@@ -71,7 +74,8 @@ namespace SlideInfo.App.Data
             {
                 FirstMidName = "Mateusz",
                 LastName = "Owczarek",
-                Email = "arturgasinski@hotmail.com",
+                Email = "mail@outlook.com",
+                UserName = "mail@outlook.com",
                 LastActive = DateTime.Now,
                 EmailConfirmed = true,
             };
@@ -80,7 +84,8 @@ namespace SlideInfo.App.Data
             {
                 FirstMidName = "Janusz",
                 LastName = "Olszewka",
-                Email = "arti.gasiski@wp.pl",
+                Email = "amil@wp.pl",
+                UserName = "amil@wp.pl",
                 LastActive = DateTime.Now,
                 EmailConfirmed = true,
             };
@@ -123,6 +128,28 @@ namespace SlideInfo.App.Data
                 };
                 context.Comments.Add(comment);
             }
+            context.SaveChanges();
+        }
+
+        private static void InsertMessages(SlideInfoDbContext context)
+        {
+            if (context.Messages.Any())
+                return;
+
+            for (var i = 0; i < 30; ++i)
+            {
+                var subjectFrom = context.Users.OrderBy(o => Guid.NewGuid()).Last().Id;
+                var message = new Message
+                {
+                    Content = "Very important content of " + i + " very important message to display on user chat",
+                    FromId = context.Users.OrderBy(o => Guid.NewGuid()).First().Id,
+                    ToId = subjectFrom,
+                    Subject = subjectFrom,
+                    DateSent = DateTime.Now.Subtract(TimeSpan.FromMinutes(0.5 * i))
+                };
+                context.Messages.Add(message);
+            }
+
             context.SaveChanges();
         }
 

@@ -14,12 +14,21 @@ namespace SlideInfo.App.Models
 
         //public Attachment Attachment { get; set; }//, -- can be null or default to a 0
 
-        public DateTime DateReceived { get; set; }// -- can be null or default to 1901 or sumin'
+        public DateTime DateSent { get; set; }// -- can be null or default to 1901 or sumin'
         public DateTime DateRead { get; set; }
 
         [JsonIgnore]
         public AppUser From { get; set; }
         [JsonIgnore]
         public AppUser To { get; set; }
+
+        public bool IsRead()
+        {
+            if (DateRead != null)
+            {
+                return DateRead > DateSent;
+            }
+            return false;
+        }
     }
 }

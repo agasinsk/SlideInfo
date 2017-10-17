@@ -11,11 +11,12 @@
         vm.autoScrollDown = true;
 
         vm.currentUserName = "";
-        vm.currentReceiverName = "";
         vm.messageText = "";
 
         vm.users = [];
         vm.currentConversation = [];
+        vm.currentSubject = "";
+        vm.currentReceivers = [];
 
         vm.messageList = $(document.getElementById("message-content"));
 
@@ -24,6 +25,7 @@
         vm.getCurrentUserName = getCurrentUserName;
         vm.getUsers = getUsers;
         vm.getConversation = getConversation;
+        vm.setReceiver = setReceiver;
 
         vm.sendMessage = sendMessage;
         vm.checkEnterPressed = checkEnterPressed;
@@ -37,11 +39,11 @@
         function hasScrollReachedBottom() {
             var bool = vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop("scrollHeight");
             return bool;
-        };
+        }
 
         function hasScrollReachedTop() {
             return vm.messageList.scrollTop() === 0;
-        };
+        }
 
         function watchScroll() {
             if (hasScrollReachedTop()) {
@@ -56,7 +58,7 @@
             }
             vm.autoScrollDown = hasScrollReachedBottom();
             console.log("vm.autoScrollDown = ", vm.autoScrollDown);
-        };
+        }
 
         function init() {
 
@@ -98,12 +100,11 @@
                 });
         }
 
-
         function getCurrentUserName() {
             messengerService.getCurrentUser()
-                .then(function (user) {
-                    console.log("current user: ", user);
-                    vm.currentUserName = user;
+                .then(function (userName) {
+                    console.log("current user: ", userName);
+                    vm.currentUserName = userName;
                 });
         }
 
@@ -112,8 +113,14 @@
                 .then(function (conversation) {
                     vm.currentSubject = conversation.Subject;
                     vm.currentConversation = conversation.Messages;
-                    vm.currentReceiverName = subject;
+                    vm.currentReceivers = conversation.Users;
                 });
+        }
+
+        function setReceiver(userName) {
+            vm.currentSubject = conversation.Subject;
+            vm.currentConversation = conversation.Messages;
+            vm.currentReceivers = conversation.Users;
         }
 
         function fetchPreviousMessages() {
@@ -137,12 +144,11 @@
 
             message.Id = _.last(vm.currentConversation).Id + 1;
             message.FromId = vm.currentUserName;
-            console.log("message.FromId = ", vm.currentReceiverName);
             message.ToId = vm.currentReceiverName;
             console.log("message.ToId = ", vm.currentReceiverName);
             message.Subject = vm.conversationSubject;
             message.Content = vm.messageText;
-            message.DateReceived = new Date();
+            message.DateSent = new Date();
             console.log("sending: ", message);
 
             vm.currentConversation.push(message);
@@ -169,7 +175,7 @@
             if (message.FromId === vm.currentReceiverName && !_.isEmpty(vm.currentConversation)) {
                 vm.currentConversation.push(message);
             } else {
-                var sender = _.find(vm.users, function (user) { return user.UserName === message.FromId });
+                var sender = _.find(vm.users, function (user) { return user.UserName === message.FromId; });
                 sender.UnreadMessagesCount++;
             }
             $scope.$apply();
@@ -185,6 +191,5 @@
                 scrollToBottom();
             }
         }
-
     }
 })();

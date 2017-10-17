@@ -30,7 +30,7 @@
 
                 <div class="member-list">
                     <div class="member-link" ng-class="{'selected' : user.UserName === vm.currentReceiverName}" ng-repeat="user in vm.users" id="{{user.UserName}}">
-                        <div class="media" ng-click="vm.getConversation(user.UserName)">
+                        <div class="media" ng-click="vm.getConversation(user.Id)">
                             <div class="media-left">
                                 <img src="~/images/messenger_user.png" alt="User Avatar" width="40" class="img-circle">
                             </div>
