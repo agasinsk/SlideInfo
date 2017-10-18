@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Newtonsoft.Json;
@@ -31,32 +32,32 @@ namespace SlideInfo.App.Hubs
 
         public override Task OnConnected()
         {
-            var userName = Context.User.Identity.Name;
+            var userId = Context.User.Identity.GetUserId();
 
-            Connections.Add(userName, Context.ConnectionId);
+            Connections.Add(userId, Context.ConnectionId);
             Clients.Caller.onConnected(Connections.GetKeys());
-            Clients.AllExcept(Context.ConnectionId).onNewUserConnected(userName);
+            Clients.AllExcept(Context.ConnectionId).onNewUserConnected(userId);
 
             return base.OnConnected();
         }
 
         public override Task OnDisconnected(bool stopCalled)
         {
-            var userName = Context.User.Identity.Name;
+            var userId = Context.User.Identity.GetUserId();
 
-            Connections.Remove(userName, Context.ConnectionId);
-            Clients.AllExcept(Context.ConnectionId).onUserDisconnected(userName);
+            Connections.Remove(userId, Context.ConnectionId);
+            Clients.AllExcept(Context.ConnectionId).onUserDisconnected(userId);
 
             return base.OnDisconnected(stopCalled);
         }
 
         public override Task OnReconnected()
         {
-            var userName = Context.User.Identity.Name;
+            var userId = Context.User.Identity.GetUserId();
 
-            if (!Connections.GetConnections(userName).Contains(Context.ConnectionId))
+            if (!Connections.GetConnections(userId).Contains(Context.ConnectionId))
             {
-                Connections.Add(userName, Context.ConnectionId);
+                Connections.Add(userId, Context.ConnectionId);
             }
 
             return base.OnReconnected();

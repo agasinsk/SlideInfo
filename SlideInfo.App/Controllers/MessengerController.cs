@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SlideInfo.App.Data;
 using SlideInfo.App.Models;
+using SlideInfo.Helpers;
 
 namespace SlideInfo.App.Controllers
 {
@@ -55,75 +57,60 @@ namespace SlideInfo.App.Controllers
         [Route("[controller]/Users")]
         public string GetAppUsers()
         {
+            var userId = context.AppUsers.FirstOrDefault(u => u.UserName == userManager.GetUserName(User))?.Id;
             var users = context.AppUsers.Where(u => u.UserName != userManager.GetUserName(User)).AsEnumerable()
                 .Select(u => new MessengerUser()
                 {
                     Id = u.Id,
                     UserName = u.UserName,
                     FullName = u.FullName,
-                    UnreadMessagesCount = 0,
+                    PrivateConversationSubject = Conversation.GenerateConversationSubject(u.Id, userId)
                 });
 
             return JsonConvert.SerializeObject(users);
         }
 
         [Route("[controller]/CurrentUser")]
-        public string GetCurrentUser(string conversationSubject)
+        public string GetCurrentUser()
         {
-            return userManager.GetUserName(User);
+            var currentUser = context.AppUsers.FirstOrDefault(u => u.UserName == userManager.GetUserName(User));
+            var messengerUser = new MessengerUser
+            {
+                Id = currentUser?.Id,
+                UserName = currentUser?.UserName,
+                FullName = currentUser?.FullName
+            };
+
+            return JsonConvert.SerializeObject(messengerUser);
+        }
+
+        [Route("[controller]/Conversations/")]
+        public string GetConversations()
+        {
+            var userId = context.AppUsers.FirstOrDefault(u => u.UserName == userManager.GetUserName(User))?.Id;
+            var conversations = context.Messages.Where(m => m.ToId == userId || m.FromId == userId)
+                .Select(m => m.Id).Distinct();
+            return JsonConvert.SerializeObject(conversations);
         }
 
         [Route("[controller]/Conversation/{conversationSubject}")]
         public string GetConversation(string conversationSubject)
         {
-            IEnumerable<Message> messageList = null;
-            IEnumerable<string> users = null;
-            if (conversationSubject != null)
-            {
-                messageList = context.Messages.Where(m => m.Subject == conversationSubject);
-                if (!messageList.Any())
-                {
-                    users = new List<string>
-                    {
-                        conversationSubject,
-                        IdentityExtensions.GetUserName(Request.HttpContext.User.Identity)
-                    };
-                }
-                else
-                {
-                    users = GetConversationUserNames(messageList);
-                }
-            }
-            //var messageList = new List<Message>();
-            //for (var i = 0; i < 11; i++)
-            //{
-            //    var message = new Message
-            //    {
-            //        Id = i,
-            //        Content = "content of " + i + "vip",
-            //        FromId = "arturgasinski@gmail.com",
-            //        ToId = "arturgasinski@hotmail.com",
-            //        Subject = "mink",
-            //        DateSent = DateTime.Now.AddMinutes(i).AddSeconds(0.5 * i)
-            //    };
-            //    messageList.Add(message);
-            //}
-            var conversation = new Conversation { Messages = messageList, Subject = conversationSubject, Users = users };
+            if (conversationSubject == null) return "";
 
-            return JsonConvert.SerializeObject(conversation);
-        }
+            var dbMessages = context.Messages.Where(c => c.Subject == conversationSubject);
+            var dbConversation = new Conversation { Messages = dbMessages, Subject = conversationSubject };
 
-        public IEnumerable<string> GetConversationUserNames(IEnumerable<Message> messageList)
-        {
-            var userNames = new List<string>();
-            foreach (var message in messageList)
+            if (!dbMessages.Any())
             {
-                if (!userNames.Contains(message.FromId))
-                {
-                    userNames.Add(message.FromId);
-                }
+                dbConversation.UnreadMessagesCount = 0;
+                var users = context.Users.Where(u => u.Id.ContainsAny(conversationSubject.Split('-')));
+                dbConversation.Users = users.Select(u => u.Id);
+                var receivers = users.Where(u => u.UserName != userManager.GetUserName(User));
+                dbConversation.ReceiverId = receivers.First().Id;
             }
-            return userNames;
+
+            return JsonConvert.SerializeObject(dbConversation);
         }
 
 

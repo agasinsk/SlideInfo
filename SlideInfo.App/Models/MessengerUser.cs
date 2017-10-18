@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace SlideInfo.App.Models
+﻿namespace SlideInfo.App.Models
 {
     public class MessengerUser
     {
@@ -8,5 +6,6 @@ namespace SlideInfo.App.Models
         public string UserName { get; set; }
         public string FullName { get; set; }
         public int UnreadMessagesCount { get; set; }
+        public string PrivateConversationSubject { get; set; }
     }
 }

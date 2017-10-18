@@ -11,6 +11,7 @@ namespace SlideInfo.App.Data
 	    public DbSet<Slide> Slides { get; set; }
         public DbSet<Property> Properties { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
 
         public SlideInfoDbContext(DbContextOptions options)
 		    : base(options)

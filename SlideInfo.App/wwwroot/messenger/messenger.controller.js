@@ -9,23 +9,25 @@
         var vm = this;
 
         vm.autoScrollDown = true;
+        vm.showUsers = true;
+        vm.showConversations = false;
 
-        vm.currentUserName = "";
+        vm.currentUser = {};
+        vm.currentReceiver = {};
         vm.messageText = "";
 
         vm.users = [];
-        vm.currentConversation = [];
-        vm.currentSubject = "";
-        vm.currentReceivers = [];
+        vm.conversations = [];
+
+        vm.currentConversation = {};
 
         vm.messageList = $(document.getElementById("message-content"));
 
         //controller functions
         vm.getUsers = getUsers;
-        vm.getCurrentUserName = getCurrentUserName;
-        vm.getUsers = getUsers;
+        vm.getConversations = getConversations;
+        vm.getCurrentUser = getCurrentUser;
         vm.getConversation = getConversation;
-        vm.setReceiver = setReceiver;
 
         vm.sendMessage = sendMessage;
         vm.checkEnterPressed = checkEnterPressed;
@@ -63,7 +65,9 @@
         function init() {
 
             vm.getUsers();
-            vm.getCurrentUserName();
+            vm.getCurrentUser();
+            vm.getConversations();
+
             vm.messageList.bind("scroll", _.throttle(watchScroll, 250));
 
             messengerHub.client.addNewMessageToPage = function (message) {
@@ -96,31 +100,39 @@
         function getUsers() {
             messengerService.getUsers()
                 .then(function (users) {
+                    console.log("Users: ", users);
                     vm.users = users;
                 });
         }
 
-        function getCurrentUserName() {
+        function getCurrentUser() {
             messengerService.getCurrentUser()
-                .then(function (userName) {
-                    console.log("current user: ", userName);
-                    vm.currentUserName = userName;
+                .then(function (currentUser) {
+                    console.log("Current user: ", currentUser);
+                    vm.currentUser = currentUser;
+                });
+        }
+
+        function getConversations(userId) {
+            messengerService.getConversations(userId)
+                .then(function (conversations) {
+                    console.log("Conversations: ", conversations);
+                    vm.conversations = conversations;
                 });
         }
 
         function getConversation(subject) {
             messengerService.getConversation(subject)
                 .then(function (conversation) {
+                    console.log("Got conversation: ", conversation);
                     vm.currentSubject = conversation.Subject;
+                    console.log("Current subject: ", vm.currentSubject);
                     vm.currentConversation = conversation.Messages;
-                    vm.currentReceivers = conversation.Users;
+                    vm.currentReceiver = _.find(vm.users, function (user) {
+                        return user.Id === conversation.ReceiverId;
+                    });
+                    console.log("Current receiver: ", vm.currentReceiver);
                 });
-        }
-
-        function setReceiver(userName) {
-            vm.currentSubject = conversation.Subject;
-            vm.currentConversation = conversation.Messages;
-            vm.currentReceivers = conversation.Users;
         }
 
         function fetchPreviousMessages() {
@@ -142,11 +154,16 @@
             // Create the new message for sending
             var message = {};
 
-            message.Id = _.last(vm.currentConversation).Id + 1;
-            message.FromId = vm.currentUserName;
-            message.ToId = vm.currentReceiverName;
-            console.log("message.ToId = ", vm.currentReceiverName);
-            message.Subject = vm.conversationSubject;
+            if (!_.isEmpty(vm.currentConversation)) {
+                message.Id = _.last(vm.currentConversation).Id + 1;
+            }
+            else {
+                message.Id = 1;
+            }
+            message.FromId = vm.currentUser.Id;
+            message.ToId = vm.currentReceiver.Id;
+            console.log("message.ToId = ", vm.currentReceiver.Id);
+            message.Subject = vm.currentSubject;
             message.Content = vm.messageText;
             message.DateSent = new Date();
             console.log("sending: ", message);
@@ -170,12 +187,16 @@
 
         function receiveMessage(messageJson) {
             var message = JSON.parse(messageJson);
-            console.log('receiving: ', message);
+            console.log("receiving: ", message);
 
-            if (message.FromId === vm.currentReceiverName && !_.isEmpty(vm.currentConversation)) {
+            //push to current conversation
+            if (message.FromId === vm.currentReceiver.Id) {
                 vm.currentConversation.push(message);
             } else {
-                var sender = _.find(vm.users, function (user) { return user.UserName === message.FromId; });
+                //show unread message badge
+                var sender = _.find(vm.users, function (user) {
+                    return user.Id === message.FromId;
+                });
                 sender.UnreadMessagesCount++;
             }
             $scope.$apply();

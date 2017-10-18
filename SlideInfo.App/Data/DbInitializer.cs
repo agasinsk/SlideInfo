@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using SlideInfo.App.Constants;
 using SlideInfo.App.Helpers;
 using SlideInfo.App.Models;
@@ -70,30 +71,8 @@ namespace SlideInfo.App.Data
                 EmailConfirmed = true,
             };
 
-            var user3 = new AppUser()
-            {
-                FirstMidName = "Mateusz",
-                LastName = "Owczarek",
-                Email = "mail@outlook.com",
-                UserName = "mail@outlook.com",
-                LastActive = DateTime.Now,
-                EmailConfirmed = true,
-            };
-
-            var user4 = new AppUser()
-            {
-                FirstMidName = "Janusz",
-                LastName = "Olszewka",
-                Email = "amil@wp.pl",
-                UserName = "amil@wp.pl",
-                LastActive = DateTime.Now,
-                EmailConfirmed = true,
-            };
-
             context.AppUsers.Add(user1);
             context.AppUsers.Add(user2);
-            context.AppUsers.Add(user3);
-            context.AppUsers.Add(user4);
             context.SaveChanges();
         }
 
@@ -136,18 +115,24 @@ namespace SlideInfo.App.Data
             if (context.Messages.Any())
                 return;
 
-            for (var i = 0; i < 30; ++i)
+            for (var i = 0; i < 31; ++i)
             {
-                var subjectFrom = context.Users.OrderBy(o => Guid.NewGuid()).Last().Id;
+                var toId = context.Users.OrderBy(u => Guid.NewGuid()).First().Id;
+                var fromId = context.Users.First(u => u.Id != toId).Id;
+                var subject = Conversation.GenerateConversationSubject(fromId, toId);
                 var message = new Message
                 {
                     Content = "Very important content of " + i + " very important message to display on user chat",
-                    FromId = context.Users.OrderBy(o => Guid.NewGuid()).First().Id,
-                    ToId = subjectFrom,
-                    Subject = subjectFrom,
+                    FromId = fromId,
+                    ToId = toId,
+                    Subject = subject,
                     DateSent = DateTime.Now.Subtract(TimeSpan.FromMinutes(0.5 * i))
                 };
                 context.Messages.Add(message);
+                if (context.Conversations.Find(subject) == null)
+                {
+                    context.Conversations.Add(new Conversation { Subject = subject });
+                }
             }
 
             context.SaveChanges();

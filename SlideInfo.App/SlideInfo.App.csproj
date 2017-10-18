@@ -93,5 +93,6 @@
   <ItemGroup>
     <Reference Include="System.Web" />
   </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/chrome-manifest" /></VisualStudio></ProjectExtensions>
 
 </Project>

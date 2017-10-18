@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Newtonsoft.Json;
 
 namespace SlideInfo.App.Models
@@ -9,6 +10,7 @@ namespace SlideInfo.App.Models
 
         public string FromId { get; set; }// -- Foreign key AppUser.Id
         public string ToId { get; set; }// -- Foreign key AppUser.Id
+
         public string Subject { get; set; }
         public string Content { get; set; }
 
@@ -18,17 +20,13 @@ namespace SlideInfo.App.Models
         public DateTime DateRead { get; set; }
 
         [JsonIgnore]
+        public Conversation Conversation { get; set; }
+        [JsonIgnore]
         public AppUser From { get; set; }
         [JsonIgnore]
         public AppUser To { get; set; }
 
-        public bool IsRead()
-        {
-            if (DateRead != null)
-            {
-                return DateRead > DateSent;
-            }
-            return false;
-        }
+        public bool IsRead() => DateRead > DateSent;
+
     }
 }
