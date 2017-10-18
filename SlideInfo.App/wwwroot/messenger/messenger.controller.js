@@ -75,17 +75,17 @@
                 receiveMessage(message);
             };
 
-            messengerHub.client.onNewUserConnected = function (userName) {
-                console.log("User connected: " + userName);
+            messengerHub.client.onNewUserConnected = function (userId) {
+                console.log("User connected: " + userId);
 
-                var userLink = $(document.getElementById(userName));
+                var userLink = $(document.getElementById(userId));
                 userLink.find('.status-icon').css("background", "green");
             };
 
-            messengerHub.client.onUserDisconnected = function (userName) {
-                console.log("User disconnected: " + userName);
+            messengerHub.client.onUserDisconnected = function (userId) {
+                console.log("User disconnected: " + userId);
 
-                var userLink = $(document.getElementById(userName));
+                var userLink = $(document.getElementById(userId));
                 userLink.find('.status-icon').css("background", "red");
             };
 
@@ -122,15 +122,18 @@
         }
 
         function getConversation(subject) {
+            vm.currentReceiver = _.find(vm.users, function (user) {
+                return user.PrivateConversationSubject === subject;
+            });
             messengerService.getConversation(subject)
                 .then(function (conversation) {
                     console.log("Got conversation: ", conversation);
                     vm.currentSubject = conversation.Subject;
                     console.log("Current subject: ", vm.currentSubject);
                     vm.currentConversation = conversation.Messages;
-                    vm.currentReceiver = _.find(vm.users, function (user) {
-                        return user.Id === conversation.ReceiverId;
-                    });
+                    //vm.currentReceiver = _.find(vm.users, function (user) {
+                    //    return user.Id === conversation.ReceiverId;
+                    //});
                     console.log("Current receiver: ", vm.currentReceiver);
                 });
         }
@@ -151,8 +154,21 @@
 
         function sendMessage() {
 
-            // Create the new message for sending
+            // Create the new message for sending - leaving message.Id empty
             var message = {};
+
+            message.FromId = vm.currentUser.Id;
+            message.ToId = vm.currentReceiver.Id;
+            console.log("message.ToId = ", vm.currentReceiver.Id);
+            message.Subject = vm.currentSubject;
+            message.Content = vm.messageText;
+            message.DateSent = new Date();
+            console.log("Sending: ", message);
+
+            // Send data to server without id
+            messengerHub.server.send(JSON.stringify(message));
+            // clear the input
+            vm.messageText = "";
 
             if (!_.isEmpty(vm.currentConversation)) {
                 message.Id = _.last(vm.currentConversation).Id + 1;
@@ -160,19 +176,7 @@
             else {
                 message.Id = 1;
             }
-            message.FromId = vm.currentUser.Id;
-            message.ToId = vm.currentReceiver.Id;
-            console.log("message.ToId = ", vm.currentReceiver.Id);
-            message.Subject = vm.currentSubject;
-            message.Content = vm.messageText;
-            message.DateSent = new Date();
-            console.log("sending: ", message);
-
             vm.currentConversation.push(message);
-            // Send data to server
-            messengerHub.server.send(JSON.stringify(message));
-            // clear the input
-            vm.messageText = "";
         }
 
         function checkEnterPressed($event) {
@@ -187,7 +191,7 @@
 
         function receiveMessage(messageJson) {
             var message = JSON.parse(messageJson);
-            console.log("receiving: ", message);
+            console.log("Received: ", message);
 
             //push to current conversation
             if (message.FromId === vm.currentReceiver.Id) {
