@@ -125,15 +125,14 @@
             vm.currentReceiver = _.find(vm.users, function (user) {
                 return user.PrivateConversationSubject === subject;
             });
+            vm.currentReceiver.UnreadMessagesCount = 0;
+
             messengerService.getConversation(subject)
                 .then(function (conversation) {
                     console.log("Got conversation: ", conversation);
                     vm.currentSubject = conversation.Subject;
                     console.log("Current subject: ", vm.currentSubject);
                     vm.currentConversation = conversation.Messages;
-                    //vm.currentReceiver = _.find(vm.users, function (user) {
-                    //    return user.Id === conversation.ReceiverId;
-                    //});
                     console.log("Current receiver: ", vm.currentReceiver);
                 });
         }
@@ -198,6 +197,12 @@
 
             //push to current conversation
             if (message.FromId === vm.currentReceiver.Id) {
+                if (!_.isEmpty(vm.currentConversation)) {
+                    message.Id = _.last(vm.currentConversation).Id + 1;
+                }
+                else {
+                    message.Id = 1;
+                }
                 vm.currentConversation.push(message);
             } else {
                 //show unread message badge

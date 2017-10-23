@@ -103,13 +103,20 @@ namespace SlideInfo.App.Controllers
             var dbMessages = context.Messages.Where(c => c.Subject == conversationSubject);
             var dbConversation = new Conversation { Messages = dbMessages, Subject = conversationSubject };
 
-            if (!dbMessages.Any())
+            //setting messages as read
+            if (dbMessages.Any())
             {
-                dbConversation.UnreadMessagesCount = 0;
-                var users = context.Users.Where(u => u.Id.ContainsAny(conversationSubject.Split('-')));
-                dbConversation.Users = users.Select(u => u.Id);
-                var receivers = users.Where(u => u.UserName != userManager.GetUserName(User));
-                dbConversation.ReceiverId = receivers.First().Id;
+                var unreadMessages = dbMessages.Where(m => !m.IsRead() && m.ToId == userManager.GetUserId(User));
+                if (unreadMessages.Any())
+                {
+                    var dateNow = DateTime.Now;
+                    foreach (var unreadMessage in unreadMessages)
+                    {
+                        unreadMessage.DateRead = dateNow;
+                        context.Update(unreadMessage);
+                    }
+                    context.SaveChanges();
+                }
             }
 
             return JsonConvert.SerializeObject(dbConversation);
