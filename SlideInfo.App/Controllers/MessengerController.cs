@@ -66,7 +66,8 @@ namespace SlideInfo.App.Controllers
                     Id = u.Id,
                     UserName = u.UserName,
                     FullName = u.FullName,
-                    PrivateConversationSubject = Conversation.GenerateConversationSubject(u.Id, userId)
+                    PrivateConversationSubject = Conversation.GenerateConversationSubject(u.Id, userId),
+                    UnreadMessagesCount = context.Messages.Count(m => !m.IsRead() && m.FromId == u.Id && m.ToId == userManager.GetUserId(User))
                 });
 
             return JsonConvert.SerializeObject(users);

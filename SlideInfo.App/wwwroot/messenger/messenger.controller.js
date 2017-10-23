@@ -223,7 +223,7 @@
         }
 
         function onUserTyping() {
-            if (vm.currentReceiver !== undefined) {
+            if (vm.currentReceiver != null) {
                 vm.userTyping = vm.currentReceiver.FullName + " is typing...";
                 console.log(vm.userTyping);
                 window.setTimeout(function () {
