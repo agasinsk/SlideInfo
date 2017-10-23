@@ -28,6 +28,14 @@ namespace SlideInfo.App.Hubs
             }
         }
 
+        public void OnUserTyping(string toUserId)
+        {
+            foreach (var connectionId in Connections.GetConnections(toUserId))
+            {
+                Clients.Client(connectionId).onUserTyping();
+            }
+        }
+
         public override Task OnConnected()
         {
             var userId = Context.User.Identity.GetUserId();

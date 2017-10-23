@@ -10,7 +10,7 @@
 
         vm.autoScrollDown = true;
         vm.showUsers = true;
-        vm.showConversations = false;
+        vm.userTyping = "";
 
         vm.currentUser = {};
         vm.currentReceiver = {};
@@ -69,6 +69,10 @@
             vm.getConversations();
 
             vm.messageList.bind("scroll", _.throttle(watchScroll, 250));
+
+            messengerHub.client.onUserTyping = function () {
+                _.throttle(onUserTyping(), 1000);
+            };
 
             messengerHub.client.addNewMessageToPage = function (message) {
                 console.log("adding message to the page...");
@@ -188,6 +192,10 @@
             if (keyCode === 13) {
                 $event.preventDefault();
                 sendMessage();
+            } else {
+                if (vm.currentReceiver.Id) {
+                    _.throttle(messengerHub.server.onUserTyping(vm.currentReceiver.Id), 500);
+                }
             }
         }
 
@@ -214,6 +222,17 @@
             $scope.$apply();
         }
 
+        function onUserTyping() {
+            if (vm.currentReceiver !== undefined) {
+                vm.userTyping = vm.currentReceiver.FullName + " is typing...";
+                console.log(vm.userTyping);
+                window.setTimeout(function () {
+                    vm.userTyping = "";
+                    $scope.$apply();
+                }, 1500);
+            }
+            $scope.$apply();
+        }
         function scrollToBottom() {
             var lastMessageId = _.last(vm.currentConversation).Id;
             $anchorScroll(lastMessageId);

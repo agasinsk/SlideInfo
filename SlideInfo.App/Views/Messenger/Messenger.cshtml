@@ -26,27 +26,6 @@
                         </button>
                     </div>
                 </div>
-                <ul class="nav nav-tabs" ng-if="vm.showConversations">
-                    <li ng-class="{'active' : !vm.showUsers}"><a href="#" ng-click="vm.showUsers = !vm.showUsers">Conversations</a></li>
-                    <li ng-class="{'active' : vm.showUsers}"><a href="#" ng-click="vm.showUsers = !vm.showUsers">Users</a></li>
-                </ul>
-
-                <div class="member-list" ng-hide="vm.showUsers" ng-if="vm.showConversations">
-                    <div class="member-link" ng-class="{'selected' : conversation.subject === vm.currentSubject}" ng-repeat="conversation in vm.conversations" id="{{conversation.subject}}">
-                        <div class="media" ng-click="vm.getConversation(conversation.subject)">
-                            <div class="media-left">
-                                <img src="~/images/messenger_user.png" alt="User Avatar" width="40" class="img-circle">
-                            </div>
-                            <div class="media-body a">
-                                <h4>
-                                    {{conversation.Users}}
-                                    <span class="status-icon"></span>
-                                    <span class="badge pull-right flash animated" ng-show="conversation.UnreadMessagesCount > 0">{{conversation.UnreadMessagesCount}}</span>
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="member-list" ng-show="vm.showUsers">
                     <div class="member-link" ng-class="{'selected' : user.Id === vm.currentReceiver.Id}" ng-repeat="user in vm.users" id="{{user.Id}}">
@@ -71,6 +50,13 @@
         <div class="col-sm-9 message_section">
             <div class="row">
 
+                <div class="new_message_head">
+                    <div class="pull-left user-typing-block">
+                        <i class="glyphicon glyphicon-comment" aria-hidden="true"></i> {{ vm.userTyping }}
+                    </div>
+                   
+                </div>
+                <!--new_message_head-->
                 <div class="chat-area" id="chat-area">
                     <div class="messages-inner" id="messages-inner">
                         <div class="messages-content" id="message-content">

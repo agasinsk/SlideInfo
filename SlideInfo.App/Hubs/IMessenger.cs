@@ -10,6 +10,7 @@ namespace SlideInfo.App.Hubs
         void onNewUserConnected(string userName);
         void onUserDisconnected(string userName);
 
+        void onUserTyping();
         void addNewMessageToPage(string messageJson);
     }
 }
