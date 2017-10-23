@@ -55,8 +55,8 @@
                 });
         }
 
-        function saveMessage() {
-            return $http.get("/Messenger/Conversation")
+        function saveMessage(messageJson) {
+            return $http.post("/Messenger/Save", messageJson)
                 .then(function (response) {
                     return response.data;
                 });

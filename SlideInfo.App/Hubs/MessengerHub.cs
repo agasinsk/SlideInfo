@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
@@ -21,20 +20,11 @@ namespace SlideInfo.App.Hubs
         public void Send(string messageJson)
         {
             var message = JsonConvert.DeserializeObject<Message>(messageJson);
-            var newMessage = new Message();
-            using (var context = new SlideInfoDbContext())
-            {
-                context.Messages.Add(message);
-                context.SaveChanges();
-                
-                var messageId = message.Id;
-                var messageWithdIdJson = JsonConvert.SerializeObject(message);
 
-                //sending message to receiver connections
-                foreach (var connectionId in Connections.GetConnections(message.ToId))
-                {
-                    Clients.Client(connectionId).addNewMessageToPage(messageWithdIdJson);
-                }
+            //sending message to receiver connections
+            foreach (var connectionId in Connections.GetConnections(message.ToId))
+            {
+                Clients.Client(connectionId).addNewMessageToPage(messageJson);
             }
         }
 

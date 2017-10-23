@@ -4,10 +4,12 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SlideInfo.App.Data;
+using SlideInfo.App.Hubs;
 using SlideInfo.App.Models;
 using SlideInfo.Helpers;
 
@@ -113,6 +115,19 @@ namespace SlideInfo.App.Controllers
             return JsonConvert.SerializeObject(dbConversation);
         }
 
+        [Route("[controller]/Save")]
+        [HttpPost]
+        public bool SaveMessage([FromBody] Message message)
+        {
+            if (message == null) return false;
 
+            context.Messages.Add(message);
+            if (context.Conversations.Find(message.Subject) == null)
+            {
+                context.Conversations.Add(new Conversation { Subject = message.Subject });
+            }
+            var savedCount = context.SaveChanges();
+            return savedCount == 1;
+        }
     }
 }

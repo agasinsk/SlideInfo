@@ -165,8 +165,11 @@
             message.DateSent = new Date();
             console.log("Sending: ", message);
 
+            var messageJson = JSON.stringify(message);
             // Send data to server without id
-            messengerHub.server.send(JSON.stringify(message));
+            messengerHub.server.send(messageJson);
+            messengerService.saveMessage(messageJson);
+
             // clear the input
             vm.messageText = "";
 
