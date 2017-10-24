@@ -15,7 +15,8 @@
             getMessage: getMessage,
             saveMessage: saveMessage,
             deleteMessage: deleteMessage,
-            generateConversationSubject: generateConversationSubject
+            generateConversationSubject: generateConversationSubject,
+            foundSearchPhrase: foundSearchPhrase
         };
 
         ///////////////
@@ -83,6 +84,20 @@
             });
             console.log("Generated conversation subject: ", subject);
             return subject;
+        }
+
+        function foundSearchPhrase(user, phrase) {
+            var searchPhrase = phrase.toLowerCase();
+            if (user.Id.toLowerCase().indexOf(searchPhrase) !== -1) {
+                return true;
+            }
+            if (user.FullName.toLowerCase().indexOf(searchPhrase) !== -1) {
+                return true;
+            }
+            if (user.Email.toLowerCase().indexOf(searchPhrase) !== -1) {
+                return true;
+            }
+            return false;
         }
 
         return service;

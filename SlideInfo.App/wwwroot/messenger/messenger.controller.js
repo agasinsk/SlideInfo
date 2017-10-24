@@ -15,13 +15,15 @@
         vm.currentUser = {};
         vm.currentReceiver = {};
         vm.messageText = "";
+        vm.searchPhrase = "";
 
         vm.users = [];
+        vm.allUsers = [];
         vm.conversations = [];
 
         vm.currentConversation = {};
 
-        vm.messageList = $(document.getElementById("message-content"));
+        vm.messageList = {};
 
         //controller functions
         vm.getUsers = getUsers;
@@ -32,42 +34,20 @@
         vm.sendMessage = sendMessage;
         vm.checkEnterPressed = checkEnterPressed;
         vm.receiveMessage = receiveMessage;
+        vm.search = search;
+        vm.clearSearch = clearSearch;
 
         vm.listDidRender = listDidRender;
 
         init();
         /////////////////
 
-        function hasScrollReachedBottom() {
-            var bool = vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop("scrollHeight");
-            return bool;
-        }
-
-        function hasScrollReachedTop() {
-            return vm.messageList.scrollTop() === 0;
-        }
-
-        function watchScroll() {
-            if (hasScrollReachedTop()) {
-
-                ngNotify.set("All the messages have been loaded", {
-                    type: "grimace",
-                    target: "#message-content"
-                });
-
-                //fetchPreviousMessages();
-
-            }
-            vm.autoScrollDown = hasScrollReachedBottom();
-            console.log("vm.autoScrollDown = ", vm.autoScrollDown);
-        }
-
         function init() {
 
             vm.getUsers();
             vm.getCurrentUser();
-            vm.getConversations();
 
+            vm.messageList = $(document.getElementById("message-content"));
             vm.messageList.bind("scroll", _.throttle(watchScroll, 250));
 
             messengerHub.client.onUserTyping = function () {
@@ -81,16 +61,20 @@
 
             messengerHub.client.onNewUserConnected = function (userId) {
                 console.log("User connected: " + userId);
-
-                var userLink = $(document.getElementById(userId));
-                userLink.find('.status-icon').css("background", "green");
+                var foundUser = _.find(vm.users, user => user.Id === userId);
+                if (foundUser) {
+                    foundUser.IsActive = true;
+                    $scope.$apply();
+                }
             };
 
             messengerHub.client.onUserDisconnected = function (userId) {
                 console.log("User disconnected: " + userId);
-
-                var userLink = $(document.getElementById(userId));
-                userLink.find('.status-icon').css("background", "red");
+                var foundUser = _.find(vm.users, user => user.Id === userId);
+                if (foundUser) {
+                    foundUser.IsActive = false;
+                    $scope.$apply();
+                }
             };
 
             messengerHub.client.onConnected = function (connectedUsers) {
@@ -106,6 +90,7 @@
                 .then(function (users) {
                     console.log("Users: ", users);
                     vm.users = users;
+                    vm.allUsers = users;
                 });
         }
 
@@ -214,28 +199,75 @@
                 vm.currentConversation.push(message);
             } else {
                 //show unread message badge
-                var sender = _.find(vm.users, function (user) {
-                    return user.Id === message.FromId;
-                });
+                var sender = _.find(vm.users, user => user.Id === message.FromId);
                 sender.UnreadMessagesCount++;
             }
             $scope.$apply();
         }
 
+        function search() {
+            if (vm.searchPhrase !== "") {
+                var searchResults = [];
+                _.each(vm.users,
+                    function (user) {
+                        if (messengerService.foundSearchPhrase(user, vm.searchPhrase)) {
+                            searchResults.push(user);
+                        }
+                    });
+                vm.users = searchResults;
+            } else {
+                vm.users = vm.allUsers;
+            }
+            $scope.$applyAsync();
+        }
+
+        function clearSearch() {
+            vm.searchPhrase = "";
+            vm.users = vm.allUsers;
+            $scope.$applyAsync();
+        }
+
         function onUserTyping() {
             if (vm.currentReceiver != null) {
-                vm.userTyping = vm.currentReceiver.FullName + " is typing...";
+                vm.userTyping = " is typing...";
                 console.log(vm.userTyping);
                 window.setTimeout(function () {
                     vm.userTyping = "";
-                    $scope.$apply();
+                    $scope.$applyAsync();
                 }, 1500);
             }
-            $scope.$apply();
+            $scope.$applyAsync();
         }
+
+        function hasScrollReachedBottom() {
+            var bool = vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop("scrollHeight");
+            return bool;
+        }
+
+        function hasScrollReachedTop() {
+            return vm.messageList.scrollTop() === 0;
+        }
+
+        function watchScroll() {
+            if (hasScrollReachedTop()) {
+
+                ngNotify.set("All the messages have been loaded", {
+                    type: "grimace",
+                    target: "#message-content"
+                });
+
+                //fetchPreviousMessages();
+
+            }
+            vm.autoScrollDown = hasScrollReachedBottom();
+            console.log("vm.autoScrollDown = ", vm.autoScrollDown);
+        }
+
         function scrollToBottom() {
-            var lastMessageId = _.last(vm.currentConversation).Id;
-            $anchorScroll(lastMessageId);
+            if (vm.currentConversation != null) {
+                var lastMessageId = _.last(vm.currentConversation).Id;
+                $anchorScroll(lastMessageId);
+            }
         }
 
         function listDidRender() {

@@ -66,6 +66,7 @@ namespace SlideInfo.App.Controllers
                     Id = u.Id,
                     UserName = u.UserName,
                     FullName = u.FullName,
+                    Email = u.Email,
                     PrivateConversationSubject = Conversation.GenerateConversationSubject(u.Id, userId),
                     UnreadMessagesCount = context.Messages.Count(m => !m.IsRead() && m.FromId == u.Id && m.ToId == userManager.GetUserId(User))
                 });
@@ -80,8 +81,8 @@ namespace SlideInfo.App.Controllers
             var messengerUser = new MessengerUser
             {
                 Id = currentUser?.Id,
-                UserName = currentUser?.UserName,
-                FullName = currentUser?.FullName
+                FullName = currentUser?.FullName,
+                Email = currentUser?.Email
             };
 
             return JsonConvert.SerializeObject(messengerUser);
