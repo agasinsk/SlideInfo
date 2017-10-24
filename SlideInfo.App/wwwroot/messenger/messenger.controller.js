@@ -22,7 +22,7 @@
         vm.conversations = [];
 
         vm.currentConversation = {};
-
+        vm.currentPage = 0;
         vm.messageList = {};
 
         //controller functions
@@ -38,6 +38,7 @@
         vm.clearSearch = clearSearch;
 
         vm.listDidRender = listDidRender;
+        vm.allMessagesFetched = false;
 
         init();
         /////////////////
@@ -47,8 +48,8 @@
             vm.getUsers();
             vm.getCurrentUser();
 
-            vm.messageList = $(document.getElementById("message-content"));
-            vm.messageList.bind("scroll", _.throttle(watchScroll, 250));
+            vm.messageList = $(document.getElementById("chat-area"));
+            vm.messageList.bind("scroll", _.throttle(watchScroll, 300));
 
             messengerHub.client.onUserTyping = function () {
                 _.throttle(onUserTyping(), 1000);
@@ -115,29 +116,33 @@
                 return user.PrivateConversationSubject === subject;
             });
             vm.currentReceiver.UnreadMessagesCount = 0;
-
-            messengerService.getConversation(subject)
+            vm.currentPage = 0;
+            messengerService.getConversation(subject, vm.currentPage)
                 .then(function (conversation) {
                     console.log("Got conversation: ", conversation);
                     vm.currentSubject = conversation.Subject;
                     console.log("Current subject: ", vm.currentSubject);
-                    vm.currentConversation = conversation.Messages;
+                    vm.currentConversation = conversation.Messages.reverse();
                     console.log("Current receiver: ", vm.currentReceiver);
+                    vm.allMessagesFetched = conversation.AllMessagesFetched;
                 });
         }
 
         function fetchPreviousMessages() {
-            ngNotify.set("Loading previous messages...", {
-                type: "success",
-                target: "#message-content"
-            });
-            var firstLoadedMessageId = vm.currentConversation[0].Id.toString();
+            vm.currentPage++;
+            ngNotify.set("Loading previous messages...", "success");
+            var currentMessageId = vm.currentConversation[0].Id.toString();
+           
+            messengerService.getConversation(vm.currentSubject, vm.currentPage)
+                .then(function (conversation) {
+                    console.log("Got conversation page: ", conversation);
+                    conversation.Messages.forEach(message => vm.currentConversation.unshift(message));
+                    vm.allMessagesFetched = conversation.AllMessagesFetched;
+                    _.defer(function () {
+                        $anchorScroll(currentMessageId);
+                    });
+                });
 
-            //scope.messages.$load(10).then(function (m) {
-            //    // Scroll to the previous message 
-            //    _.defer(function () { $anchorScroll(currentMessage) });
-            //});
-            console.log("loading more messages/// bakcend working hard");
         }
 
         function sendMessage() {
@@ -228,7 +233,7 @@
         }
 
         function onUserTyping() {
-            if (vm.currentReceiver != null) {
+            if (vm.currentReceiver !== null) {
                 vm.userTyping = " is typing...";
                 console.log(vm.userTyping);
                 window.setTimeout(function () {
@@ -239,32 +244,29 @@
             $scope.$applyAsync();
         }
 
-        function hasScrollReachedBottom() {
-            var bool = vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop("scrollHeight");
-            return bool;
+        function watchScroll() {
+            if (hasScrollReachedTop()) {
+                if (vm.allMessagesFetched) {
+                    ngNotify.set("All the messages have been loaded!", "grimace");
+                } else {
+                    fetchPreviousMessages();
+                }
+            }
+            vm.autoScrollDown = hasScrollReachedBottom();
+            console.log("vm.autoScrollDown = ", vm.autoScrollDown);
         }
 
         function hasScrollReachedTop() {
             return vm.messageList.scrollTop() === 0;
         }
 
-        function watchScroll() {
-            if (hasScrollReachedTop()) {
-
-                ngNotify.set("All the messages have been loaded", {
-                    type: "grimace",
-                    target: "#message-content"
-                });
-
-                //fetchPreviousMessages();
-
-            }
-            vm.autoScrollDown = hasScrollReachedBottom();
-            console.log("vm.autoScrollDown = ", vm.autoScrollDown);
+        function hasScrollReachedBottom() {
+            var bool = vm.messageList.scrollTop() + vm.messageList.innerHeight() >= vm.messageList.prop("scrollHeight");
+            return bool;
         }
 
         function scrollToBottom() {
-            if (vm.currentConversation != null) {
+            if (vm.currentConversation !== null) {
                 var lastMessageId = _.last(vm.currentConversation).Id;
                 $anchorScroll(lastMessageId);
             }

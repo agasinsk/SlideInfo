@@ -42,8 +42,8 @@
                 });
         }
 
-        function getConversation(subject) {
-            return $http.get("/Messenger/Conversation/" + subject)
+        function getConversation(subject, pageNumber) {
+            return $http.get("/Messenger/Conversation/" + subject + "/" + pageNumber)
                 .then(function (response) {
                     return response.data;
                 });

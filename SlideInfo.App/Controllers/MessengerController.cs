@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using SlideInfo.App.Data;
+using SlideInfo.App.Helpers;
 using SlideInfo.App.Hubs;
 using SlideInfo.App.Models;
 using SlideInfo.Helpers;
@@ -97,18 +98,19 @@ namespace SlideInfo.App.Controllers
             return JsonConvert.SerializeObject(conversations);
         }
 
-        [Route("[controller]/Conversation/{conversationSubject}")]
-        public string GetConversation(string conversationSubject)
+        [Route("[controller]/Conversation/{conversationSubject}/{pageNumber}")]
+        public string GetConversation(string conversationSubject, int? pageNumber)
         {
             if (conversationSubject == null) return "";
+            const int pageSize = 10;
 
-            var dbMessages = context.Messages.Where(c => c.Subject == conversationSubject);
-            var dbConversation = new Conversation { Messages = dbMessages, Subject = conversationSubject };
+            var dbMessages = context.Messages.Where(m => m.Subject == conversationSubject).OrderByDescending(m => m.DateSent);
+            var dbMessagesPage = dbMessages.AsNoTracking().Skip((pageNumber ?? 1 - 1) * pageSize).Take(pageSize);
 
             //setting messages as read
-            if (dbMessages.Any())
+            if (dbMessagesPage.Any())
             {
-                var unreadMessages = dbMessages.Where(m => !m.IsRead() && m.ToId == userManager.GetUserId(User));
+                var unreadMessages = dbMessagesPage.Where(m => !m.IsRead() && m.ToId == userManager.GetUserId(User));
                 if (unreadMessages.Any())
                 {
                     var dateNow = DateTime.Now;
@@ -120,6 +122,8 @@ namespace SlideInfo.App.Controllers
                     context.SaveChanges();
                 }
             }
+            var allMessagesFetched = (pageNumber ?? 1 + 1) * pageSize >= dbMessages.Count();
+            var dbConversation = new Conversation { Messages = dbMessagesPage, Subject = conversationSubject, AllMessagesFetched = allMessagesFetched };
 
             return JsonConvert.SerializeObject(dbConversation);
         }

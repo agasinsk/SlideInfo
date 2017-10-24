@@ -285,7 +285,7 @@ namespace SlideInfo.App.Controllers
             comments = descending ?
                 comments.OrderByDescending(e => EF.Property<object>(e, sortOrder))
                 : comments.OrderBy(e => EF.Property<object>(e, sortOrder));
-
+            //paging
             var defaultPageSize = 15;
 
             var paginatedComments = await PaginatedList<Comment>.

@@ -14,6 +14,9 @@ namespace SlideInfo.App.Models
         public IEnumerable<Message> Messages { get; set; }
 
         [NotMapped]
+        public bool AllMessagesFetched { get; set; }
+
+        [NotMapped]
         public string ReceiverId { get; set; }
 
         [NotMapped]
