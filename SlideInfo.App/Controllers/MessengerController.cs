@@ -122,10 +122,19 @@ namespace SlideInfo.App.Controllers
                     context.SaveChanges();
                 }
             }
-            var allMessagesFetched = (pageNumber ?? 1 + 1) * pageSize >= dbMessages.Count();
-            var dbConversation = new Conversation { Messages = dbMessagesPage, Subject = conversationSubject, AllMessagesFetched = allMessagesFetched };
+
+            var dbConversation = new Conversation { Messages = dbMessagesPage, Subject = conversationSubject, MessagesCount = dbMessages.Count() };
 
             return JsonConvert.SerializeObject(dbConversation);
+        }
+
+        [Route("[controller]/Conversation/Count{conversationSubject}")]
+        public string GetConversationCount(string conversationSubject)
+        {
+            if (conversationSubject == null) return "";
+
+            var dbMessages = context.Messages.Where(m => m.Subject == conversationSubject).OrderByDescending(m => m.DateSent);
+            return JsonConvert.SerializeObject(dbMessages.Count());
         }
 
         [Route("[controller]/Save")]

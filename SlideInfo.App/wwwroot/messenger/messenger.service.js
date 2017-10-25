@@ -15,7 +15,6 @@
             getMessage: getMessage,
             saveMessage: saveMessage,
             deleteMessage: deleteMessage,
-            generateConversationSubject: generateConversationSubject,
             foundSearchPhrase: foundSearchPhrase
         };
 
@@ -68,22 +67,6 @@
                 .then(function (response) {
                     return response.data;
                 });
-        }
-
-        function generateConversationSubject(userIds) {
-
-            var subject = "";
-            var sortedIds = _.sortBy(userIds, function (userId) {
-                return userId;
-            });
-
-            _.each(sortedIds, function (userId) {
-                var userIdTruncated = userId.split("-")[0];
-                subject += userIdTruncated;
-                subject += "-";
-            });
-            console.log("Generated conversation subject: ", subject);
-            return subject;
         }
 
         function foundSearchPhrase(user, phrase) {

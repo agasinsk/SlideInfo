@@ -5,12 +5,12 @@ namespace SlideInfo.App.Hubs
 {
     public interface IMessenger
     {
-        void onConnected(IEnumerable<string> ConnectedUsers);
+        void onConnected(IEnumerable<string> connectedUsers);
 
-        void onNewUserConnected(string userName);
-        void onUserDisconnected(string userName);
+        void onNewUserConnected(string userId);
+        void onUserDisconnected(string userId);
 
-        void onUserTyping();
+        void onUserTyping(string fromUserId);
         void addNewMessageToPage(string messageJson);
     }
 }

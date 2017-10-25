@@ -28,11 +28,11 @@ namespace SlideInfo.App.Hubs
             }
         }
 
-        public void OnUserTyping(string toUserId)
+        public void OnUserTyping(string toUserId, string fromUserId)
         {
             foreach (var connectionId in Connections.GetConnections(toUserId))
             {
-                Clients.Client(connectionId).onUserTyping();
+                Clients.Client(connectionId).onUserTyping(fromUserId);
             }
         }
 

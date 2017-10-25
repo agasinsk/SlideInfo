@@ -19,7 +19,7 @@
 
         vm.users = [];
         vm.allUsers = [];
-        vm.conversations = [];
+        vm.cachedConversations = [];
 
         vm.currentConversation = {};
         vm.currentPage = 0;
@@ -27,7 +27,6 @@
 
         //controller functions
         vm.getUsers = getUsers;
-        vm.getConversations = getConversations;
         vm.getCurrentUser = getCurrentUser;
         vm.getConversation = getConversation;
 
@@ -51,12 +50,12 @@
             vm.messageList = $(document.getElementById("chat-area"));
             vm.messageList.bind("scroll", _.throttle(watchScroll, 300));
 
-            messengerHub.client.onUserTyping = function () {
-                _.throttle(onUserTyping(), 1000);
+            messengerHub.client.onUserTyping = function (typingUserId) {
+                _.throttle(onUserTyping(typingUserId), 1000);
             };
 
             messengerHub.client.addNewMessageToPage = function (message) {
-                console.log("adding message to the page...");
+                console.log("Adding message to the page...");
                 receiveMessage(message);
             };
 
@@ -103,46 +102,41 @@
                 });
         }
 
-        function getConversations(userId) {
-            messengerService.getConversations(userId)
-                .then(function (conversations) {
-                    console.log("Conversations: ", conversations);
-                    vm.conversations = conversations;
-                });
-        }
-
         function getConversation(subject) {
+
             vm.currentReceiver = _.find(vm.users, function (user) {
                 return user.PrivateConversationSubject === subject;
             });
             vm.currentReceiver.UnreadMessagesCount = 0;
             vm.currentPage = 0;
-            messengerService.getConversation(subject, vm.currentPage)
-                .then(function (conversation) {
-                    console.log("Got conversation: ", conversation);
-                    vm.currentSubject = conversation.Subject;
-                    console.log("Current subject: ", vm.currentSubject);
-                    vm.currentConversation = conversation.Messages.reverse();
-                    console.log("Current receiver: ", vm.currentReceiver);
-                    vm.allMessagesFetched = conversation.AllMessagesFetched;
-                });
+            if (!_.isEmpty(vm.cachedConversations[subject])) {
+                vm.currentConversation = vm.cachedConversations[subject];
+            } else {
+                messengerService.getConversation(subject, vm.currentPage)
+                    .then(function (conversation) {
+                        conversation.Messages.reverse();
+                        console.log("Got conversation: ", conversation); 
+                        vm.currentConversation = conversation;
+                        vm.cachedConversations[conversation.Subject] = conversation;
+                    });
+            }
         }
 
         function fetchPreviousMessages() {
             vm.currentPage++;
             ngNotify.set("Loading previous messages...", "success");
-            var currentMessageId = vm.currentConversation[0].Id.toString();
-           
-            messengerService.getConversation(vm.currentSubject, vm.currentPage)
+            var currentMessageId = vm.currentConversation.Messages[0].Id.toString();
+
+            messengerService.getConversation(vm.currentConversation.Subject, vm.currentPage)
                 .then(function (conversation) {
                     console.log("Got conversation page: ", conversation);
-                    conversation.Messages.forEach(message => vm.currentConversation.unshift(message));
-                    vm.allMessagesFetched = conversation.AllMessagesFetched;
+                    conversation.Messages.forEach(message => vm.currentConversation.Messages.unshift(message));
+                    vm.cachedConversations[conversation.Subject].Messages = vm.currentConversation.Messages;
+
                     _.defer(function () {
                         $anchorScroll(currentMessageId);
                     });
                 });
-
         }
 
         function sendMessage() {
@@ -152,13 +146,13 @@
 
             message.FromId = vm.currentUser.Id;
             message.ToId = vm.currentReceiver.Id;
-            console.log("message.ToId = ", vm.currentReceiver.Id);
-            message.Subject = vm.currentSubject;
+            message.Subject = vm.currentConversation.Subject;
             message.Content = vm.messageText;
             message.DateSent = new Date();
             console.log("Sending: ", message);
 
             var messageJson = JSON.stringify(message);
+
             // Send data to server without id
             messengerHub.server.send(messageJson);
             messengerService.saveMessage(messageJson);
@@ -167,12 +161,12 @@
             vm.messageText = "";
 
             if (!_.isEmpty(vm.currentConversation)) {
-                message.Id = _.last(vm.currentConversation).Id + 1;
+                message.Id = _.last(vm.currentConversation.Messages).Id + 1;
             }
             else {
                 message.Id = 1;
             }
-            vm.currentConversation.push(message);
+            vm.currentConversation.Messages.push(message);
         }
 
         function checkEnterPressed($event) {
@@ -183,8 +177,8 @@
                 $event.preventDefault();
                 sendMessage();
             } else {
-                if (vm.currentReceiver.Id) {
-                    _.throttle(messengerHub.server.onUserTyping(vm.currentReceiver.Id), 500);
+                if (vm.currentReceiver.Id && vm.currentUser.Id) {
+                    _.throttle(messengerHub.server.onUserTyping(vm.currentReceiver.Id, vm.currentUser.Id), 500);
                 }
             }
         }
@@ -196,18 +190,22 @@
             //push to current conversation
             if (message.FromId === vm.currentReceiver.Id) {
                 if (!_.isEmpty(vm.currentConversation)) {
-                    message.Id = _.last(vm.currentConversation).Id + 1;
+                    message.Id = _.last(vm.currentConversation.Messages).Id + 1;
                 }
                 else {
                     message.Id = 1;
                 }
-                vm.currentConversation.push(message);
+                vm.currentConversation.Messages.push(message);
             } else {
                 //show unread message badge
                 var sender = _.find(vm.users, user => user.Id === message.FromId);
                 sender.UnreadMessagesCount++;
             }
             $scope.$apply();
+        }
+
+        function allMessagesFetched() {
+            return vm.currentConversation.Messages.length >= vm.currentConversation.MessagesCount;
         }
 
         function search() {
@@ -232,8 +230,8 @@
             $scope.$applyAsync();
         }
 
-        function onUserTyping() {
-            if (vm.currentReceiver !== null) {
+        function onUserTyping(typingUserId) {
+            if (vm.currentReceiver.Id === typingUserId) {
                 vm.userTyping = " is typing...";
                 console.log(vm.userTyping);
                 window.setTimeout(function () {
@@ -245,8 +243,8 @@
         }
 
         function watchScroll() {
-            if (hasScrollReachedTop()) {
-                if (vm.allMessagesFetched) {
+            if (hasScrollReachedTop() && !_.isEmpty(vm.currentConversation)) {
+                if (allMessagesFetched()) {
                     ngNotify.set("All the messages have been loaded!", "grimace");
                 } else {
                     fetchPreviousMessages();
@@ -267,7 +265,7 @@
 
         function scrollToBottom() {
             if (vm.currentConversation !== null) {
-                var lastMessageId = _.last(vm.currentConversation).Id;
+                var lastMessageId = _.last(vm.currentConversation.Messages).Id;
                 $anchorScroll(lastMessageId);
             }
         }

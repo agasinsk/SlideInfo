@@ -14,10 +14,7 @@ namespace SlideInfo.App.Models
         public IEnumerable<Message> Messages { get; set; }
 
         [NotMapped]
-        public bool AllMessagesFetched { get; set; }
-
-        [NotMapped]
-        public string ReceiverId { get; set; }
+        public int MessagesCount { get; set; }
 
         [NotMapped]
         public int UnreadMessagesCount
@@ -33,42 +30,6 @@ namespace SlideInfo.App.Models
         {
             var unreadMessages = Messages.Where(m => !m.IsRead()).AsQueryable();
             return unreadMessages.Count();
-        }
-
-        [NotMapped]
-        public IEnumerable<string> Users
-        {
-            get => GetConversationUserNames();
-            set
-            {
-                if (value == null) throw new ArgumentNullException(nameof(value));
-            }
-        }
-
-        public IEnumerable<string> GetConversationUserNames()
-        {
-            var userNames = new List<string>();
-            foreach (var message in Messages)
-            {
-                if (!userNames.Contains(message.FromId))
-                {
-                    userNames.Add(message.FromId);
-                }
-            }
-            return userNames;
-        }
-
-        public static IEnumerable<string> GetConversationUserNames(IEnumerable<Message> messageList)
-        {
-            var userNames = new List<string>();
-            foreach (var message in messageList)
-            {
-                if (!userNames.Contains(message.FromId))
-                {
-                    userNames.Add(message.FromId);
-                }
-            }
-            return userNames;
         }
 
         public static int GetUnreadMessagesCount(IEnumerable<Message> messageList)
