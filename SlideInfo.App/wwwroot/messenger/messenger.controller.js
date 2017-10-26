@@ -21,7 +21,7 @@
         vm.allUsers = [];
         vm.cachedConversations = [];
 
-        vm.currentConversation = {};
+        vm.currentConversation = undefined;
         vm.currentPage = 0;
         vm.messageList = {};
 
@@ -37,7 +37,6 @@
         vm.clearSearch = clearSearch;
 
         vm.listDidRender = listDidRender;
-        vm.allMessagesFetched = false;
 
         init();
         /////////////////
@@ -111,11 +110,12 @@
             vm.currentPage = 0;
             if (!_.isEmpty(vm.cachedConversations[subject])) {
                 vm.currentConversation = vm.cachedConversations[subject];
+                scrollToBottom();
             } else {
                 messengerService.getConversation(subject, vm.currentPage)
                     .then(function (conversation) {
                         conversation.Messages.reverse();
-                        console.log("Got conversation: ", conversation); 
+                        console.log("Got conversation: ", conversation);
                         vm.currentConversation = conversation;
                         vm.cachedConversations[conversation.Subject] = conversation;
                     });
@@ -153,20 +153,21 @@
 
             var messageJson = JSON.stringify(message);
 
-            // Send data to server without id
             messengerHub.server.send(messageJson);
             messengerService.saveMessage(messageJson);
 
             // clear the input
             vm.messageText = "";
 
-            if (!_.isEmpty(vm.currentConversation)) {
-                message.Id = _.last(vm.currentConversation.Messages).Id + 1;
-            }
-            else {
-                message.Id = 1;
-            }
+            message.Id = getNextMessageId();
             vm.currentConversation.Messages.push(message);
+        }
+
+        function getNextMessageId() {
+            if (!_.isEmpty(vm.currentConversation)) {
+                return _.last(vm.currentConversation.Messages).Id + 1;
+            }
+            return 1;
         }
 
         function checkEnterPressed($event) {
@@ -189,12 +190,7 @@
 
             //push to current conversation
             if (message.FromId === vm.currentReceiver.Id) {
-                if (!_.isEmpty(vm.currentConversation)) {
-                    message.Id = _.last(vm.currentConversation.Messages).Id + 1;
-                }
-                else {
-                    message.Id = 1;
-                }
+                message.Id = getNextMessageId();
                 vm.currentConversation.Messages.push(message);
             } else {
                 //show unread message badge
@@ -211,12 +207,11 @@
         function search() {
             if (vm.searchPhrase !== "") {
                 var searchResults = [];
-                _.each(vm.users,
-                    function (user) {
-                        if (messengerService.foundSearchPhrase(user, vm.searchPhrase)) {
-                            searchResults.push(user);
-                        }
-                    });
+                _.each(vm.users, function (user) {
+                    if (messengerService.foundSearchPhrase(user, vm.searchPhrase)) {
+                        searchResults.push(user);
+                    }
+                });
                 vm.users = searchResults;
             } else {
                 vm.users = vm.allUsers;
@@ -233,7 +228,6 @@
         function onUserTyping(typingUserId) {
             if (vm.currentReceiver.Id === typingUserId) {
                 vm.userTyping = " is typing...";
-                console.log(vm.userTyping);
                 window.setTimeout(function () {
                     vm.userTyping = "";
                     $scope.$applyAsync();
@@ -264,7 +258,7 @@
         }
 
         function scrollToBottom() {
-            if (vm.currentConversation !== null) {
+            if (vm.currentConversation.Messages !== null) {
                 var lastMessageId = _.last(vm.currentConversation.Messages).Id;
                 $anchorScroll(lastMessageId);
             }

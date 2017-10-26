@@ -48,7 +48,6 @@
         <!--chat_sidebar-->
         <div class="col-sm-9 message-section">
             <div class="row">
-
                 <div class="new-message-head">
                     <div class="pull-left user-typing-block">
                         <button disabled ng-show="vm.currentReceiver.FullName">
@@ -56,29 +55,31 @@
                             {{ vm.currentReceiver.FullName }}{{ vm.userTyping }}
                         </button>
                     </div>
-
                 </div>
 
-                <div class="chat-area" id="chat-area">
-                    <div class="messages-inner" id="messages-inner">
-                        <div class="messages-content" id="message-content">
-                            <div class="message-wrapper" ng-repeat="message in vm.currentConversation.Messages" repeat-complete="vm.listDidRender()" id="{{message.Id}}" ng-class="message.FromId === vm.currentUser.Id ? 'me' : 'them'">
+                <div id="chat-area" class="chat-area">
+                    <div id="messages-inner" class="messages-inner">
+                        <div id="message-content" class="messages-content">
+                            <div ng-repeat="message in vm.currentConversation.Messages" repeat-complete="vm.listDidRender()" id="{{message.Id}}" class="message-wrapper" ng-class="message.FromId === vm.currentUser.Id ? 'me' : 'them'">
                                 <div class="date-wrapper animated fadeIn">{{ message.DateSent | date: "dd.MM.yyyy HH:mm:ss"}}</div>
                                 <div class="circle-wrapper animated bounceIn"></div>
                                 <div class="text-wrapper animated fadeIn">{{ message.Content }}</div>
+                            </div>
+                            <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation.MessagesCount === 0">
+                                <small>This conversation is empty. Be the first to send a message!</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="message-write">
-                    <textarea class="form-control message-input" id="message-input" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keypress="vm.checkEnterPressed($event)"></textarea>
+                    <textarea id="message-input" class="form-control message-input" ng-class="{disabled: vm.currentConversation == null}" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keypress="vm.checkEnterPressed($event)"></textarea>
                     <div class="clearfix"></div>
                     <div class="chat-bottom">
-                        <a href="#" class="btn btn-default pull-left" role="button">
+                        <a href="#" class="btn btn-default pull-left" role="button" ng-class="{disabled: vm.currentConversation == null}">
                             <i class="glyphicon glyphicon-upload" aria-hidden="true"></i> @ViewConstants.MESSAGE_ADD_ATTACHMENT
                         </a>
-                        <a href="#" id="send-message" class="pull-right btn btn-success green-button" ng-click="vm.sendMessage()">
+                        <a href="#" id="send-message" class="pull-right btn btn-success green-button" ng-class="{disabled: vm.currentConversation == null}" ng-click="vm.sendMessage()">
                             @ViewConstants.SEND_MESSAGE
                         </a>
                     </div>
