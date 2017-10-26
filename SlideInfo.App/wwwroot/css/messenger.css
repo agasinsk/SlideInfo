@@ -24,6 +24,7 @@
 .search-group {
     margin: 0;
     padding: 15px;
+    display: block;
 }
 
 #searchclear {
@@ -46,33 +47,6 @@
     .dropdown-container button {
         width: 100%
     }
-
-.custom-search-input .search-query {
-    background: #fff none repeat scroll 0 0 !important;
-    border-radius: 4px;
-    height: 33px;
-    margin-bottom: 0;
-    padding-left: 7px;
-    padding-right: 7px;
-}
-
-.custom-search-input button {
-    background: rgba(0, 0, 0, 0) none repeat scroll 0 0;
-    border: 0 none;
-    border-radius: 3px;
-    color: #666666;
-    left: auto;
-    margin-bottom: 0;
-    margin-top: 7px;
-    padding: 2px 5px;
-    position: absolute;
-    right: 0;
-    z-index: 9999;
-}
-
-.search-query:focus + button {
-    z-index: 3;
-}
 
 .a {
     text-decoration: none;
@@ -290,4 +264,8 @@
 
 .user-typing-block {
     margin-left: 10px;
+}
+
+.user-mail-icon {
+    border: 2px solid #bbb;
 }

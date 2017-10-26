@@ -110,7 +110,9 @@
             vm.currentPage = 0;
             if (!_.isEmpty(vm.cachedConversations[subject])) {
                 vm.currentConversation = vm.cachedConversations[subject];
-                scrollToBottom();
+                window.setTimeout(function () {
+                    scrollToBottom();
+                }, 150);
             } else {
                 messengerService.getConversation(subject, vm.currentPage)
                     .then(function (conversation) {
@@ -123,20 +125,22 @@
         }
 
         function fetchPreviousMessages() {
-            vm.currentPage++;
-            ngNotify.set("Loading previous messages...", "success");
-            var currentMessageId = vm.currentConversation.Messages[0].Id.toString();
+            if (vm.currentConversation.Messages.length > 0) {
+                vm.currentPage++;
+                ngNotify.set("Loading previous messages...", "success");
+                var currentMessageId = vm.currentConversation.Messages[0].Id.toString();
 
-            messengerService.getConversation(vm.currentConversation.Subject, vm.currentPage)
-                .then(function (conversation) {
-                    console.log("Got conversation page: ", conversation);
-                    conversation.Messages.forEach(message => vm.currentConversation.Messages.unshift(message));
-                    vm.cachedConversations[conversation.Subject].Messages = vm.currentConversation.Messages;
+                messengerService.getConversation(vm.currentConversation.Subject, vm.currentPage)
+                    .then(function (conversation) {
+                        console.log("Got conversation page: ", conversation);
+                        conversation.Messages.forEach(message => vm.currentConversation.Messages.unshift(message));
+                        vm.cachedConversations[conversation.Subject].Messages = vm.currentConversation.Messages;
 
-                    _.defer(function () {
-                        $anchorScroll(currentMessageId);
+                        _.defer(function () {
+                            $anchorScroll(currentMessageId);
+                        });
                     });
-                });
+            }
         }
 
         function sendMessage() {
@@ -245,7 +249,6 @@
                 }
             }
             vm.autoScrollDown = hasScrollReachedBottom();
-            console.log("vm.autoScrollDown = ", vm.autoScrollDown);
         }
 
         function hasScrollReachedTop() {
@@ -257,17 +260,18 @@
             return bool;
         }
 
-        function scrollToBottom() {
-            if (vm.currentConversation.Messages !== null) {
-                var lastMessageId = _.last(vm.currentConversation.Messages).Id;
-                $anchorScroll(lastMessageId);
-            }
-        }
-
         function listDidRender() {
             if (vm.autoScrollDown) {
                 scrollToBottom();
             }
         }
+
+        function scrollToBottom() {
+            if (vm.currentConversation.Messages && vm.currentConversation.Messages.length > 0) {
+                var lastMessageId = _.last(vm.currentConversation.Messages).Id;
+                $anchorScroll(lastMessageId);
+            }
+        }
+
     }
 })();

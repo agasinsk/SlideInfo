@@ -1,7 +1,5 @@
-﻿@model SlideInfo.App.Models.MessengerViewModel
-@using Microsoft.AspNetCore.Http
+﻿@using Microsoft.AspNetCore.Http
 @using SlideInfo.App.Constants
-@using SlideInfo.App.Helpers
 
 @if (Context.Session.GetString(SessionConstants.ALERT) != null)
 {
@@ -20,7 +18,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="btn-group search-group">
-                        <input id="searchinput" type="search" class="form-control" ng-model="vm.searchPhrase" ng-change="vm.search()" ng-model-options="{debounce: 200}" placeholder="Search..." />
+                        <input type="search" class="form-control" ng-model="vm.searchPhrase" ng-change="vm.search()" ng-model-options="{debounce: 200}" placeholder="Search..." />
                         <span id="searchclear" class="glyphicon glyphicon-remove" ng-click="vm.clearSearch()" ng-hide="!vm.searchPhrase" title="Clear search"></span>
                     </div>
                 </div>
@@ -28,11 +26,13 @@
             <div class="row">
                 <div class="member-list" ng-show="vm.showUsers">
                     <div class="member-link" ng-class="{'selected' : user.Id === vm.currentReceiver.Id}" ng-repeat="user in vm.users" id="{{user.Id}}">
-                        <div class="media" ng-click="vm.getConversation(user.PrivateConversationSubject)">
-                            <div class="media-left">
-                                <img src="~/images/messenger_user.png" alt="User Avatar" width="40" class="img-circle">
+                        <div class="media">
+                            <div class="media-left animated fadeIn">
+                                <a href="mailto:{{user.Email}}?Subject=[SlideInfo_Messenger]" target="_top" title="Send mail to this user">
+                                    <img src="~/images/messenger_mail.png" class="img-circle user-mail-icon" alt="User Email" width="40" height="40">
+                                </a>
                             </div>
-                            <div class="media-body a">
+                            <div class="media-body a" ng-click="vm.getConversation(user.PrivateConversationSubject)">
                                 <h4>
                                     {{user.FullName}}
                                     <span class="status-icon" ng-class="{connected: user.IsActive, disconnected: !user.IsActive}"></span>
@@ -67,6 +67,9 @@
                             </div>
                             <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation.MessagesCount === 0">
                                 <small>This conversation is empty. Be the first to send a message!</small>
+                            </div>
+                            <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation === undefined">
+                                <small>Select a conversation from the list on the right!</small>
                             </div>
                         </div>
                     </div>

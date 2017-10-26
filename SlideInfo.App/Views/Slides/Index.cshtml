@@ -60,10 +60,10 @@
                         <ul>
                             <li>
                                 <h5><small>Vendor</small> @slide.Vendor.ToSentenceCase()</h5>
-</li>
+                            </li>
                             <li>
                                 <h5><small>Original size</small> @slide.Width x @slide.Height px</h5>
-</li>
+                            </li>
                             <hr class="slide-list-divider">
                             <li>
                                 <a asp-action="Properties" asp-route-id="@slide.Id">Properties</a>
@@ -80,7 +80,7 @@
                                     <a asp-action="Comments" asp-route-id="@slide.Id">Comments</a>
                                 </li>
                             }
-                            </ul>
+                        </ul>
                     </div>
 
                     @{var imgName = slide.Name.ToUrlSlug() + ".jpeg";}
@@ -92,7 +92,7 @@
 </div>
 
 @section scripts
-{
+    {
     <script>
         $('.thumb').hover(function () {
             $(this).find('.caption').css('opacity', '1');
