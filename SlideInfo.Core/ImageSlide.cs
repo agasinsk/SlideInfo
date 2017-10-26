@@ -75,7 +75,7 @@ namespace SlideInfo.Core
         /*Returns an image containing the contents of the region.
 			location: (x, y) tuple giving the top left pixel in the level 0 reference frame.
 			level:    the level number.
-			size:     (width, height) tuple giving the region size.*/
+			maxSize:     (width, height) tuple giving the region maxSize.*/
         public override Image ReadRegion(SizeL location, int level, SizeL size)
         {
             if (image == null)
@@ -86,7 +86,7 @@ namespace SlideInfo.Core
                 throw new OpenSlideException($"Size {size} must be non-negative");
 
             /*	Any corner of the requested region may be outside the bounds of
-				the image. Create a transparent tile of the correct size and
+				the image. Create a transparent tile of the correct maxSize and
 				paste the valid part of the region into the correct location.*/
             var imageTopLeft = new SizeL(Math.Max(0, Math.Min(location.Width, Dimensions.Width)),
                                          Math.Max(0, Math.Min(location.Height, Dimensions.Height)));
@@ -95,7 +95,7 @@ namespace SlideInfo.Core
 
             var tile = new Bitmap((int)size.Width, (int)size.Height);
 
-            // Crop size is greater than zero in both dimensions.
+            // Crop maxSize is greater than zero in both dimensions.
             if (imageBottomRight.Width - imageTopLeft.Width < 0 &&
                 imageBottomRight.Height - imageTopLeft.Height < 0)
                 return tile;
@@ -114,9 +114,9 @@ namespace SlideInfo.Core
             return GetThumbnail(size.ToSizeL());
         }
 
-        public override Image GetThumbnail(SizeL size)
+        public override Image GetThumbnail(SizeL maxSize)
         {
-            var thumbSize = image.GetProportionateResize(size.ToSize());
+            var thumbSize = image.GetProportionateResize(maxSize.ToSize());
             var callback = new Image.GetThumbnailImageAbort(ThumbnailCallback);
             var thumbnail = image.GetThumbnailImage(thumbSize.Width, thumbSize.Height,
                                 callback, new IntPtr());

@@ -42,7 +42,7 @@ namespace SlideInfo.App.Controllers
             foreach (var slide in slides)
             {
                 var existingSlideThumb = from file in existingThumbs
-                                         where file.ToLower().Equals($"{slide.Name.ToUrlSlug()}.jpeg")
+                                         where file.ToLower().Contains($"{slide.Name.ToUrlSlug()}")
                                          select file;
                 if (existingSlideThumb.Any())
                     continue;

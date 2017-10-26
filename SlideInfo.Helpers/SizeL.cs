@@ -35,7 +35,17 @@ namespace SlideInfo.Helpers
 			return new SizeF(Width, Height);
 		}
 
-		public override bool Equals(object obj)
+	    public static SizeL operator +(SizeL s1, SizeL s2)
+	    {
+	        return new SizeL(s1.Width + s2.Width, s1.Height + s2.Height);
+	    }
+
+	    public static SizeL operator -(SizeL s1, SizeL s2)
+	    {
+	        return new SizeL(s1.Width - s2.Width, s1.Height - s2.Height);
+	    }
+
+        public override bool Equals(object obj)
 		{
 			if (obj == null || GetType() != obj.GetType())
 				return false;

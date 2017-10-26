@@ -262,8 +262,8 @@ paket-files/
 __pycache__/
 *.pyc
 /SlideInfo.App/wwwroot/images/associatedThumbs
-/SlideInfo.App/wwwroot/images/associatedThumbs
-/SlideInfo.App/wwwroot/images/associatedThumbs/1_macro.jpeg
-/SlideInfo.App/wwwroot/images/slideThumbs
+/SlideInfo.App/wwwroot/images/associatedThumbs/*.jpeg
+/SlideInfo.App/wwwroot/images/slideThumbs/*.jpeg
 /data
 /data/CMU-1-Small-Region.svs
+*.jpeg

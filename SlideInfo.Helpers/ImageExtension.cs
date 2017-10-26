@@ -40,6 +40,11 @@ namespace SlideInfo.Helpers
             return new Size(newWidth, newHeight);
         }
 
+        public static Size GetProportionateResize(this Image i, SizeL maxSize)
+        {
+            return i.GetProportionateResize(maxSize.ToSize());
+        }
+
         public static Image CropImage(this Image i, Rectangle section)
         {
             // An empty bitmap which will hold the cropped image
@@ -52,6 +57,39 @@ namespace SlideInfo.Helpers
             g.DrawImage(i, 0, 0, section, GraphicsUnit.Pixel);
 
             return bmp;
+        }
+
+        public static Image ApplyOnBackgroundColor(this Image i, Color color)
+        {
+            using (var src = new Bitmap(i))
+            {
+                i.Dispose();
+                i = new Bitmap(src.Width, src.Height);
+                using (var g1 = Graphics.FromImage(i))
+                {
+                    g1.Clear(color);
+                    g1.DrawImage(src, 0, 0);
+                }
+            }
+            return i;
+        }
+
+        public static Image GetThumbnail(this Image i, SizeL maxSize)
+        {
+            return GetThumbnail(i, maxSize.ToSize());
+        }
+
+        public static Image GetThumbnail(this Image i, Size maxSize)
+        {
+            var thumbSize = i.GetProportionateResize(maxSize);
+            var callback = new Image.GetThumbnailImageAbort(ThumbnailCallback);
+
+            return i.GetThumbnailImage(thumbSize.Width, thumbSize.Height, callback, new IntPtr());
+        }
+
+        public static bool ThumbnailCallback()
+        {
+            return true;
         }
     }
 }

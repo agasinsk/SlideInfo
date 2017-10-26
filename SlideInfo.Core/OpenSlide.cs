@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using SlideInfo.Helpers;
 
@@ -260,7 +261,7 @@ namespace SlideInfo.Core
             CheckDisposed();
             OpenSlideDll.openslide_read_region(Osr, bmpPtr, location.Width, location.Height, level, size.Width, size.Height);
             if (bmpPtr == null)
-                throw new OpenSlideException($"error reading region location:{location}, level:{level}, size:{size}");
+                throw new OpenSlideException($"error reading region location:{location}, level:{level}, maxSize:{size}");
 
             bmp.UnlockBits(bmpData);
 
@@ -274,34 +275,67 @@ namespace SlideInfo.Core
             return GetThumbnail(size.ToSizeL());
         }
 
-        public override Image GetThumbnail(SizeL size)
+        //        downsample = max(*[dim / thumb for dim, thumb in
+        //        zip(self.dimensions, maxSize)])
+        //        level = self.get_best_level_for_downsample(downsample)
+        //            tile = self.read_region((0, 0), level, self.level_dimensions[level])
+        //
+        //        bg_color = '#' + self.properties.get(PROPERTY_NAME_BACKGROUND_COLOR,
+        //            'ffffff')
+        //            thumb = Image.new('RGB', tile.maxSize, bg_color)
+        //        thumb.paste(tile, None, tile)
+        //            thumb.thumbnail(maxSize, Image.ANTIALIAS)
+        //            return thumb
+        public override Image GetThumbnail(SizeL maxSize)
         {
-            var downsample = Math.Max(Dimensions.Width / size.Width, Dimensions.Height / size.Height);
-            var level = GetBestLevelForDownsample(downsample);
-            var thumbnailSize = LevelDimensions[level];
-            SizeL startLocation;
+            var thumbnail = ReadThumbnailRegion(maxSize);
+            var bgthumbnail = thumbnail.ApplyOnBackgroundColor(Color.White);
+            bgthumbnail.Save(Path.GetFileNameWithoutExtension(FilePath) + ".jpeg", ImageFormat.Jpeg);
+
+            return bgthumbnail.GetThumbnail(maxSize);
+        }
+
+        private Image ReadThumbnailRegion(SizeL maxSize)
+        {
+            double downsample;
+            int level;
+            SizeL thumbnailSize, startLocation;
 
             try
-            {
-                float.TryParse(Properties[PROPERTY_NAME_BOUNDS_X], out float xBound);
-                float.TryParse(Properties[PROPERTY_NAME_BOUNDS_Y], out float yBound);
+            {   //if the slides is not aligned from point (0, 0)
+                float.TryParse(Properties[PROPERTY_NAME_BOUNDS_X], out var xBound);
+                float.TryParse(Properties[PROPERTY_NAME_BOUNDS_Y], out var yBound);
+
+                //Slide level dimensions scale factor in each axis
+                float.TryParse(Properties[PROPERTY_NAME_BOUNDS_WIDTH], out var scaledWidth);
+                float.TryParse(Properties[PROPERTY_NAME_BOUNDS_HEIGHT], out var scaledHeight);
+
+                scaledWidth = scaledWidth / LevelDimensions[0].Width;
+                scaledHeight = scaledHeight / LevelDimensions[0].Height;
+
+                var sizeScale = new SizeF(scaledWidth, scaledHeight);
+
+                // Dimensions of active area
+                var scaledLevelDimensions = (from levelSize in LevelDimensions
+                                       let newScaledWidth = (long)Math.Ceiling((double)levelSize.Width * sizeScale.Width)
+                                       let newScaledHeight = (long)Math.Ceiling((double)levelSize.Height * sizeScale.Height)
+                                       select new SizeL(newScaledWidth, newScaledHeight)).ToList();
+
                 startLocation = new SizeL((long)xBound, (long)yBound);
+                downsample = Math.Min(scaledLevelDimensions[0].Width / maxSize.Width, scaledLevelDimensions[0].Height / maxSize.Height);
+                level = GetBestLevelForDownsample(downsample);
+                thumbnailSize = scaledLevelDimensions[level];
             }
             catch
             {
                 startLocation = new SizeL(0, 0);
+                downsample = Math.Min(Dimensions.Width / maxSize.Width, Dimensions.Height / maxSize.Height);
+                level = GetBestLevelForDownsample(downsample);
+                thumbnailSize = LevelDimensions[level];
             }
-
-            var thumbnail = ReadRegion(startLocation, level, thumbnailSize);
-            thumbnail.Save(Path.GetFileNameWithoutExtension(FilePath), ImageFormat.Jpeg);
-            if (size.Equals(thumbnailSize))
-                return thumbnail;
-
-            var thumbSize = thumbnail.GetProportionateResize(size.ToSize());
-            var callback = new Image.GetThumbnailImageAbort(ThumbnailCallback);
-            var thumb = thumbnail.GetThumbnailImage(thumbSize.Width, thumbSize.Height, callback, new IntPtr());
-
-            return thumb;
+            var realthumbnail = ReadRegion(startLocation, level, thumbnailSize);
+            realthumbnail.Save(Path.GetFileNameWithoutExtension(FilePath) + "_real.jpeg", ImageFormat.Jpeg);
+            return realthumbnail;
         }
 
         public override string DetectFormat(string fileName)

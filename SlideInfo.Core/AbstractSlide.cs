@@ -32,12 +32,12 @@ namespace SlideInfo.Core
 		/*Returns an Image containing the contents of the region.
 		location: (x, y) tuple giving the top left pixel in the level 0 reference frame.
 		level:    the level number.
-		size:     (width, height) tuple giving the region size.*/
+		maxSize:     (width, height) tuple giving the region maxSize.*/
 		public abstract Image ReadRegion(SizeL location, int level, SizeL size);
 
 	    public abstract Image GetThumbnail(Size size);
 
-        public abstract Image GetThumbnail(SizeL size);
+        public abstract Image GetThumbnail(SizeL maxSize);
         
 		public static bool ThumbnailCallback()
 		{
