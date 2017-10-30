@@ -1,0 +1,107 @@
+﻿@using Microsoft.AspNetCore.Http
+@using SlideInfo.App.Constants
+
+@if (Context.Session.GetString(SessionConstants.ALERT) != null)
+{
+    @Html.Raw(Context.Session.GetString(SessionConstants.ALERT))
+    Context.Session.Remove(SessionConstants.ALERT);
+}
+
+@{
+    ViewData["Title"] = "Messages";
+}
+<h2>@ViewData["Title"]</h2>
+<hr />
+<div ng-app="messenger">
+    <div class="messenger" ng-controller="messengerController as vm">
+        <div class="col-sm-3">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="btn-group search-group">
+                        <input type="search" class="form-control" ng-model="vm.searchPhrase" ng-change="vm.search()" ng-model-options="{debounce: 200}" placeholder="Search..." />
+                        <span id="searchclear" class="glyphicon glyphicon-remove" ng-click="vm.clearSearch()" ng-hide="!vm.searchPhrase" title="Clear search"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="member-list" ng-show="vm.showUsers">
+                    <div class="member-link" ng-class="{'selected' : user.Id === vm.currentReceiver.Id}" ng-repeat="user in vm.users" id="{{user.Id}}">
+                        <div class="media">
+                            <div class="media-left animated fadeIn">
+                                <a href="mailto:{{user.Email}}?Subject=[SlideInfo_Messenger]" target="_top" title="Send mail to this user">
+                                    <img src="~/images/messenger_mail.png" class="img-circle user-mail-icon" alt="User Email" width="40" height="40">
+                                </a>
+                            </div>
+                            <div class="media-body a" ng-click="vm.getConversation(user.PrivateConversationSubject)">
+                                <h4>
+                                    {{user.FullName}}
+                                    <span class="status-icon" ng-class="{connected: user.IsActive, disconnected: !user.IsActive}"></span>
+                                    <span class="badge pull-right flash animated" ng-show="user.UnreadMessagesCount > 0">{{user.UnreadMessagesCount}}</span>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--chat_sidebar-->
+        <div class="col-sm-9 message-section">
+            <div class="row">
+                <div class="new-message-head">
+                    <div class="pull-left user-typing-block">
+                        <button disabled ng-show="vm.currentReceiver.FullName">
+                            <i class="glyphicon glyphicon-comment" aria-hidden="true"></i>
+                            {{ vm.currentReceiver.FullName }}{{ vm.userTyping }}
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chat-area" class="chat-area">
+                    <div id="messages-inner" class="messages-inner">
+                        <div id="message-content" class="messages-content">
+                            <div ng-repeat="message in vm.currentConversation.Messages" repeat-complete="vm.listDidRender()" id="{{message.Id}}" class="message-wrapper" ng-class="message.FromId === vm.currentUser.Id ? 'me' : 'them'">
+                                <div class="date-wrapper animated fadeIn">{{ message.DateSent | date: "dd.MM.yyyy HH:mm:ss"}}</div>
+                                <div class="circle-wrapper animated bounceIn"></div>
+                                <div class="text-wrapper animated fadeIn">{{ message.Content }}</div>
+                            </div>
+                            <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation.MessagesCount === 0">
+                                <small>This conversation is empty. Be the first to send a message!</small>
+                            </div>
+                            <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation === undefined">
+                                <small>Select a conversation from the list on the right!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-write">
+                    <textarea id="message-input" class="form-control message-input" ng-class="{disabled: vm.currentConversation == null}" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keyup="vm.checkEnterPressed($event)"></textarea>
+                    <div class="clearfix"></div>
+                    <div class="chat-bottom">
+                        <a href="#" class="btn btn-default pull-left" role="button" ng-class="{disabled: vm.currentConversation == null}">
+                            <i class="glyphicon glyphicon-upload" aria-hidden="true"></i> @ViewConstants.MESSAGE_ADD_ATTACHMENT
+                        </a>
+                        <a href="#" id="send-message" class="pull-right btn btn-success green-button" ng-class="{disabled: vm.currentConversation == null}" ng-click="vm.sendMessage()">
+                            @ViewConstants.SEND_MESSAGE
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts {
+
+    <!-- jQuery -->
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <!-- SignalR -->
+    <script src="~/js/jquery.signalr-2.2.2.js"></script>
+    <!--Reference the autogenerated SignalR hub script. -->
+    <script src="~/signalr/hubs"></script>
+    <!--SignalR script to update the chat page and send messages.-->
+    <script src="/messenger/messenger.module.js"></script>
+    <script src="/messenger/messenger.controller.js"></script>
+    <script src="/messenger/messenger.service.js"></script>
+    <script src="/messenger/repeat-complete-directive.js"></script>
+}

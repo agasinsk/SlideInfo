@@ -12,11 +12,11 @@
     Context.Session.Remove(SessionConstants.ALERT);
 }
 <div class="container" id="properties">
-    <h2>@Model.Name properties</h2>
+    <h2>@Model.Name | Properties</h2>
     @if (Model.Properties != null)
     {
         <form asp-action="Properties" method="get">
-            <div class="form-inline no-color">
+            <div class="form-inline">
                 <p>
                     <input type="text" name="searchString" class="form-control" placeholder="Find property..." value="@ViewData[ViewConstants.CURRENT_FILTER]" />
                     <input type="submit" value="Search" class="btn btn-success green-button" />

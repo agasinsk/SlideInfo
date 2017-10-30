@@ -12,7 +12,7 @@
     Context.Session.Remove(SessionConstants.ALERT);
 }
 <div class="container-fluid" id="comments">
-    <h2>@Model.Name comments</h2>
+    <h2>@Model.Name | Comments</h2>
     @if (Model.Comments != null)
     {
         <form asp-action="Comments" method="get">
@@ -48,7 +48,26 @@
                 @foreach (var item in Model.Comments)
                 {
                     <tr>
-                        <td><a href="mailto:@item.AppUser.Email?Subject=[SlideInfo_Comment]" target="_top" title="Send mail to this user">@item.AppUser.FullName</a></td>
+                        <td>
+                            <div class="media">
+                                <div class="media-body">
+                                    <a href="mailto:@item.AppUser.Email?Subject=[SlideInfo_Comment]" target="_top" title="Send mail to this user">
+                                        <h4>@item.AppUser.FullName</h4>
+                                    </a>
+                                </div>
+                                <div class="media-right">
+                                    <a asp-action="Messenger"
+                                       asp-controller="Messenger" title="Chat with this user">
+                                        <img src="~/images/messenger_chat.png" class="img-circle user-mail-icon media-object" alt="User Email" width="40" height="40">
+                                    </a>
+                                </div>
+                                <div class="media-right">
+                                    <a href="mailto:@item.AppUser.Email?Subject=[SlideInfo_Comment]" target="_top" title="Send mail to this user">
+                                        <img src="~/images/messenger_mail.png" class="img-circle user-mail-icon media-object" alt="User Email" width="40" height="40">
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
                         <td>@item.Text</td>
                         <td>@item.Date</td>
                     </tr>

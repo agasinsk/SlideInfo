@@ -10,16 +10,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - SlideInfo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet prefetch" href="https://s3-us-west-2.amazonaws.com/s.cdpn.io/104946/animate.min.css">
 
     <environment names="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
+        <link rel="stylesheet" href="~/css/messenger.css" />
+        <link rel="stylesheet" href="~/css/ng-notify.min.css">
     </environment>
     <environment names="Staging,Production">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/messenger.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/ng-notify.min.css" asp-append-version="true" />>
     </environment>
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
@@ -37,7 +43,7 @@
                 </button>
                 <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">
                     <img alt="" class="img-responsive" src="/images/rounded-info-button.svg" style="display:inline-block; height:30px; margin-top:-5px" /> SlideInfo
-               </a>
+                </a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
@@ -53,7 +59,8 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <a asp-area="" asp-controller="Slides" asp-action="Index">
-                                        All Slides &raquo;</a>
+                                        All Slides &raquo;
+                                    </a>
                                 </li>
                                 <li class="divider"></li>
                                 <li>
@@ -67,13 +74,13 @@
                                 <li class="@Html.IsActive("Slides", "Properties")">
                                     <a asp-area="" asp-controller="Slides" asp-action="Properties" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Properties</a>
                                 </li>
-                                @if ((bool) ViewData[ViewConstants.HAS_ASSOCIATED_IMAGES])
+                                @if ((bool)ViewData[ViewConstants.HAS_ASSOCIATED_IMAGES])
                                 {
                                     <li class="@Html.IsActive("Slides", "AssociatedImages")">
                                         <a asp-area="" asp-controller="Slides" asp-action="AssociatedImages" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Associated Images</a>
                                     </li>
                                 }
-                                @if ((bool) ViewData[ViewConstants.HAS_COMMENTS])
+                                @if ((bool)ViewData[ViewConstants.HAS_COMMENTS])
                                 {
                                     <li class="@Html.IsActive("Slides", "Comments")">
                                         <a class="@Html.IsDisabled("Slides", ViewData[ViewConstants.HAS_COMMENTS] as string)" asp-area="" asp-controller="Slides" asp-action="Comments" asp-route-id="@ViewData[ViewConstants.SLIDE_ID]">Comments</a>
@@ -92,6 +99,7 @@
                             <a asp-area="" asp-controller="Slides" asp-action="Index">Slides</a>
                         </li>
                     }
+                    <li class="@Html.IsActive("Messenger", "Messenger")"><a asp-area="" asp-controller="Messenger" asp-action="Messenger">Messenger</a></li>
                     <li class="@Html.IsActive("Home", "About")"><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
                     <li class="@Html.IsActive("Home", "Contact")"><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
                 </ul>
@@ -112,6 +120,9 @@
     <environment names="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/lib/angular/dist/angular.js"></script>
+        <script src="~/lib/underscore/dist/underscore.js"></script>
+        <script src="~/lib/ng-notify/dist/ng-notify.min.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>
     <environment names="Staging,Production">
@@ -127,39 +138,43 @@
                 crossorigin="anonymous"
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"
+                asp-fallback-src="~/lib/angular/dist/angular.min.js"
+                asp-fallback-test="window.angular">
+        </script>
+        <script src="~/lib/underscore/dist/underscore.min.js"></script>
+        <script src="~/lib/ng-notify/dist/ng-notify.min.js"></script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
+    <script>
+        jQuery(function ($) {
+            $('.navbar .dropdown').hover(function () {
+                $(this).find('.dropdown-menu').first().stop(true, true).slideDown(75);
 
+            }, function () {
+                $(this).find('.dropdown-menu').first().stop(true, true).slideUp(75);
+
+            });
+
+            $('.navbar .dropdown > a').click(function () {
+                location.href = this.href;
+            });
+
+        });
+
+        function showCommentSubmitForm() {
+            document.getElementById("commentSideForm").style.width = "300px";
+            if (!document.getElementById("displayContainer")) {
+                document.getElementById("main").style.paddingLeft = "315px";
+                document.getElementById("main").style.overflowX = "hidden";
+            }
+        }
+
+        function hideCommentForm() {
+            document.getElementById("commentSideForm").style.width = "0";
+            document.getElementById("main").style.paddingLeft = "15px";
+        }
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
-
-<script>
-    jQuery(function ($) {
-        $('.navbar .dropdown').hover(function () {
-            $(this).find('.dropdown-menu').first().stop(true, true).slideDown(75);
-
-        }, function () {
-            $(this).find('.dropdown-menu').first().stop(true, true).slideUp(75);
-
-        });
-
-        $('.navbar .dropdown > a').click(function () {
-            location.href = this.href;
-        });
-
-    });
-
-    function showCommentSubmitForm() {
-        document.getElementById("commentSideForm").style.width = "300px";
-        if (!document.getElementById("displayContainer")) {
-            document.getElementById("main").style.paddingLeft = "315px";
-            document.getElementById("main").style.overflowX = "hidden";
-        }
-    }
-
-    function hideCommentForm() {
-        document.getElementById("commentSideForm").style.width = "0";
-        document.getElementById("main").style.paddingLeft = "15px";
-    }
-</script>

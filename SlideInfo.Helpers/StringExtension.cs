@@ -10,6 +10,16 @@ namespace SlideInfo.Helpers
             return source.IndexOf(toCheck, comp) >= 0;
         }
 
+        public static bool ContainsAny(this string source, params string[] toCheck)
+        {
+            foreach (var str in toCheck)
+            {
+                if (!string.IsNullOrEmpty(str) && source.Contains(str))
+                    return true;
+            }
+            return false;
+        }
+
         public static string ToSentenceCase(this string source)
         {
             var lowerCase = source.ToLower();

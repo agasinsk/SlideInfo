@@ -2,7 +2,6 @@
 {
     public static class ViewConstants
     {
-
         public const string APP_EMAIL = "slide.info.pwr@gmail.com";
         public const string EMAIL_SENT = "Your email was sent succesfully";
         public const string EMAIL_ERROR = "There was an error when sending your email";
@@ -11,6 +10,11 @@
         public const string INSERT_COMMENT_SUCCESS = "Comment added successfully";
 
         public const string COMMENT_TEXT_PLACEHOLDER = "Your observations about the slide...";
+        public const string MESSAGE_TEXT_PLACEHOLDER = "Type a message...";
+        public const string MESSAGE_ADD_ATTACHMENT = "Add attachment";
+        public const string SEND_MESSAGE = "Send";
+        public const string CONVERSATIONS = "All conversations"; 
+
         public const string SLIDE_ID = "SlideId";
         public const string SLIDE_NAME = "SlideName";
         public const string HAS_ASSOCIATED_IMAGES = "HasAssociated";

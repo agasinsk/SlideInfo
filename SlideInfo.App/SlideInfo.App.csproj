@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <Optimize>True</Optimize>
+    <Optimize>false</Optimize>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
 
@@ -37,24 +37,34 @@
 
   <ItemGroup>
     <Compile Remove="Views\Manage - Copy\**" />
+    <Compile Remove="wwwroot\messenger\templates\**" />
     <Content Remove="Views\Manage - Copy\**" />
+    <Content Remove="wwwroot\messenger\templates\**" />
     <EmbeddedResource Remove="Views\Manage - Copy\**" />
+    <EmbeddedResource Remove="wwwroot\messenger\templates\**" />
     <None Remove="Views\Manage - Copy\**" />
+    <None Remove="wwwroot\messenger\templates\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Properties\PublishProfiles\SlideInfo - Web Deploy.pubxml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="angularjs" Version="1.6.6" />
     <PackageReference Include="EntityFramework" Version="6.1.3" />
     <PackageReference Include="MailKit" Version="1.16.2" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNet.Identity.EntityFramework" Version="2.2.1" />
+    <PackageReference Include="Microsoft.AspNet.SignalR" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNet.SignalR.Core" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNet.SignalR.JS" Version="2.2.2" />
+    <PackageReference Include="Microsoft.AspNet.SignalR.Owin" Version="1.2.2" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Owin" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Session" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" PrivateAssets="All" />
@@ -65,8 +75,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Owin.Host.SystemWeb" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Owin.Security" Version="3.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="1.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Owin.Security.AesDataProtectorProvider" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.1" />
@@ -79,5 +93,6 @@
   <ItemGroup>
     <Reference Include="System.Web" />
   </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/chrome-manifest" /></VisualStudio></ProjectExtensions>
 
 </Project>

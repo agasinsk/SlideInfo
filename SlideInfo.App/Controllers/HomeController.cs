@@ -31,6 +31,15 @@ namespace SlideInfo.App.Controllers
             return View();
         }
 
+        public IActionResult Chat()
+        {
+            return View();
+        }
+
+        public IActionResult Messenger()
+        {
+            return View();
+        }
 
         //GET Contact
         public IActionResult Contact()
