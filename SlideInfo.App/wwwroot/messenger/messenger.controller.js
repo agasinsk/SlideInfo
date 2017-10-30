@@ -175,17 +175,20 @@
         }
 
         function checkEnterPressed($event) {
-            var keyCode = $event.which || $event.keyCode;
+            var keyCode = $event.keyCode ||$event.which;
 
             //if enter was pressed, send the message
             if (keyCode === 13) {
                 $event.preventDefault();
                 sendMessage();
-            } else {
+            }
+            //if space was pressed, notify other user of typing
+            if (keyCode < 65 || keyCode > 90) {
                 if (vm.currentReceiver.Id && vm.currentUser.Id) {
-                    _.throttle(messengerHub.server.onUserTyping(vm.currentReceiver.Id, vm.currentUser.Id), 500);
+                    _.debounce(messengerHub.server.onUserTyping(vm.currentReceiver.Id, vm.currentUser.Id), 3000);
                 }
             }
+
         }
 
         function receiveMessage(messageJson) {
@@ -235,7 +238,7 @@
                 window.setTimeout(function () {
                     vm.userTyping = "";
                     $scope.$applyAsync();
-                }, 1500);
+                }, 3000);
             }
             $scope.$applyAsync();
         }

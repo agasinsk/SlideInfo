@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="message-write">
-                    <textarea id="message-input" class="form-control message-input" ng-class="{disabled: vm.currentConversation == null}" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keypress="vm.checkEnterPressed($event)"></textarea>
+                    <textarea id="message-input" class="form-control message-input" ng-class="{disabled: vm.currentConversation == null}" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keyup="vm.checkEnterPressed($event)"></textarea>
                     <div class="clearfix"></div>
                     <div class="chat-bottom">
                         <a href="#" class="btn btn-default pull-left" role="button" ng-class="{disabled: vm.currentConversation == null}">
