@@ -38,7 +38,7 @@ namespace SlideInfo.App
         {
             // Add framework services.
             services.AddDbContext<SlideInfoDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("MessengerConnection")));
 
             services.AddIdentity<AppUser, IdentityRole>(config =>
             {
