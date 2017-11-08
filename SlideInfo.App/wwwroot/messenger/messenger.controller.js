@@ -168,7 +168,7 @@
         }
 
         function getNextMessageId() {
-            if (!_.isEmpty(vm.currentConversation)) {
+            if (!_.isEmpty(vm.currentConversation.Messages)) {
                 return _.last(vm.currentConversation.Messages).Id + 1;
             }
             return 1;

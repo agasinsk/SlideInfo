@@ -65,7 +65,7 @@
                                 <div class="circle-wrapper animated bounceIn"></div>
                                 <div class="text-wrapper animated fadeIn">{{ message.Content }}</div>
                             </div>
-                            <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation.MessagesCount === 0">
+                            <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation.Messages.length === 0">
                                 <small>This conversation is empty. Be the first to send a message!</small>
                             </div>
                             <div class="message-wrapper text-muted text-center" ng-show="vm.currentConversation === undefined">
