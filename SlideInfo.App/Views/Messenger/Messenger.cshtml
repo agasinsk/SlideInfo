@@ -79,9 +79,6 @@
                     <textarea id="message-input" class="form-control message-input" ng-class="{disabled: vm.currentConversation == null}" placeholder="@ViewConstants.MESSAGE_TEXT_PLACEHOLDER" ng-model="vm.messageText" ng-keyup="vm.checkEnterPressed($event)"></textarea>
                     <div class="clearfix"></div>
                     <div class="chat-bottom">
-                        <a href="#" class="btn btn-default pull-left" role="button" ng-class="{disabled: vm.currentConversation == null}">
-                            <i class="glyphicon glyphicon-upload" aria-hidden="true"></i> @ViewConstants.MESSAGE_ADD_ATTACHMENT
-                        </a>
                         <a href="#" id="send-message" class="pull-right btn btn-success green-button" ng-class="{disabled: vm.currentConversation == null}" ng-click="vm.sendMessage()">
                             @ViewConstants.SEND_MESSAGE
                         </a>

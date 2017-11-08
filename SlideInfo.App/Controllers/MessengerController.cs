@@ -45,7 +45,7 @@ namespace SlideInfo.App.Controllers
             var viewModel = new MessengerViewModel
             {
                 UserName = userManager.GetUserName(User),
-                Users = context.AppUsers.Where(u => u.UserName != userManager.GetUserName(User)).AsEnumerable()
+                Users = context.AppUsers.Where(u => u.UserName != userManager.GetUserName(User)).ToList()
                     .Select(u => new MessengerUser()
                     {
                         UserName = u.UserName,
